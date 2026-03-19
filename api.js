@@ -1,7 +1,8 @@
 // ========== api.js ==========
 // РАБОЧАЯ ВЕРСИЯ С РЕАЛЬНЫМИ ВЫЗОВАМИ API
 
-const API_BASE = ''; // Пусто, так как API на том же домене
+// URL вашего бэкенда на Render
+const API_BASE = 'https://max-bot-1-ywpz.onrender.com'; // <--- ИСПРАВЛЕНО!
 
 const api = {
     /**
@@ -24,7 +25,7 @@ const api = {
                 first_visit: !data.has_profile
             };
         } catch (error) {
-            console.error('Ошибка получения статуса пользователя:', error);
+            console.error('❌ Ошибка получения статуса пользователя:', error);
             // Возвращаем минимальные данные при ошибке
             return {
                 user_id: userId,
@@ -49,7 +50,7 @@ const api = {
                 temp: '+15'
             };
         } catch (error) {
-            console.error('Ошибка получения погоды:', error);
+            console.error('❌ Ошибка получения погоды:', error);
             return null;
         }
     },
@@ -76,7 +77,7 @@ const api = {
             
             return await response.json();
         } catch (error) {
-            console.error('Ошибка сохранения контекста:', error);
+            console.error('❌ Ошибка сохранения контекста:', error);
             return { success: false, error: error.message };
         }
     },
@@ -92,7 +93,7 @@ const api = {
             }
             return await response.json();
         } catch (error) {
-            console.error('Ошибка получения профиля:', error);
+            console.error('❌ Ошибка получения профиля:', error);
             return null;
         }
     },
@@ -119,7 +120,7 @@ const api = {
             
             return await response.json();
         } catch (error) {
-            console.error('Ошибка сохранения профиля:', error);
+            console.error('❌ Ошибка сохранения профиля:', error);
             return { success: false, error: error.message };
         }
     },
@@ -136,7 +137,7 @@ const api = {
             const data = await response.json();
             return data.thought;
         } catch (error) {
-            console.error('Ошибка получения мыслей:', error);
+            console.error('❌ Ошибка получения мыслей:', error);
             return null;
         }
     },
@@ -153,7 +154,7 @@ const api = {
             const data = await response.json();
             return data.ideas || [];
         } catch (error) {
-            console.error('Ошибка получения идей:', error);
+            console.error('❌ Ошибка получения идей:', error);
             return [];
         }
     },
@@ -169,7 +170,7 @@ const api = {
             }
             return await response.json();
         } catch (error) {
-            console.error('Ошибка получения прогресса теста:', error);
+            console.error('❌ Ошибка получения прогресса теста:', error);
             return {
                 stage1_complete: false,
                 stage2_complete: false,
@@ -205,7 +206,7 @@ const api = {
             
             return await response.json();
         } catch (error) {
-            console.error('Ошибка сохранения прогресса теста:', error);
+            console.error('❌ Ошибка сохранения прогресса теста:', error);
             return { success: false, error: error.message };
         }
     },
@@ -232,7 +233,7 @@ const api = {
             
             return await response.json();
         } catch (error) {
-            console.error('Ошибка сохранения режима:', error);
+            console.error('❌ Ошибка сохранения режима:', error);
             return { success: false, error: error.message };
         }
     },
@@ -259,7 +260,7 @@ const api = {
             
             return await response.json();
         } catch (error) {
-            console.error('Ошибка синхронизации:', error);
+            console.error('❌ Ошибка синхронизации:', error);
             return { success: false, error: error.message };
         }
     }
@@ -269,4 +270,5 @@ const api = {
 window.api = api;
 
 // Для отладки
-console.log('✅ API инициализирован, эндпоинты:', Object.keys(api));
+console.log('✅ API инициализирован, базовый URL:', API_BASE);
+console.log('✅ Доступные методы:', Object.keys(api));
