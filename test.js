@@ -1,5 +1,5 @@
 // ========== test.js ==========
-// ТЕСТ КАК В TELEGRAM - ВОПРОС И КНОПКИ ВМЕСТЕ
+// ТЕСТ КАК В TELEGRAM - ТОЧНОЕ КОЛИЧЕСТВО ВОПРОСОВ
 
 const Test = {
     // Текущее состояние
@@ -8,201 +8,491 @@ const Test = {
     userId: null,
     answers: {},
     
-    // Структура теста
+    // Структура теста с точным количеством вопросов
     stages: [
         { 
             id: 'perception', 
-            name: '🧠 ЭТАП 1/5: ВОСПРИЯТИЕ',
-            description: 'Линза, через которую вы смотрите на мир'
+            name: '🧠 ЭТАП 1/5: КОНФИГУРАЦИЯ ВОСПРИЯТИЯ',
+            description: 'Линза, через которую вы смотрите на мир',
+            total: 8  // ✅ ТОЧНО: 8 вопросов
         },
         { 
             id: 'thinking', 
-            name: '🧠 ЭТАП 2/5: МЫШЛЕНИЕ',
-            description: 'Как вы обрабатываете информацию'
+            name: '🧠 ЭТАП 2/5: КОНФИГУРАЦИЯ МЫШЛЕНИЯ',
+            description: 'Как вы обрабатываете информацию',
+            total: 8  // ✅ ТОЧНО: 8 вопросов
         },
         { 
             id: 'behavior', 
-            name: '🧠 ЭТАП 3/5: ПОВЕДЕНИЕ',
-            description: 'Ваши автоматические реакции'
+            name: '🧠 ЭТАП 3/5: КОНФИГУРАЦИЯ ПОВЕДЕНИЯ',
+            description: 'Ваши автоматические реакции',
+            total: 8  // ✅ ТОЧНО: 8 вопросов
         },
         { 
             id: 'growth', 
             name: '🧠 ЭТАП 4/5: ТОЧКА РОСТА',
-            description: 'Где находится рычаг изменений'
+            description: 'Где находится рычаг изменений',
+            total: 8  // ✅ ТОЧНО: 8 вопросов
         },
         { 
             id: 'deep', 
             name: '🧠 ЭТАП 5/5: ГЛУБИННЫЕ ПАТТЕРНЫ',
-            description: 'Тип привязанности, защитные механизмы'
+            description: 'Тип привязанности, защитные механизмы',
+            total: 10  // ✅ ТОЧНО: 10 вопросов
         }
     ],
     
-    // Вопросы по этапам
-    questions: {
-        perception: [
-            {
-                id: 'p1',
-                text: 'Когда вы заходите в новую компанию, что замечаете в первую очередь?',
-                options: [
-                    '👥 Кто с кем общается и какие между ними отношения',
-                    '🤔 Что здесь происходит и каковы правила',
-                    '💡 Какие здесь есть возможности и идеи',
-                    '⚡ Кто здесь главный и какую позицию занять'
-                ]
-            },
-            {
-                id: 'p2',
-                text: 'Какое утверждение больше про вас?',
-                options: [
-                    '🎨 Я чувствую атмосферу и настроение людей',
-                    '📊 Я анализирую факты и логику',
-                    '🔮 Я вижу потенциал и будущие возможности',
-                    '🏃 Я действую быстро, не задумываясь'
-                ]
-            },
-            {
-                id: 'p3',
-                text: 'В конфликтной ситуации вы обычно:',
-                options: [
-                    '❤️ Стараетесь сгладить и сохранить отношения',
-                    '⚖️ Ищете справедливое решение',
-                    '💭 Анализируете причины конфликта',
-                    '🛡️ Защищаете свои интересы'
-                ]
-            }
-        ],
-        
-        thinking: [
-            {
-                id: 't1',
-                text: 'Когда вы сталкиваетесь с проблемой, вы:',
-                options: [
-                    '📚 Ищете похожий опыт и готовые решения',
-                    '🧩 Раскладываете на части и анализируете',
-                    '💫 Доверяете интуиции и первому впечатлению',
-                    '🤝 Советуетесь с другими'
-                ]
-            },
-            {
-                id: 't2',
-                text: 'Что вам легче всего?',
-                options: [
-                    '🔍 Замечать детали и нюансы',
-                    '📈 Видеть общую картину и тенденции',
-                    '🎯 Находить нестандартные решения',
-                    '📝 Действовать по инструкции'
-                ]
-            },
-            {
-                id: 't3',
-                text: 'Как вы принимаете важные решения?',
-                options: [
-                    '⚖️ Взвешиваете все за и против',
-                    '💭 Прислушиваетесь к внутреннему голосу',
-                    '👥 Советуетесь с близкими',
-                    '⏰ Откладываете, пока всё не решится само'
-                ]
-            }
-        ],
-        
-        behavior: [
-            {
-                id: 'b1',
-                text: 'В стрессовой ситуации вы:',
-                options: [
-                    '🏃‍♂️ Начинаете действовать быстро и активно',
-                    '🧊 Замираете и наблюдаете',
-                    '🗣 Ищете поддержку у других',
-                    '🎭 Делаете вид, что всё нормально'
-                ]
-            },
-            {
-                id: 'b2',
-                text: 'Когда кто-то критикует вас, вы:',
-                options: [
-                    '👂 Внимательно слушаете и анализируете',
-                    '🛡️ Защищаетесь и объясняете',
-                    '😔 Расстраиваетесь и переживаете',
-                    '🤷 Пропускаете мимо ушей'
-                ]
-            },
-            {
-                id: 'b3',
-                text: 'Ваш типичный способ отдыха:',
-                options: [
-                    '🏠 Побыть в тишине и одиночестве',
-                    '👥 Встретиться с друзьями',
-                    '🎮 Заняться любимым хобби',
-                    '📱 Зависнуть в телефоне/интернете'
-                ]
-            }
-        ],
-        
-        growth: [
-            {
-                id: 'g1',
-                text: 'Что для вас самое сложное?',
-                options: [
-                    '🚀 Начинать новое',
-                    '⏸ Останавливаться и отдыхать',
-                    '🙏 Просить о помощи',
-                    '🎯 Доводить до конца'
-                ]
-            },
-            {
-                id: 'g2',
-                text: 'В чем ваша суперсила?',
-                options: [
-                    '💪 Упорство и дисциплина',
-                    '🤝 Эмпатия и понимание людей',
-                    '💡 Креативность и идеи',
-                    '⚡ Скорость и реакция'
-                ]
-            },
-            {
-                id: 'g3',
-                text: 'Что бы вы хотели в себе изменить?',
-                options: [
-                    '🐢 Меньше тормозить',
-                    '🎭 Меньше зависеть от чужого мнения',
-                    '🧠 Лучше понимать свои эмоции',
-                    '📋 Стать более организованным'
-                ]
-            }
-        ],
-        
-        deep: [
-            {
-                id: 'd1',
-                text: 'В детстве, когда вы расстраивались, родители обычно:',
-                options: [
-                    '🤗 Утешали и обнимали',
-                    '💬 Объясняли и говорили',
-                    '⏰ Оставляли побыть одного',
-                    '🎁 Отвлекали чем-то интересным'
-                ]
-            },
-            {
-                id: 'd2',
-                text: 'В отношениях вы чаще всего боитесь:',
-                options: [
-                    '👋 Что вас бросят',
-                    '🔗 Потерять себя',
-                    '🙅 Что не поймут',
-                    '💔 Что будет больно'
-                ]
-            },
-            {
-                id: 'd3',
-                text: 'Какое утверждение про вас?',
-                options: [
-                    '🏰 Я сам по себе, мне никто не нужен',
-                    '🤝 Я не могу без близких отношений',
-                    '🎭 Я по-разному веду себя с разными людьми',
-                    '🌊 Я плыву по течению'
-                ]
-            }
-        ]
+    // Вопросы этапа 1 (8 вопросов) - ВОСПРИЯТИЕ
+    perception_questions: [
+        {
+            id: 'p1',
+            text: 'Когда вы заходите в новую компанию, что замечаете в первую очередь?',
+            options: [
+                '👥 Кто с кем общается и какие между ними отношения',
+                '🤔 Что здесь происходит и каковы правила',
+                '💡 Какие здесь есть возможности и идеи',
+                '⚡ Кто здесь главный и какую позицию занять'
+            ]
+        },
+        {
+            id: 'p2',
+            text: 'Какое утверждение больше про вас?',
+            options: [
+                '🎨 Я чувствую атмосферу и настроение людей',
+                '📊 Я анализирую факты и логику',
+                '🔮 Я вижу потенциал и будущие возможности',
+                '🏃 Я действую быстро, не задумываясь'
+            ]
+        },
+        {
+            id: 'p3',
+            text: 'В конфликтной ситуации вы обычно:',
+            options: [
+                '❤️ Стараетесь сгладить и сохранить отношения',
+                '⚖️ Ищете справедливое решение',
+                '💭 Анализируете причины конфликта',
+                '🛡️ Защищаете свои интересы'
+            ]
+        },
+        {
+            id: 'p4',
+            text: 'Что для вас важнее в работе?',
+            options: [
+                '🤝 Хорошие отношения в коллективе',
+                '💰 Достойная оплата труда',
+                '💡 Интересные задачи',
+                '🏆 Признание и статус'
+            ]
+        },
+        {
+            id: 'p5',
+            text: 'Когда вы принимаете важное решение, вы опираетесь на:',
+            options: [
+                '🗣 Мнение близких людей',
+                '📊 Факты и цифры',
+                '💭 Интуицию и внутреннее чутье',
+                '⚖️ Анализ рисков и выгоды'
+            ]
+        },
+        {
+            id: 'p6',
+            text: 'Что вас чаще всего тревожит?',
+            options: [
+                '👥 Что обо мне подумают другие',
+                '💰 Материальная нестабильность',
+                '🔮 Неопределенность будущего',
+                '⚡ Потеря контроля над ситуацией'
+            ]
+        },
+        {
+            id: 'p7',
+            text: 'Как вы обычно проводите выходной день?',
+            options: [
+                '👫 Встречаюсь с друзьями или семьей',
+                '🏠 Занимаюсь домашними делами',
+                '📚 Читаю, учусь новому',
+                '🎮 Отдыхаю, ничего не делаю'
+            ]
+        },
+        {
+            id: 'p8',
+            text: 'Что для вас значит успех?',
+            options: [
+                '❤️ Гармоничные отношения с близкими',
+                '💰 Финансовая независимость',
+                '🎯 Самореализация и развитие',
+                '🏅 Признание и уважение'
+            ]
+        }
+    ],
+    
+    // Вопросы этапа 2 (8 вопросов) - МЫШЛЕНИЕ
+    thinking_questions: [
+        {
+            id: 't1',
+            text: 'Когда вы сталкиваетесь с проблемой, вы:',
+            options: [
+                '📚 Ищете похожий опыт и готовые решения',
+                '🧩 Раскладываете на части и анализируете',
+                '💫 Доверяете интуиции и первому впечатлению',
+                '🤝 Советуетесь с другими'
+            ]
+        },
+        {
+            id: 't2',
+            text: 'Что вам легче всего?',
+            options: [
+                '🔍 Замечать детали и нюансы',
+                '📈 Видеть общую картину и тенденции',
+                '🎯 Находить нестандартные решения',
+                '📝 Действовать по инструкции'
+            ]
+        },
+        {
+            id: 't3',
+            text: 'Как вы принимаете важные решения?',
+            options: [
+                '⚖️ Взвешиваете все за и против',
+                '💭 Прислушиваетесь к внутреннему голосу',
+                '👥 Советуетесь с близкими',
+                '⏰ Откладываете, пока всё не решится само'
+            ]
+        },
+        {
+            id: 't4',
+            text: 'Что вы делаете, когда получаете новую информацию?',
+            options: [
+                '🔗 Связываю с тем, что уже знаю',
+                '❓ Задаю много вопросов',
+                '📝 Запоминаю основные моменты',
+                '🤔 Думаю, как это можно применить'
+            ]
+        },
+        {
+            id: 't5',
+            text: 'Как вы относитесь к сложным теориям и концепциям?',
+            options: [
+                '😫 С трудом воспринимаю абстракции',
+                '📚 Могу разобраться, если нужно',
+                '💡 Люблю искать глубинные смыслы',
+                '🛠 Ищу практическое применение'
+            ]
+        },
+        {
+            id: 't6',
+            text: 'Когда вы объясняете что-то другому, вы:',
+            options: [
+                '📖 Рассказываете последовательно, шаг за шагом',
+                '🎨 Используете метафоры и образы',
+                '📊 Показываете схему или структуру',
+                '🤷 Затрудняетесь объяснить'
+            ]
+        },
+        {
+            id: 't7',
+            text: 'Что для вас важнее при планировании?',
+            options: [
+                '🎯 Конкретная цель и сроки',
+                '🔄 Гибкость и возможность менять план',
+                '📋 Четкая последовательность шагов',
+                '🌈 Вдохновение и идеи'
+            ]
+        },
+        {
+            id: 't8',
+            text: 'Как вы относитесь к критике?',
+            options: [
+                '👂 Внимательно слушаю и анализирую',
+                '🛡️ Защищаюсь и объясняю свою позицию',
+                '😔 Расстраиваюсь и переживаю',
+                '🤷 Пропускаю мимо ушей'
+            ]
+        }
+    ],
+    
+    // Вопросы этапа 3 (8 вопросов) - ПОВЕДЕНИЕ
+    behavior_questions: [
+        {
+            id: 'b1',
+            text: 'В стрессовой ситуации вы:',
+            options: [
+                '🏃‍♂️ Начинаете действовать быстро и активно',
+                '🧊 Замираете и наблюдаете',
+                '🗣 Ищете поддержку у других',
+                '🎭 Делаете вид, что всё нормально'
+            ]
+        },
+        {
+            id: 'b2',
+            text: 'Когда кто-то критикует вас, вы:',
+            options: [
+                '👂 Внимательно слушаете и анализируете',
+                '🛡️ Защищаетесь и объясняете',
+                '😔 Расстраиваетесь и переживаете',
+                '🤷 Пропускаете мимо ушей'
+            ]
+        },
+        {
+            id: 'b3',
+            text: 'Ваш типичный способ отдыха:',
+            options: [
+                '🏠 Побыть в тишине и одиночестве',
+                '👥 Встретиться с друзьями',
+                '🎮 Заняться любимым хобби',
+                '📱 Зависнуть в телефоне/интернете'
+            ]
+        },
+        {
+            id: 'b4',
+            text: 'Как вы реагируете на неожиданные изменения?',
+            options: [
+                '🔄 Быстро адаптируюсь',
+                '😰 Тревожусь и переживаю',
+                '⏳ Нужно время, чтобы привыкнуть',
+                '🎭 Делаю вид, что всё по плану'
+            ]
+        },
+        {
+            id: 'b5',
+            text: 'Когда вы злитесь, вы обычно:',
+            options: [
+                '💥 Сразу выплескиваете эмоции',
+                '😤 Сдерживаете внутри',
+                '🗣 Обсуждаете с кем-то',
+                '🎯 Направляете энергию в дело'
+            ]
+        },
+        {
+            id: 'b6',
+            text: 'Как вы ведете себя в конфликте?',
+            options: [
+                '🕊 Стараюсь сгладить',
+                '⚔️ Иду в открытое противостояние',
+                '🚪 Ухожу от конфликта',
+                '🧘 Сохраняю спокойствие'
+            ]
+        },
+        {
+            id: 'b7',
+            text: 'Что вы делаете, когда устали?',
+            options: [
+                '🛌 Иду отдыхать',
+                '☕ Взбадриваюсь кофе/чаем',
+                '💪 Терплю и продолжаю',
+                '🔄 Меняю деятельность'
+            ]
+        },
+        {
+            id: 'b8',
+            text: 'Как вы обычно просите о помощи?',
+            options: [
+                '🗣 Прямо говорю, что нужно',
+                '😶 Жду, пока догадаются сами',
+                '🤝 Предлагаю взамен что-то',
+                '🙏 Мне трудно просить'
+            ]
+        }
+    ],
+    
+    // Вопросы этапа 4 (8 вопросов) - ТОЧКА РОСТА
+    growth_questions: [
+        {
+            id: 'g1',
+            text: 'Что для вас самое сложное?',
+            options: [
+                '🚀 Начинать новое',
+                '⏸ Останавливаться и отдыхать',
+                '🙏 Просить о помощи',
+                '🎯 Доводить до конца'
+            ]
+        },
+        {
+            id: 'g2',
+            text: 'В чем ваша суперсила?',
+            options: [
+                '💪 Упорство и дисциплина',
+                '🤝 Эмпатия и понимание людей',
+                '💡 Креативность и идеи',
+                '⚡ Скорость и реакция'
+            ]
+        },
+        {
+            id: 'g3',
+            text: 'Что бы вы хотели в себе изменить?',
+            options: [
+                '🐢 Меньше тормозить',
+                '🎭 Меньше зависеть от чужого мнения',
+                '🧠 Лучше понимать свои эмоции',
+                '📋 Стать более организованным'
+            ]
+        },
+        {
+            id: 'g4',
+            text: 'Что вас мотивирует больше всего?',
+            options: [
+                '🏆 Признание и похвала',
+                '💰 Материальное вознаграждение',
+                '🌱 Личностный рост',
+                '🤝 Помощь другим'
+            ]
+        },
+        {
+            id: 'g5',
+            text: 'Что вас демотивирует?',
+            options: [
+                '👎 Критика и осуждение',
+                '💸 Нестабильность',
+                '🔄 Рутина и однообразие',
+                '🚫 Отсутствие поддержки'
+            ]
+        },
+        {
+            id: 'g6',
+            text: 'Какая сфера для вас наиболее проблемная?',
+            options: [
+                '👥 Отношения с людьми',
+                '💰 Финансы и карьера',
+                '🧠 Понимание себя',
+                '⚖️ Баланс жизни'
+            ]
+        },
+        {
+            id: 'g7',
+            text: 'Что вы откладываете на потом?',
+            options: [
+                '📞 Важные звонки и разговоры',
+                '📝 Планирование и стратегию',
+                '🏃‍♂️ Заботу о здоровье',
+                '🎯 Достижение целей'
+            ]
+        },
+        {
+            id: 'g8',
+            text: 'Где вам нужна поддержка?',
+            options: [
+                '👥 В отношениях',
+                '💰 В финансах',
+                '🧠 В самоопределении',
+                '💪 В достижении целей'
+            ]
+        }
+    ],
+    
+    // Вопросы этапа 5 (10 вопросов) - ГЛУБИННЫЕ ПАТТЕРНЫ
+    deep_questions: [
+        {
+            id: 'd1',
+            text: 'В детстве, когда вы расстраивались, родители обычно:',
+            options: [
+                '🤗 Утешали и обнимали',
+                '💬 Объясняли и говорили',
+                '⏰ Оставляли побыть одного',
+                '🎁 Отвлекали чем-то интересным'
+            ]
+        },
+        {
+            id: 'd2',
+            text: 'В отношениях вы чаще всего боитесь:',
+            options: [
+                '👋 Что вас бросят',
+                '🔗 Потерять себя',
+                '🙅 Что не поймут',
+                '💔 Что будет больно'
+            ]
+        },
+        {
+            id: 'd3',
+            text: 'Какое утверждение про вас?',
+            options: [
+                '🏰 Я сам по себе, мне никто не нужен',
+                '🤝 Я не могу без близких отношений',
+                '🎭 Я по-разному веду себя с разными людьми',
+                '🌊 Я плыву по течению'
+            ]
+        },
+        {
+            id: 'd4',
+            text: 'Как вы справляетесь с сильными эмоциями?',
+            options: [
+                '🎨 Выражаю их творчеством',
+                '🏃‍♂️ Выплескиваю в активность',
+                '🧘 Пытаюсь осознать и понять',
+                '🍫 Заедаю/запиваю'
+            ]
+        },
+        {
+            id: 'd5',
+            text: 'Что вы думаете о своем детстве?',
+            options: [
+                '☀️ Оно было счастливым',
+                '🌧 Было много сложностей',
+                '🤔 Я мало что помню',
+                '🔄 Было по-разному'
+            ]
+        },
+        {
+            id: 'd6',
+            text: 'Как вы реагируете на несправедливость?',
+            options: [
+                '⚔️ Борюсь и восстанавливаю справедливость',
+                '😔 Обижаюсь и замыкаюсь',
+                '🤷 Принимаю как данность',
+                '📝 Анализирую причины'
+            ]
+        },
+        {
+            id: 'd7',
+            text: 'Что для вас значит "быть собой"?',
+            options: [
+                '🎭 Делать то, что хочется',
+                '🤝 Быть честным с другими',
+                '🧠 Понимать свои желания',
+                '🌱 Постоянно развиваться'
+            ]
+        },
+        {
+            id: 'd8',
+            text: 'Как вы относитесь к одиночеству?',
+            options: [
+                '😊 Люблю побыть один',
+                '😔 Боюсь оставаться один',
+                '🔄 Мне комфортно и с людьми, и одному',
+                '🏃 Стараюсь его избегать'
+            ]
+        },
+        {
+            id: 'd9',
+            text: 'Что вы чувствуете, когда вас критикуют?',
+            options: [
+                '🛡️ Защиту и желание оправдаться',
+                '😞 Стыд и вину',
+                '🤔 Интерес и желание понять',
+                '⚡ Желание ответить'
+            ]
+        },
+        {
+            id: 'd10',
+            text: 'Какая мысль вызывает у вас тревогу?',
+            options: [
+                '👥 Что подумают другие',
+                '💰 Что будет с финансами',
+                '🔮 Что ждет в будущем',
+                '💔 Что я не справлюсь'
+            ]
+        }
+    ],
+    
+    // Получить вопросы для текущего этапа
+    getCurrentQuestions() {
+        const stage = this.stages[this.currentStage];
+        switch(stage.id) {
+            case 'perception': return this.perception_questions;
+            case 'thinking': return this.thinking_questions;
+            case 'behavior': return this.behavior_questions;
+            case 'growth': return this.growth_questions;
+            case 'deep': return this.deep_questions;
+            default: return [];
+        }
     },
     
     // Инициализация теста
@@ -227,7 +517,7 @@ const Test = {
                 this.currentStage = data.currentStage || 0;
                 this.currentQuestionIndex = data.currentQuestionIndex || 0;
                 this.answers = data.answers || {};
-                console.log('📂 Загружен прогресс теста, этап:', this.currentStage, 'вопрос:', this.currentQuestionIndex);
+                console.log('📂 Загружен прогресс теста, этап:', this.currentStage + 1, 'вопрос:', this.currentQuestionIndex + 1);
             } catch (e) {
                 console.warn('❌ Ошибка загрузки прогресса:', e);
             }
@@ -256,19 +546,18 @@ const Test = {
         
         // Показываем приветственное сообщение
         setTimeout(() => {
-            this.addBotMessageWithButtons(
-                '🧠 Начинаем тест из 5 этапов. Я буду задавать вопросы, а ты выбирай ответы.',
-                []
+            this.addBotMessage(
+                '🧠 Начинаем тест из 5 этапов. Я буду задавать вопросы, а ты выбирай ответы.'
             );
             
-            // Через секунду показываем первый вопрос
+            // Через секунду показываем первый этап
             setTimeout(() => {
-                this.sendNextQuestion();
+                this.sendStageIntro();
             }, 1000);
         }, 100);
     },
     
-    // Показать экран теста (контейнер для сообщений)
+    // Показать экран теста
     showTestScreen() {
         const container = document.getElementById('screenContainer');
         
@@ -282,58 +571,32 @@ const Test = {
         this.addTestStyles();
     },
     
-    // Добавить сообщение бота с кнопками
-    addBotMessageWithButtons(text, options, callback) {
+    // Отправить вступление к этапу
+    sendStageIntro() {
+        const stage = this.stages[this.currentStage];
+        const total = stage.total;
+        this.addBotMessage(`${stage.name}\n${stage.description}\n\n📊 Всего вопросов: ${total}`);
+        
+        setTimeout(() => {
+            this.sendNextQuestion();
+        }, 2000);
+    },
+    
+    // Добавить сообщение бота (без кнопок)
+    addBotMessage(text) {
         const messagesList = document.getElementById('testMessagesList');
         if (!messagesList) return;
         
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message bot-message';
-        
-        let buttonsHtml = '';
-        if (options && options.length > 0) {
-            buttonsHtml = '<div class="message-buttons">';
-            options.forEach((option, index) => {
-                buttonsHtml += `
-                    <button class="message-button" data-option-index="${index}">
-                        ${option}
-                    </button>
-                `;
-            });
-            buttonsHtml += '</div>';
-        }
-        
         messageDiv.innerHTML = `
             <div class="message-bubble">
                 <div class="message-text">${text}</div>
-                ${buttonsHtml}
                 <div class="message-time">только что</div>
             </div>
         `;
         
         messagesList.appendChild(messageDiv);
-        
-        // Добавляем обработчики для кнопок
-        if (options && options.length > 0 && callback) {
-            const buttons = messageDiv.querySelectorAll('.message-button');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const index = parseInt(btn.dataset.optionIndex);
-                    
-                    // Добавляем сообщение пользователя
-                    this.addUserMessage(options[index]);
-                    
-                    // Удаляем кнопки из сообщения бота
-                    const buttonsContainer = messageDiv.querySelector('.message-buttons');
-                    if (buttonsContainer) {
-                        buttonsContainer.remove();
-                    }
-                    
-                    // Вызываем callback
-                    callback(index);
-                });
-            });
-        }
         
         // Прокрутка вниз
         setTimeout(() => {
@@ -342,8 +605,66 @@ const Test = {
                 container.scrollTop = container.scrollHeight;
             }
         }, 50);
+    },
+    
+    // Добавить сообщение бота с вопросом и кнопками
+    addQuestionMessage(text, options, callback, currentQuestion, totalQuestions) {
+        const messagesList = document.getElementById('testMessagesList');
+        if (!messagesList) return;
         
-        return messageDiv;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message bot-message';
+        
+        // Добавляем прогресс
+        const progress = `📊 Вопрос ${currentQuestion}/${totalQuestions}`;
+        
+        let buttonsHtml = '<div class="message-buttons">';
+        options.forEach((option, index) => {
+            buttonsHtml += `
+                <button class="message-button" data-option-index="${index}">
+                    ${option}
+                </button>
+            `;
+        });
+        buttonsHtml += '</div>';
+        
+        messageDiv.innerHTML = `
+            <div class="message-bubble">
+                <div class="message-text">${text}</div>
+                ${buttonsHtml}
+                <div class="message-time">${progress}</div>
+            </div>
+        `;
+        
+        messagesList.appendChild(messageDiv);
+        
+        // Добавляем обработчики для кнопок
+        const buttons = messageDiv.querySelectorAll('.message-button');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.optionIndex);
+                
+                // Добавляем сообщение пользователя
+                this.addUserMessage(options[index]);
+                
+                // Удаляем кнопки из сообщения бота
+                const buttonsContainer = messageDiv.querySelector('.message-buttons');
+                if (buttonsContainer) {
+                    buttonsContainer.remove();
+                }
+                
+                // Вызываем callback
+                callback(index);
+            });
+        });
+        
+        // Прокрутка вниз
+        setTimeout(() => {
+            const container = document.getElementById('testMessagesContainer');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 50);
     },
     
     // Добавить сообщение пользователя
@@ -382,15 +703,16 @@ const Test = {
         }
         
         const stage = this.stages[this.currentStage];
-        const questions = this.questions[stage.id];
+        const questions = this.getCurrentQuestions();
+        const totalQuestions = stage.total;
         
-        if (this.currentQuestionIndex >= questions.length) {
+        if (this.currentQuestionIndex >= totalQuestions) {
             // Переходим к следующему этапу
             this.currentStage++;
             this.currentQuestionIndex = 0;
             
             if (this.currentStage < this.stages.length) {
-                this.sendStageMessage();
+                this.sendStageIntro();
             } else {
                 this.showResults();
             }
@@ -400,26 +722,15 @@ const Test = {
         const question = questions[this.currentQuestionIndex];
         
         // Показываем вопрос с кнопками
-        this.addBotMessageWithButtons(
+        this.addQuestionMessage(
             question.text,
             question.options,
             (selectedIndex) => {
                 this.handleAnswer(stage.id, question.id, selectedIndex, question.options[selectedIndex]);
-            }
+            },
+            this.currentQuestionIndex + 1,
+            totalQuestions
         );
-    },
-    
-    // Отправить сообщение о начале этапа
-    sendStageMessage() {
-        const stage = this.stages[this.currentStage];
-        const stageMessage = `${stage.name}\n${stage.description}`;
-        
-        this.addBotMessageWithButtons(stageMessage, []);
-        
-        // Небольшая пауза перед первым вопросом этапа
-        setTimeout(() => {
-            this.sendNextQuestion();
-        }, 1000);
     },
     
     // Обработка ответа
@@ -441,198 +752,19 @@ const Test = {
     
     // Показать результаты
     showResults() {
-        const results = this.calculateResults();
+        this.addBotMessage('✅ Тест завершен! Спасибо за ответы.');
         
-        // Отправляем результаты на сервер
-        if (window.api) {
-            api.saveTestResults(this.userId, results).catch(e => {
-                console.warn('❌ Не удалось сохранить результаты на сервере:', e);
-            });
+        // Сохраняем результаты
+        if (App && App.userId) {
+            localStorage.setItem(`test_results_${App.userId}`, JSON.stringify(this.answers));
         }
         
-        // Очищаем прогресс
-        localStorage.removeItem(`test_${this.userId}`);
-        
-        // Показываем результаты
-        this.renderResults(results);
-    },
-    
-    // Расчет результатов
-    calculateResults() {
-        const results = {
-            perception: this.calculateDimension('perception'),
-            thinking: this.calculateDimension('thinking'),
-            behavior: this.calculateDimension('behavior'),
-            growth: this.calculateDimension('growth'),
-            deep: this.calculateDimension('deep'),
-            
-            profile: this.getProfileType(),
-            attachment: this.getAttachmentType(),
-            defense: this.getDefenseMechanisms()
-        };
-        
-        return results;
-    },
-    
-    // Расчет одного измерения
-    calculateDimension(dimension) {
-        const questions = this.questions[dimension];
-        let sum = 0;
-        let count = 0;
-        
-        questions.forEach(q => {
-            const answer = this.answers[`${dimension}_${q.id}`];
-            if (answer !== undefined) {
-                sum += answer;
-                count++;
+        // Через 2 секунды переходим в чат
+        setTimeout(() => {
+            if (App && App.showMainChat) {
+                App.showMainChat();
             }
-        });
-        
-        // Нормализуем к 0-100%
-        return count > 0 ? Math.round((sum / (count * 3)) * 100) : 50;
-    },
-    
-    // Тип профиля
-    getProfileType() {
-        const p = this.calculateDimension('perception');
-        const t = this.calculateDimension('thinking');
-        const b = this.calculateDimension('behavior');
-        
-        if (p > 60 && t > 60) return '🧠 Аналитик';
-        if (p > 60 && b > 60) return '🤝 Эмпат';
-        if (t > 60 && b > 60) return '⚡ Реализатор';
-        if (p < 40 && t < 40) return '🎨 Творец';
-        return '🌀 Гармоничный';
-    },
-    
-    // Тип привязанности
-    getAttachmentType() {
-        const d1 = this.answers['deep_d1'];
-        const d2 = this.answers['deep_d2'];
-        
-        if (d1 === 0 && d2 === 1) return '🤗 Надежный';
-        if (d1 === 2 && d2 === 0) return '😥 Тревожный';
-        if (d1 === 1 && d2 === 0) return '🛡️ Избегающий';
-        return '🌀 Смешанный';
-    },
-    
-    // Защитные механизмы
-    getDefenseMechanisms() {
-        const mechanisms = [];
-        
-        if (this.answers['behavior_b1'] === 1) mechanisms.push('🧊 Замирание');
-        if (this.answers['behavior_b2'] === 1) mechanisms.push('🛡️ Рационализация');
-        if (this.answers['deep_d3'] === 2) mechanisms.push('🎭 Диссоциация');
-        
-        return mechanisms.length > 0 ? mechanisms : ['⚖️ Адаптивные'];
-    },
-    
-    // Отрисовка результатов
-    renderResults(results) {
-        const container = document.getElementById('screenContainer');
-        
-        const html = `
-            <div class="results-container">
-                <div class="results-header">
-                    <div class="results-emoji">📊</div>
-                    <h1>Ваш психологический профиль</h1>
-                    <p class="profile-type">${results.profile}</p>
-                </div>
-                
-                <div class="results-dimensions">
-                    <div class="dimension-item">
-                        <div class="dimension-name">Восприятие</div>
-                        <div class="dimension-bar">
-                            <div class="dimension-fill" style="width: ${results.perception}%"></div>
-                        </div>
-                        <div class="dimension-value">${results.perception}%</div>
-                    </div>
-                    
-                    <div class="dimension-item">
-                        <div class="dimension-name">Мышление</div>
-                        <div class="dimension-bar">
-                            <div class="dimension-fill" style="width: ${results.thinking}%"></div>
-                        </div>
-                        <div class="dimension-value">${results.thinking}%</div>
-                    </div>
-                    
-                    <div class="dimension-item">
-                        <div class="dimension-name">Поведение</div>
-                        <div class="dimension-bar">
-                            <div class="dimension-fill" style="width: ${results.behavior}%"></div>
-                        </div>
-                        <div class="dimension-value">${results.behavior}%</div>
-                    </div>
-                    
-                    <div class="dimension-item">
-                        <div class="dimension-name">Точка роста</div>
-                        <div class="dimension-bar">
-                            <div class="dimension-fill" style="width: ${results.growth}%"></div>
-                        </div>
-                        <div class="dimension-value">${results.growth}%</div>
-                    </div>
-                    
-                    <div class="dimension-item">
-                        <div class="dimension-name">Глубинные паттерны</div>
-                        <div class="dimension-bar">
-                            <div class="dimension-fill" style="width: ${results.deep}%"></div>
-                        </div>
-                        <div class="dimension-value">${results.deep}%</div>
-                    </div>
-                </div>
-                
-                <div class="results-details">
-                    <div class="detail-card">
-                        <h3>🧠 Тип привязанности</h3>
-                        <p>${results.attachment}</p>
-                    </div>
-                    
-                    <div class="detail-card">
-                        <h3>🛡️ Защитные механизмы</h3>
-                        <p>${results.defense.join(' · ')}</p>
-                    </div>
-                </div>
-                
-                <div class="results-actions">
-                    <button class="onboarding-btn primary" onclick="Test.chooseMode('coach')">
-                        🔮 КОУЧ
-                    </button>
-                    <button class="onboarding-btn primary" onclick="Test.chooseMode('psychologist')">
-                        🧠 ПСИХОЛОГ
-                    </button>
-                    <button class="onboarding-btn primary" onclick="Test.chooseMode('trainer')">
-                        ⚡ ТРЕНЕР
-                    </button>
-                </div>
-                
-                <div class="results-chat">
-                    <button class="onboarding-btn secondary" onclick="Test.startChat()">
-                        💬 Перейти в чат
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = html;
-        
-        // Добавляем стили
-        this.addResultsStyles();
-    },
-    
-    // Выбор режима общения
-    chooseMode(mode) {
-        localStorage.setItem('chatMode', mode);
-        alert(`✅ Выбран режим: ${mode === 'coach' ? 'КОУЧ' : mode === 'psychologist' ? 'ПСИХОЛОГ' : 'ТРЕНЕР'}`);
-        this.startChat();
-    },
-    
-    // Переход в чат
-    startChat() {
-        if (App && App.showMainChat) {
-            App.showMainChat();
-        } else {
-            window.location.href = '#chat';
-        }
+        }, 2000);
     },
     
     // Добавление стилей теста
@@ -689,110 +821,6 @@ const Test = {
                 transform: translateY(0);
             }
             
-            /* Стили для результатов */
-            .results-container {
-                padding: 20px;
-                overflow-y: auto;
-                height: 100%;
-            }
-            
-            .results-header {
-                text-align: center;
-                margin-bottom: 24px;
-            }
-            
-            .results-emoji {
-                font-size: 48px;
-                margin-bottom: 8px;
-            }
-            
-            .profile-type {
-                font-size: 20px;
-                color: var(--max-blue);
-                font-weight: 600;
-                margin-top: 8px;
-            }
-            
-            .results-dimensions {
-                margin: 24px 0;
-            }
-            
-            .dimension-item {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin-bottom: 12px;
-            }
-            
-            .dimension-name {
-                width: 100px;
-                font-size: 14px;
-            }
-            
-            .dimension-bar {
-                flex: 1;
-                height: 8px;
-                background: var(--glass-bg);
-                border-radius: 4px;
-                overflow: hidden;
-            }
-            
-            .dimension-fill {
-                height: 100%;
-                background: linear-gradient(90deg, var(--max-blue), #5a9eff);
-                border-radius: 4px;
-                transition: width 0.3s;
-            }
-            
-            .dimension-value {
-                width: 45px;
-                font-size: 14px;
-                font-weight: 600;
-            }
-            
-            .results-details {
-                display: flex;
-                gap: 16px;
-                margin: 24px 0;
-            }
-            
-            .detail-card {
-                flex: 1;
-                padding: 16px;
-                background: var(--glass-bg);
-                border: 1px solid var(--glass-border);
-                border-radius: 16px;
-                text-align: center;
-            }
-            
-            .detail-card h3 {
-                font-size: 14px;
-                margin-bottom: 8px;
-                color: var(--max-text-secondary);
-            }
-            
-            .detail-card p {
-                font-size: 16px;
-                font-weight: 600;
-            }
-            
-            .results-actions {
-                display: flex;
-                gap: 8px;
-                margin: 20px 0;
-                flex-wrap: wrap;
-            }
-            
-            .results-actions .onboarding-btn {
-                flex: 1;
-                min-width: 100px;
-                font-size: 14px;
-            }
-            
-            .results-chat {
-                margin-top: 20px;
-            }
-            
             /* Анимации */
             @keyframes slideIn {
                 from {
@@ -815,10 +843,6 @@ const Test = {
         `;
         
         document.head.appendChild(style);
-    },
-    
-    addResultsStyles() {
-        this.addTestStyles();
     }
 };
 
