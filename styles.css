@@ -1,5 +1,5 @@
 /* ========== STYLES.CSS ========== */
-/* ПОЛНАЯ ПОДДЕРЖКА ЭМОДЗИ + ВСЕ ФИЧИ */
+/* ПОЛНАЯ ПОДДЕРЖКА ЭМОДЗИ + ВСЕ ФИЧИ + ВИЗУАЛЬНЫЕ УЛУЧШЕНИЯ */
 
 /* 1. ГЛОБАЛЬНАЯ ПОДДЕРЖКА ЭМОДЗИ - В САМОМ НАЧАЛЕ */
 * {
@@ -25,6 +25,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* 2. СПЕЦИАЛЬНО ДЛЯ ЭМОДЗИ */
@@ -126,14 +130,19 @@
     --max-red: #f44336;                /* Красный для ошибок */
     --max-yellow: #ffc107;              /* Желтый для предупреждений */
     
+    /* ВИЗУАЛЬНЫЕ УЛУЧШЕНИЯ - Стеклянный эффект */
+    --glass-bg: rgba(26, 34, 44, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    
     /* Ширина сообщений как в Telegram */
     --message-max-width: 85%;
     
     /* Остальные параметры сообщений */
     --message-min-width: 80px;
-    --message-bubble-radius: 18px;
-    --message-padding-vertical: 8px;
-    --message-padding-horizontal: 12px;
+    --message-bubble-radius: 22px;     /* Увеличено с 18px */
+    --message-padding-vertical: 10px;  /* Увеличено с 8px */
+    --message-padding-horizontal: 14px; /* Увеличено с 12px */
     --message-gap: 4px;
     --message-time-font: 11px;
     --message-text-font: 16px;
@@ -177,6 +186,11 @@
         --max-hover: #e0e0e0;
         --max-blue: #248bf2;
         --max-blue-hover: #1a7ad9;
+        
+        /* ВИЗУАЛЬНЫЕ УЛУЧШЕНИЯ для светлой темы */
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(0, 0, 0, 0.05);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
     /* Корректировка уголков для светлой темы */
@@ -199,13 +213,6 @@
         border-left: 1px solid #b0e0a0;
         border-bottom: 1px solid #b0e0a0;
     }
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    /* Шрифты уже объявлены в глобальном правиле выше */
 }
 
 html, body {
@@ -236,11 +243,25 @@ body {
     min-height: var(--phone-min-height);
     aspect-ratio: 9/19;                      /* Пропорции телефона */
     background-color: var(--max-bg);
-    border-radius: 40px;
+    border-radius: 44px;                      /* Увеличено с 40px */
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     margin: 20px auto;
     position: relative;
+}
+
+/* ВИЗУАЛЬНОЕ УЛУЧШЕНИЕ - шумовая текстура */
+.phone-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc0IiBudW1PY3RhdmVzPSIzIiAvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNmKSIgb3BhY2l0eT0iMC4wMjUiIC8+PC9zdmc+');
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 1;
 }
 
 /* На реальных телефонах - на весь экран */
@@ -294,9 +315,95 @@ body {
     overflow: hidden;
     background-color: var(--max-bg);
     border-radius: inherit;
+    position: relative;
+    z-index: 2;
 }
 
-/* ========== ЦЕНТРИРОВАНИЕ ЭКРАНОВ ========== */
+/* ===== СТЕКЛЯННЫЙ ЭФФЕКТ ДЛЯ ВСЕХ ПАНЕЛЕЙ ===== */
+.chat-header,
+.chats-panel,
+.input-panel,
+.chats-header {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+}
+
+/* Специфичные скругления для панелей */
+.chat-header {
+    border-bottom: 1px solid var(--glass-border);
+    border-radius: 44px 44px 0 0;
+}
+
+.input-panel {
+    border-top: 1px solid var(--glass-border);
+    border-radius: 0 0 44px 44px;
+}
+
+.chats-panel {
+    border-right: 1px solid var(--glass-border);
+    border-radius: 44px 0 0 44px;
+}
+
+/* ===== ТЕКСТУРЫ И УЗОРЫ ===== */
+
+/* Основной фон с градиентами */
+.screen-container {
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(36, 139, 242, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.02) 0%, transparent 40%),
+        var(--max-bg);
+    position: relative;
+    z-index: 1;
+}
+
+/* Точечный узор */
+.screen-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20px 20px, var(--max-border-light) 0.5px, transparent 0.5px);
+    background-size: 40px 40px;
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Текстурные сообщения */
+.message-bubble {
+    position: relative;
+    overflow: hidden;
+}
+
+.message-bubble::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.02) 0%, 
+            transparent 50%),
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 255, 255, 0.01) 10px,
+            rgba(255, 255, 255, 0.01) 20px
+        );
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* ===== ЦЕНТРИРОВАНИЕ ЭКРАНОВ ===== */
 
 /* Контейнер экранов */
 .screen-container {
@@ -305,7 +412,6 @@ body {
     flex-direction: column;
     height: 100%;
     overflow-y: auto;
-    background-color: transparent;
 }
 
 /* Для экранов с вертикальным центрированием (приветствие, тест) */
@@ -317,6 +423,41 @@ body {
     min-height: 100%;
     padding: var(--spacing-lg);
     text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+/* ВИЗУАЛЬНОЕ УЛУЧШЕНИЕ - волны для приветствия */
+.centered-screen:first-child {
+    position: relative;
+    overflow: hidden;
+}
+
+.centered-screen:first-child::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 30% 50%, 
+            rgba(36, 139, 242, 0.05) 0%,
+            transparent 50%),
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 30px,
+            rgba(36, 139, 242, 0.02) 30px,
+            rgba(36, 139, 242, 0.02) 60px
+        );
+    animation: rotate 30s linear infinite;
+    z-index: 0;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* Для экранов с прокруткой (результаты, длинные тексты) */
@@ -327,6 +468,8 @@ body {
     padding: var(--spacing-lg);
     min-height: 100%;
     text-align: left;
+    position: relative;
+    z-index: 2;
 }
 
 /* Для экранов с формой (ввод города, возраста) */
@@ -338,6 +481,8 @@ body {
     min-height: 100%;
     padding: var(--spacing-lg);
     text-align: center;
+    position: relative;
+    z-index: 2;
 }
 
 /* Для экранов с выбором (пол, режим) */
@@ -350,6 +495,8 @@ body {
     padding: var(--spacing-lg);
     text-align: center;
     gap: var(--spacing-lg);
+    position: relative;
+    z-index: 2;
 }
 
 /* Заголовки на центрированных экранах */
@@ -522,8 +669,8 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    padding: 0;  /* Убираем лишние отступы */
-    min-width: 48px;  /* Фиксированная ширина */
+    padding: 0;
+    min-width: 48px;
 }
 
 .context-submit:hover {
@@ -574,12 +721,12 @@ body {
 /* ===== ЛЕВАЯ ПАНЕЛЬ ===== */
 .chats-panel {
     width: 320px;
-    background-color: var(--max-panel-bg);
-    border-right: 1px solid var(--max-border);
     display: flex;
     flex-direction: column;
     height: 100%;
     flex-shrink: 0;
+    position: relative;
+    z-index: 4;
 }
 
 @media (max-width: 768px) {
@@ -600,8 +747,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: var(--max-header-bg);
-    border-bottom: 1px solid var(--max-border);
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .chats-title {
@@ -630,15 +776,16 @@ body {
 
 .chats-search {
     padding: var(--spacing-sm) var(--spacing-lg);
-    border-bottom: 1px solid var(--max-border);
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .chats-search input {
     width: 100%;
     padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--max-input-bg);
-    border: 1px solid var(--max-border);
-    border-radius: 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
     color: var(--max-text);
     font-size: var(--text-sm);
     outline: none;
@@ -793,8 +940,6 @@ body {
 
 .chat-header {
     padding: var(--spacing-sm) var(--spacing-lg);
-    background-color: var(--max-header-bg);
-    border-bottom: 1px solid var(--max-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -885,24 +1030,27 @@ body {
     overflow-y: auto;
     padding: var(--spacing-lg);
     background-color: transparent;
+    position: relative;
+    z-index: 2;
 }
 
 .messages-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;  /* Увеличенный отступ между сообщениями */
+    gap: 8px;
 }
 
-/* ========== ОБЛАЧКА СООБЩЕНИЙ КАК В TELEGRAM ========== */
+/* ========== ОБЛАЧКА СООБЩЕНИЙ ========== */
 .message {
     display: flex;
     flex-direction: column;
     max-width: 85%;
     min-width: 80px;
     width: fit-content;
-    animation: messageAppear 0.2s ease-out;
+    animation: messageAppear 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1);
     margin-bottom: 4px;
     position: relative;
+    z-index: 2;
 }
 
 .message.bot-message {
@@ -917,7 +1065,7 @@ body {
 
 .message-bubble {
     background-color: var(--max-message-bot);
-    border-radius: 18px 18px 18px 4px;
+    border-radius: 22px 22px 22px 6px;  /* Увеличено */
     padding: 10px 14px;
     word-wrap: break-word;
     width: fit-content;
@@ -935,24 +1083,20 @@ body {
     content: '';
     position: absolute;
     bottom: 0;
-    left: -6px;
-    width: 10px;
-    height: 10px;
+    left: -8px;  /* Увеличено с -6px */
+    width: 12px;  /* Увеличено с 10px */
+    height: 12px;  /* Увеличено с 10px */
     background-color: var(--max-message-bot);
-    border-radius: 0 0 10px 0;
+    border-radius: 0 0 12px 0;
     border-right: 1px solid var(--max-border-light);
     border-bottom: 1px solid var(--max-border-light);
 }
 
 .message.user-message .message-bubble {
     background-color: var(--max-message-user);
-    border-radius: 18px 18px 4px 18px;
-    
-    /* ВЫДЕЛЕНИЕ КАК В TELEGRAM */
+    border-radius: 22px 22px 6px 22px;  /* Увеличено */
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     border: 1px solid #3a68a0;
-    
-    /* Уголок как в Telegram */
     position: relative;
 }
 
@@ -960,11 +1104,11 @@ body {
     content: '';
     position: absolute;
     bottom: 0;
-    right: -6px;
-    width: 10px;
-    height: 10px;
+    right: -8px;  /* Увеличено с -6px */
+    width: 12px;  /* Увеличено с 10px */
+    height: 12px;  /* Увеличено с 10px */
     background-color: var(--max-message-user);
-    border-radius: 0 0 0 10px;
+    border-radius: 0 0 0 12px;
     border-left: 1px solid #3a68a0;
     border-bottom: 1px solid #3a68a0;
 }
@@ -976,6 +1120,8 @@ body {
     white-space: pre-wrap;
     text-align: left;
     word-break: break-word;
+    position: relative;
+    z-index: 2;
 }
 
 .message-time {
@@ -983,6 +1129,14 @@ body {
     color: var(--max-text-secondary);
     text-align: right;
     margin-top: 4px;
+}
+
+/* Ховер-эффект с улучшениями */
+.message-bubble:hover {
+    transform: translateY(-1px) scale(1.01);
+    transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    filter: brightness(1.05);
 }
 
 /* ===== ИНДИКАТОР ПРОЧИТАНО ===== */
@@ -1038,12 +1192,14 @@ body {
     color: var(--max-blue);
 }
 
-/* ===== РЕАКЦИИ НА СООБЩЕНИЯ С ЭМОДЗИ ===== */
+/* ===== РЕАКЦИИ НА СООБЩЕНИЯ ===== */
 .message-reactions {
     display: flex;
     gap: 6px;
     margin-top: 6px;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 3;
 }
 
 .message.bot-message .message-reactions {
@@ -1057,7 +1213,7 @@ body {
 .reaction {
     background-color: var(--max-panel-bg);
     border: 1px solid var(--max-border);
-    border-radius: 16px;
+    border-radius: 20px;  /* Увеличено с 16px */
     padding: 4px 8px;
     font-size: 13px;
     cursor: pointer;
@@ -1080,7 +1236,7 @@ body {
 }
 
 .reaction-emoji {
-    font-size: 1.4em;  /* Размер эмодзи в реакциях */
+    font-size: 1.4em;
     line-height: 1;
     display: inline-block;
     vertical-align: middle;
@@ -1097,18 +1253,19 @@ body {
     color: var(--max-blue);
 }
 
-/* Палитра реакций при наведении */
+/* Палитра реакций с улучшениями */
 .reactions-picker {
     display: none;
     position: absolute;
     bottom: 100%;
     right: 0;
-    background-color: var(--max-panel-bg);
-    border: 1px solid var(--max-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
     border-radius: 30px;
     padding: 8px 12px;
     gap: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--glass-shadow);
     z-index: 10;
     margin-bottom: 8px;
     flex-wrap: wrap;
@@ -1129,7 +1286,7 @@ body {
 }
 
 .reaction-option {
-    font-size: 1.8em;  /* Крупные эмодзи */
+    font-size: 1.8em;
     cursor: pointer;
     transition: transform 0.2s;
     padding: 4px;
@@ -1142,7 +1299,7 @@ body {
     transform: scale(1.3);
 }
 
-/* Тестовые сообщения (заглушки) */
+/* Тестовые сообщения */
 .message.test-message .message-bubble {
     background-color: var(--max-panel-bg);
     border: 1px dashed var(--max-text-secondary);
@@ -1151,7 +1308,7 @@ body {
 }
 
 .message.test-message .message-bubble::before {
-    display: none;  /* Убираем уголок у тестовых */
+    display: none;
 }
 
 /* Группировка сообщений */
@@ -1160,30 +1317,24 @@ body {
 }
 
 .message-group-first .message-bubble {
-    border-radius: 18px 18px 4px 4px;
+    border-radius: 22px 22px 4px 4px;
 }
 
 .message-group-last .message-bubble {
-    border-radius: 4px 4px 18px 18px;
+    border-radius: 4px 4px 22px 22px;
 }
 
-/* Ховер-эффект */
-.message-bubble:hover {
-    transform: scale(1.01);
-    transition: transform 0.1s;
-    filter: brightness(1.1);
-}
-
-/* Индикатор печати */
+/* Индикатор печати с улучшениями */
 .typing-indicator {
     display: none;
     gap: 4px;
     padding: 10px 14px;
-    background-color: var(--max-message-bot);
-    border-radius: 18px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border-radius: 22px;
     width: fit-content;
-    border: 1px solid var(--max-border-light);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
 }
 
 .typing-indicator.visible {
@@ -1204,25 +1355,27 @@ body {
 }
 
 @keyframes messageAppear {
-    from {
+    0% {
         opacity: 0;
         transform: translateY(10px) scale(0.95);
+        filter: blur(2px);
     }
-    to {
+    100% {
         opacity: 1;
         transform: translateY(0) scale(1);
+        filter: blur(0);
     }
 }
 
 /* ===== ПАНЕЛЬ ВВОДА ===== */
 .input-panel {
     padding: var(--spacing-sm) var(--spacing-lg);
-    background-color: var(--max-panel-bg);
-    border-top: 1px solid var(--max-border);
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
     flex-shrink: 0;
+    position: relative;
+    z-index: 5;
 }
 
 .attach-btn, .voice-btn {
@@ -1249,8 +1402,9 @@ body {
     display: flex;
     align-items: center;
     background-color: var(--max-input-bg);
-    border-radius: 20px;
+    border-radius: 30px;
     padding: 2px;
+    border: 1px solid var(--glass-border);
 }
 
 .message-input {
@@ -1267,11 +1421,12 @@ body {
     color: var(--max-text-secondary);
 }
 
+/* Улучшенная кнопка отправки */
 .send-btn {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background-color: var(--max-blue);
+    background: linear-gradient(135deg, var(--max-blue), #5a9eff);
     border: none;
     color: white;
     font-size: 16px;
@@ -1279,10 +1434,24 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.send-btn:hover {
-    background-color: var(--max-blue-hover);
+.send-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.send-btn:hover::after {
+    opacity: 1;
 }
 
 /* ===== СТИЛИ ДЛЯ ЭКРАНОВ ===== */
@@ -1299,7 +1468,7 @@ body {
 }
 
 .onboarding-avatar {
-    font-size: 5em;  /* Огромные эмодзи */
+    font-size: 5em;
     line-height: 1.2;
     display: block;
     text-align: center;
@@ -1526,8 +1695,8 @@ body {
 }
 
 .screen-container::-webkit-scrollbar-thumb {
-    background: var(--max-text-secondary);
-    border-radius: 2px;
+    background: linear-gradient(180deg, var(--max-blue), #5a9eff);
+    border-radius: 4px;
 }
 
 .screen-container::-webkit-scrollbar-thumb:hover {
@@ -1540,7 +1709,7 @@ body {
 .context-submit,
 .send-btn,
 .reaction {
-    min-height: 48px;  /* Минимальный размер для сенсорных экранов */
+    min-height: 48px;
 }
 
 /* Маркдаун-форматирование */
@@ -1601,6 +1770,30 @@ body {
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
     }
+}
+
+/* Текстурные разделители */
+.date-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 0;
+    color: var(--max-text-secondary);
+    font-size: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+.date-divider::before,
+.date-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        var(--max-border-light) 20%,
+        var(--max-border-light) 80%,
+        transparent 100%);
 }
 
 .hidden {
