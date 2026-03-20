@@ -1,5 +1,5 @@
 // ========== script.js ==========
-// ПОЛНАЯ ВЕРСИЯ С ПРАВИЛЬНОЙ ЛОГИКОЙ + СОХРАНЕНИЕ ИМЕНИ + ИНТЕГРАЦИЯ С MAX
+// ПОЛНАЯ ВЕРСИЯ С ПРАВИЛЬНОЙ ЛОГИКОЙ + СОХРАНЕНИЕ ИМЕНИ + ИНТЕГРАЦИЯ С MAX + ТЕСТ
 
 const App = {
     userId: 'test_user_123',
@@ -343,12 +343,14 @@ const App = {
             if (status.first_visit || !status.context_complete) {
                 this.showOnboardingScreen1();
             } else if (!status.test_completed) {
+                // Контекст есть, тест не пройден
                 if (typeof Context !== 'undefined') {
                     Context.showCompleteScreen(this.userContext);
                 } else {
                     this.showOnboardingScreen1();
                 }
             } else {
+                // Всё пройдено - показываем чат
                 this.showMainChat();
             }
             
@@ -389,7 +391,13 @@ const App = {
                     if (typeof Context !== 'undefined') {
                         Context.startCollection();
                     } else {
-                        this.showContextScreen('city');
+                        // ЗАПУСК ТЕСТА
+                        if (typeof Test !== 'undefined') {
+                            Test.init(this.userId);
+                            Test.start();
+                        } else {
+                            alert('Функция теста временно недоступна');
+                        }
                     }
                 });
             }
@@ -418,7 +426,13 @@ const App = {
                     if (typeof Context !== 'undefined') {
                         Context.startCollection();
                     } else {
-                        this.showContextScreen('city');
+                        // ЗАПУСК ТЕСТА
+                        if (typeof Test !== 'undefined') {
+                            Test.init(this.userId);
+                            Test.start();
+                        } else {
+                            alert('Начинаем тест!');
+                        }
                     }
                 });
             }
@@ -573,7 +587,13 @@ const App = {
             
             if (startTestBtn) {
                 startTestBtn.addEventListener('click', () => {
-                    alert('Тест будет запущен!');
+                    // ЗАПУСК ТЕСТА
+                    if (typeof Test !== 'undefined') {
+                        Test.init(this.userId);
+                        Test.start();
+                    } else {
+                        alert('Тест будет запущен!');
+                    }
                 });
             }
             
@@ -606,7 +626,13 @@ const App = {
             
             if (startTestBtn) {
                 startTestBtn.addEventListener('click', () => {
-                    alert('Тест будет запущен!');
+                    // ЗАПУСК ТЕСТА
+                    if (typeof Test !== 'undefined') {
+                        Test.init(this.userId);
+                        Test.start();
+                    } else {
+                        alert('Тест будет запущен!');
+                    }
                 });
             }
             
