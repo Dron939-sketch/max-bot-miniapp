@@ -1,5 +1,5 @@
 /* ========== STYLES.CSS ========== */
-/* ОРИГИНАЛЬНЫЕ ЦВЕТА MAX + ФОРМА ТЕЛЕФОНА */
+/* ОРИГИНАЛЬНЫЕ ЦВЕТА MAX + ФОРМА ТЕЛЕФОНА + ЦЕНТРИРОВАНИЕ */
 
 :root {
     /* Оригинальные цвета MAX (из вашего бота) */
@@ -19,7 +19,7 @@
     /* Ширина сообщений как в Telegram */
     --message-max-width: 85%;
     
-    /* Остальные параметры */
+    /* Остальные параметры сообщений */
     --message-min-width: 80px;
     --message-bubble-radius: 18px;
     --message-padding-vertical: 8px;
@@ -44,9 +44,11 @@
     --text-xl: 22px;
     --text-xxl: 28px;
     
-    /* Размеры телефона */
-    --phone-max-width: 400px;         /* Максимальная ширина как у телефона */
-    --phone-min-width: 320px;         /* Минимальная ширина */
+    /* Размеры телефона - АВТО-ПОДБОР */
+    --phone-max-width: min(400px, 95vw);     /* Не шире 400px или 95% экрана */
+    --phone-max-height: min(800px, 90vh);    /* Не выше 800px или 90% экрана */
+    --phone-min-width: 320px;
+    --phone-min-height: 600px;                /* Минимальная высота */
 }
 
 * {
@@ -79,29 +81,59 @@ body {
     width: 100%;
     max-width: var(--phone-max-width);
     min-width: var(--phone-min-width);
-    height: 100vh;
-    max-height: 800px;  /* Ограничиваем высоту как у телефона */
+    height: auto;
+    max-height: var(--phone-max-height);
+    min-height: var(--phone-min-height);
+    aspect-ratio: 9/19;                      /* Пропорции телефона */
     background-color: var(--max-bg);
-    border-radius: 40px;  /* Скруглённые углы как у телефона */
+    border-radius: 40px;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     margin: 20px auto;
     position: relative;
 }
 
-/* Эмуляция "динамика" телефона (опционально) */
-.phone-container::before {
-    content: '';
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 25px;
-    background-color: #000000;
-    border-radius: 0 0 20px 20px;
-    z-index: 1000;
-    display: none;  /* Скрыто по умолчанию, включите если нужно */
+/* На реальных телефонах - на весь экран */
+@media (max-width: 768px) and (max-height: 900px) {
+    .phone-container {
+        max-width: 100%;
+        max-height: 100vh;
+        min-height: 100vh;
+        aspect-ratio: auto;
+        border-radius: 0;
+        margin: 0;
+        box-shadow: none;
+    }
+}
+
+/* На планшетах в горизонтальной ориентации */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+    .phone-container {
+        --phone-max-width: 380px;
+        --phone-max-height: 700px;
+    }
+}
+
+/* На очень высоких экранах (4K) */
+@media (min-height: 1200px) {
+    .phone-container {
+        --phone-max-height: 900px;
+        margin: 50px auto;
+    }
+}
+
+/* Альбомная ориентация на телефонах */
+@media (max-width: 900px) and (orientation: landscape) {
+    .phone-container {
+        flex-direction: row;
+        max-height: 100vh;
+        min-height: 100vh;
+        aspect-ratio: auto;
+    }
+    
+    .chats-panel {
+        width: 280px;
+    }
 }
 
 /* Сам чат внутри телефона */
@@ -114,7 +146,99 @@ body {
     border-radius: inherit;
 }
 
-/* Левая панель */
+/* ========== ЦЕНТРИРОВАНИЕ ЭКРАНОВ ========== */
+
+/* Контейнер экранов */
+.screen-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    background-color: transparent;
+}
+
+/* Для экранов с вертикальным центрированием (приветствие, тест) */
+.centered-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+/* Для экранов с прокруткой (результаты, длинные тексты) */
+.scrollable-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-lg);
+    min-height: 100%;
+    text-align: left;
+}
+
+/* Для экранов с формой (ввод города, возраста) */
+.form-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+/* Для экранов с выбором (пол, режим) */
+.choice-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    padding: var(--spacing-lg);
+    text-align: center;
+    gap: var(--spacing-lg);
+}
+
+/* Заголовки на центрированных экранах */
+.centered-screen h1, 
+.centered-screen h2, 
+.centered-screen h3,
+.form-screen h1,
+.form-screen h2,
+.form-screen h3,
+.choice-screen h1,
+.choice-screen h2,
+.choice-screen h3 {
+    text-align: center;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Текст на центрированных экранах */
+.centered-screen p,
+.form-screen p,
+.choice-screen p {
+    text-align: center;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Кнопки на центрированных экранах */
+.centered-screen .onboarding-buttons,
+.form-screen .gender-buttons,
+.choice-screen .mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 280px;
+    margin-top: var(--spacing-lg);
+}
+
+/* ===== ЛЕВАЯ ПАНЕЛЬ ===== */
 .chats-panel {
     width: 320px;
     background-color: var(--max-panel-bg);
@@ -125,15 +249,7 @@ body {
     flex-shrink: 0;
 }
 
-/* На мобильных устройствах (реальных телефонах) - левая панель выезжает */
 @media (max-width: 768px) {
-    .phone-container {
-        max-width: 100%;
-        max-height: 100vh;
-        border-radius: 0;
-        margin: 0;
-    }
-    
     .chats-panel {
         position: absolute;
         left: -320px;
@@ -143,21 +259,6 @@ body {
     }
     .chats-panel.visible {
         left: 0;
-    }
-    
-    .phone-container::before {
-        display: none;  /* Убираем "динамик" на реальных телефонах */
-    }
-}
-
-/* На больших экранах (мониторах) - показываем как телефон */
-@media (min-width: 769px) {
-    body {
-        background-color: #111111;  /* Тёмный фон вокруг телефона */
-    }
-    
-    .phone-container {
-        border: 2px solid #333;  /* Рамка как у телефона */
     }
 }
 
@@ -347,7 +448,7 @@ body {
     text-overflow: ellipsis;
 }
 
-/* Правая панель */
+/* ===== ПРАВАЯ ПАНЕЛЬ ===== */
 .chat-panel {
     flex: 1;
     display: flex;
@@ -445,7 +546,7 @@ body {
     background-color: var(--max-hover);
 }
 
-/* Область сообщений */
+/* ===== ОБЛАСТЬ СООБЩЕНИЙ ===== */
 .messages-container {
     flex: 1;
     overflow-y: auto;
@@ -479,7 +580,7 @@ body {
 
 .message-bubble {
     background-color: var(--max-message-bot);
-    border-radius: 18px 18px 18px 4px;  /* Скругление как в Telegram */
+    border-radius: 18px 18px 18px 4px;
     padding: 8px 12px;
     word-wrap: break-word;
     min-width: 80px;
@@ -487,7 +588,7 @@ body {
 
 .user-message .message-bubble {
     background-color: var(--max-message-user);
-    border-radius: 18px 18px 4px 18px;  /* Скругление как в Telegram */
+    border-radius: 18px 18px 4px 18px;
 }
 
 .message-text {
@@ -495,6 +596,7 @@ body {
     line-height: 1.5;
     color: var(--max-text);
     white-space: pre-wrap;
+    text-align: left;  /* Текст сообщений всегда по левому краю */
 }
 
 .message-time {
@@ -531,7 +633,7 @@ body {
     50% { opacity: 1; }
 }
 
-/* Панель ввода */
+/* ===== ПАНЕЛЬ ВВОДА ===== */
 .input-panel {
     padding: var(--spacing-sm) var(--spacing-lg);
     background-color: var(--max-panel-bg);
@@ -554,6 +656,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.attach-btn:hover, .voice-btn:hover {
+    background-color: var(--max-hover);
+    color: var(--max-text);
 }
 
 .message-input-wrapper {
@@ -593,32 +700,307 @@ body {
     justify-content: center;
 }
 
-/* Контейнер экранов */
-.screen-container {
+.send-btn:hover {
+    background-color: var(--max-blue-hover);
+}
+
+/* ===== СТИЛИ ДЛЯ ЭКРАНОВ ===== */
+
+/* Приветствие */
+.onboarding-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.onboarding-avatar {
+    font-size: 64px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.onboarding-title {
+    font-size: var(--text-xxl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.onboarding-subtitle {
+    font-size: var(--text-lg);
+    color: var(--max-text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+.onboarding-text {
+    text-align: left;
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.6;
+    max-width: 320px;
+}
+
+.onboarding-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 280px;
+}
+
+.onboarding-btn {
+    padding: 14px 20px;
+    border-radius: 30px;
+    font-size: var(--text-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-align: center;
+}
+
+.onboarding-btn.primary {
+    background-color: var(--max-blue);
+    color: white;
+}
+
+.onboarding-btn.primary:hover {
+    background-color: var(--max-blue-hover);
+}
+
+.onboarding-btn.secondary {
+    background-color: transparent;
+    color: var(--max-text);
+    border: 1px solid var(--max-border);
+}
+
+.onboarding-btn.secondary:hover {
+    background-color: var(--max-hover);
+}
+
+/* Сбор контекста */
+.context-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.context-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xl);
+}
+
+.context-question {
+    font-size: var(--text-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+.context-hint {
+    font-size: var(--text-sm);
+    color: var(--max-text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.context-input-group {
+    display: flex;
+    gap: var(--spacing-sm);
+    width: 100%;
+    max-width: 280px;
+    margin-bottom: var(--spacing-md);
+}
+
+.context-input {
+    flex: 1;
+    padding: 12px 16px;
+    background-color: var(--max-input-bg);
+    border: 1px solid var(--max-border);
+    border-radius: 30px;
+    color: var(--max-text);
+    font-size: var(--text-md);
+    outline: none;
+}
+
+.context-input:focus {
+    border-color: var(--max-blue);
+}
+
+.context-submit {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--max-blue);
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.context-submit:hover {
+    background-color: var(--max-blue-hover);
+}
+
+.context-skip {
+    background: none;
+    border: none;
+    color: var(--max-text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--spacing-md);
+}
+
+.context-skip:hover {
+    color: var(--max-text);
+}
+
+/* Выбор пола */
+.gender-buttons {
+    display: flex;
+    gap: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+    width: 100%;
+    max-width: 320px;
+}
+
+.gender-btn {
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-    background-color: transparent;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg) var(--spacing-md);
+    background-color: var(--max-input-bg);
+    border: 1px solid var(--max-border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gender-btn:hover {
+    background-color: var(--max-hover);
+    border-color: var(--max-blue);
+}
+
+.gender-emoji {
+    font-size: 32px;
+}
+
+.gender-text {
+    font-size: var(--text-sm);
+}
+
+/* Завершение контекста */
+.context-complete-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-lg);
+    min-height: 100%;
+    text-align: center;
+}
+
+.context-complete-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-lg);
+}
+
+.context-info {
+    background-color: var(--max-panel-bg);
+    border: 1px solid var(--max-border);
+    border-radius: 16px;
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    width: 100%;
+    max-width: 320px;
+    text-align: left;
+    line-height: 1.8;
+}
+
+.context-next-text {
+    text-align: left;
+    margin-bottom: var(--spacing-xl);
+    max-width: 320px;
+    line-height: 1.6;
+}
+
+.context-complete-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 280px;
+}
+
+/* Преимущества теста */
+.benefits-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-lg);
+    min-height: 100%;
+}
+
+.benefits-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+}
+
+.benefits-list {
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: var(--spacing-xl);
+}
+
+.benefit-item {
+    background-color: var(--max-panel-bg);
+    border: 1px solid var(--max-border);
+    border-radius: 12px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.benefit-stage {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--max-blue);
+}
+
+.benefit-desc {
+    font-size: var(--text-sm);
+    color: var(--max-text-secondary);
+}
+
+.benefits-after {
+    text-align: left;
+    margin-bottom: var(--spacing-xl);
+    max-width: 320px;
+    line-height: 1.8;
+}
+
+.benefits-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 280px;
 }
 
 /* Анимации */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-/* Адаптация для очень маленьких экранов */
-@media (max-width: 480px) {
-    .message {
-        max-width: 90%;
-    }
-    
-    .phone-container {
-        min-width: 100%;
-        border-radius: 0;
-    }
 }
 
 /* Поддержка безопасной зоны на iPhone */
@@ -633,6 +1015,11 @@ body {
         padding-bottom: max(var(--spacing-sm), env(safe-area-inset-bottom));
         padding-left: max(var(--spacing-lg), env(safe-area-inset-left));
         padding-right: max(var(--spacing-lg), env(safe-area-inset-right));
+    }
+    
+    .chats-panel {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
     }
 }
 
