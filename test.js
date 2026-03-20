@@ -915,7 +915,7 @@ const Test = {
     },
     
     // ============================================
-    // ЛОГИКА ТЕСТА
+    // ЛОГИКА ТЕСТА - ИСПРАВЛЕННЫЕ МЕТОДЫ
     // ============================================
     
     getCurrentQuestions() {
@@ -1055,7 +1055,7 @@ const Test = {
         msg.className = 'message bot-message';
         msg.innerHTML = `<div class="message-bubble"><div class="message-text">${text}</div><div class="message-time">только что</div></div>`;
         list.appendChild(msg);
-        setTimeout(() => document.getElementById('testMessagesContainer')?.scrollTo(0, 99999), 50);
+        this.scrollToBottom();
     },
     
     addUserMessage(text) {
@@ -1065,63 +1065,147 @@ const Test = {
         msg.className = 'message user-message';
         msg.innerHTML = `<div class="message-bubble"><div class="message-text">${text}</div><div class="message-time">только что</div><div class="message-status"><span class="status-icon sent"></span></div></div>`;
         list.appendChild(msg);
-        setTimeout(() => document.getElementById('testMessagesContainer')?.scrollTo(0, 99999), 50);
+        this.scrollToBottom();
     },
     
+    // ===== ИСПРАВЛЕННЫЙ МЕТОД addQuestionMessage =====
     addQuestionMessage(text, options, callback, current, total) {
         const list = document.getElementById('testMessagesList');
         if (!list) return;
+        
         const msg = document.createElement('div');
         msg.className = 'message bot-message';
         
-        let btns = '<div class="message-buttons">';
+        // Создаем пузырек сообщения
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        
+        // Текст вопроса
+        const textDiv = document.createElement('div');
+        textDiv.className = 'message-text';
+        textDiv.textContent = text;
+        
+        // Контейнер для кнопок
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'message-buttons';
+        
+        // Добавляем кнопки
         options.forEach((opt, idx) => {
             const optText = typeof opt === 'object' ? opt.text : opt;
-            btns += `<button class="message-button" data-option-index="${idx}">${optText}</button>`;
+            const btn = document.createElement('button');
+            btn.className = 'message-button';
+            btn.setAttribute('data-option-index', idx);
+            btn.textContent = optText;
+            
+            // Добавляем обработчик
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(btn.dataset.optionIndex);
+                const option = options[index];
+                const optionText = typeof option === 'object' ? option.text : option;
+                
+                this.addUserMessage(optionText);
+                
+                // Удаляем контейнер с кнопками
+                const buttonsContainer = msg.querySelector('.message-buttons');
+                if (buttonsContainer) {
+                    buttonsContainer.remove();
+                }
+                
+                callback(index, option);
+            });
+            
+            buttonsDiv.appendChild(btn);
         });
-        btns += '</div>';
         
-        msg.innerHTML = `<div class="message-bubble"><div class="message-text">${text}</div>${btns}<div class="message-time">📊 Вопрос ${current}/${total}</div></div>`;
+        // Время и прогресс
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        timeDiv.textContent = `📊 Вопрос ${current}/${total}`;
+        
+        // Собираем сообщение
+        bubble.appendChild(textDiv);
+        bubble.appendChild(buttonsDiv);
+        bubble.appendChild(timeDiv);
+        msg.appendChild(bubble);
+        
+        // Добавляем в список
         list.appendChild(msg);
         
-        msg.querySelectorAll('.message-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const idx = parseInt(btn.dataset.optionIndex);
-                const opt = options[idx];
-                const optText = typeof opt === 'object' ? opt.text : opt;
-                this.addUserMessage(optText);
-                btn.closest('.message-buttons')?.remove();
-                callback(idx, opt);
-            });
-        });
-        
-        setTimeout(() => document.getElementById('testMessagesContainer')?.scrollTo(0, 99999), 50);
+        // Прокрутка вниз
+        this.scrollToBottom();
     },
     
+    // ===== ИСПРАВЛЕННЫЙ МЕТОД addMessageWithButtons =====
     addMessageWithButtons(text, buttons) {
         const list = document.getElementById('testMessagesList');
         if (!list) return;
+        
         const msg = document.createElement('div');
         msg.className = 'message bot-message';
         
-        let btns = '<div class="message-buttons">';
+        // Создаем пузырек сообщения
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        
+        // Текст сообщения
+        const textDiv = document.createElement('div');
+        textDiv.className = 'message-text';
+        textDiv.textContent = text;
+        
+        // Контейнер для кнопок
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'message-buttons';
+        
+        // Добавляем кнопки
         buttons.forEach((btn, i) => {
-            btns += `<button class="message-button" data-callback="${i}">${btn.text}</button>`;
-        });
-        btns += '</div>';
-        
-        msg.innerHTML = `<div class="message-bubble"><div class="message-text">${text}</div>${btns}<div class="message-time">только что</div></div>`;
-        list.appendChild(msg);
-        
-        msg.querySelectorAll('.message-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const idx = parseInt(btn.dataset.callback);
-                btn.closest('.message-buttons')?.remove();
+            const button = document.createElement('button');
+            button.className = 'message-button';
+            button.setAttribute('data-callback', i);
+            button.textContent = btn.text;
+            
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(button.dataset.callback);
+                
+                // Удаляем контейнер с кнопками
+                const buttonsContainer = msg.querySelector('.message-buttons');
+                if (buttonsContainer) {
+                    buttonsContainer.remove();
+                }
+                
                 buttons[idx].callback();
             });
+            
+            buttonsDiv.appendChild(button);
         });
         
-        setTimeout(() => document.getElementById('testMessagesContainer')?.scrollTo(0, 99999), 50);
+        // Время
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        timeDiv.textContent = 'только что';
+        
+        // Собираем сообщение
+        bubble.appendChild(textDiv);
+        bubble.appendChild(buttonsDiv);
+        bubble.appendChild(timeDiv);
+        msg.appendChild(bubble);
+        
+        // Добавляем в список
+        list.appendChild(msg);
+        
+        // Прокрутка вниз
+        this.scrollToBottom();
+    },
+    
+    // ===== НОВЫЙ МЕТОД ДЛЯ АВТО-ПРОКРУТКИ =====
+    scrollToBottom() {
+        setTimeout(() => {
+            const container = document.getElementById('testMessagesContainer');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 50);
     },
     
     sendNextQuestion() {
@@ -1401,7 +1485,7 @@ const Test = {
     updateProfileWithClarifications() {
         this.clarificationIteration++;
         this.saveProgress();
-        this.showStage4Result(); // Показываем профиль снова, но с большей уверенностью
+        this.showStage4Result();
     },
     
     // ============================================
@@ -1415,7 +1499,6 @@ const Test = {
             { text: "👋 ДОСВИДУЛИ", callback: () => this.goToChat() }
         ]);
         
-        // Не очищаем данные полностью, но сбрасываем текущий прогресс
         this.currentStage = 0;
         this.currentQuestionIndex = 0;
         this.answers = [];
