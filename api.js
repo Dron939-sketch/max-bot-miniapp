@@ -1,12 +1,13 @@
 // ========== api.js ==========
-// РАБОЧАЯ ВЕРСИЯ С РЕАЛЬНЫМИ ВЫЗОВАМИ API
+// ПОЛНАЯ ВЕРСИЯ С РЕАЛЬНЫМИ ВЫЗОВАМИ API
+// ВКЛЮЧАЕТ ВСЕ ЭНДПОИНТЫ ДЛЯ ТЕСТА И ИНТЕРПРЕТАЦИИ
 
 // URL вашего бэкенда на Render
-const API_BASE = 'https://max-bot-1-ywpz.onrender.com'; // <--- ИСПРАВЛЕНО!
+const API_BASE = 'https://max-bot-1-ywpz.onrender.com';
 
 const api = {
     /**
-     * Получает статус пользователя
+     * Получает статус пользователя (базовая версия)
      */
     async getUserStatus(userId) {
         try {
@@ -20,19 +21,41 @@ const api = {
             return {
                 user_id: data.user_id,
                 user_name: data.user_name || 'друг',
-                context_complete: false, // Бэкенд пока не возвращает это
+                context_complete: false,
                 test_completed: data.has_profile || false,
                 first_visit: !data.has_profile
             };
         } catch (error) {
             console.error('❌ Ошибка получения статуса пользователя:', error);
-            // Возвращаем минимальные данные при ошибке
             return {
                 user_id: userId,
                 user_name: 'друг',
                 context_complete: false,
                 test_completed: false,
                 first_visit: true
+            };
+        }
+    },
+    
+    /**
+     * Получает полный статус пользователя (расширенная версия)
+     */
+    async getUserFullStatus(userId) {
+        try {
+            const response = await fetch(`${API_BASE}/api/user-status?user_id=${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка получения полного статуса:', error);
+            return {
+                success: false,
+                has_profile: false,
+                has_interpretation: false,
+                test_completed: false,
+                interpretation_ready: false,
+                profile_code: null
             };
         }
     },
@@ -56,7 +79,7 @@ const api = {
     },
     
     /**
-     * Сохраняет контекст пользователя
+     * Сохраняет контекст пользователя (город, пол, возраст)
      */
     async saveContext(userId, contextData) {
         try {
@@ -184,7 +207,7 @@ const api = {
     },
     
     /**
-     * Сохраняет прогресс теста
+     * Сохраняет прогресс теста (поэтапно)
      */
     async saveTestProgress(userId, stage, answers) {
         try {
@@ -208,6 +231,49 @@ const api = {
         } catch (error) {
             console.error('❌ Ошибка сохранения прогресса теста:', error);
             return { success: false, error: error.message };
+        }
+    },
+    
+    /**
+     * Сохраняет полные результаты теста (после завершения всех этапов)
+     */
+    async saveTestResults(userId, results) {
+        try {
+            const response = await fetch(`${API_BASE}/api/save-test-results`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    results: results
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка сохранения результатов теста:', error);
+            return { success: false, error: error.message };
+        }
+    },
+    
+    /**
+     * Получает интерпретацию теста (опрашивает сервер)
+     */
+    async getTestInterpretation(userId) {
+        try {
+            const response = await fetch(`${API_BASE}/api/get-test-interpretation?user_id=${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка получения интерпретации:', error);
+            return { success: false, ready: false, interpretation: null };
         }
     },
     
@@ -262,6 +328,100 @@ const api = {
         } catch (error) {
             console.error('❌ Ошибка синхронизации:', error);
             return { success: false, error: error.message };
+        }
+    },
+    
+    /**
+     * Получает вопрос теста
+     */
+    async getTestQuestion(userId, stage, index) {
+        try {
+            const response = await fetch(`${API_BASE}/api/test/question?user_id=${userId}&stage=${stage}&index=${index}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка получения вопроса:', error);
+            return { success: false, error: error.message };
+        }
+    },
+    
+    /**
+     * Отправляет ответ на вопрос теста
+     */
+    async submitTestAnswer(userId, stage, questionIndex, answer, option) {
+        try {
+            const response = await fetch(`${API_BASE}/api/test/answer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    stage: stage,
+                    question_index: questionIndex,
+                    answer: answer,
+                    option: option
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка отправки ответа:', error);
+            return { success: false, error: error.message };
+        }
+    },
+    
+    /**
+     * Получает результаты этапа теста
+     */
+    async getTestStageResults(userId, stage) {
+        try {
+            const response = await fetch(`${API_BASE}/api/test/results?user_id=${userId}&stage=${stage}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка получения результатов этапа:', error);
+            return { success: false, error: error.message };
+        }
+    },
+    
+    /**
+     * Проверяет работу базы данных
+     */
+    async checkDatabase() {
+        try {
+            const response = await fetch(`${API_BASE}/api/check-db`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка проверки БД:', error);
+            return { status: 'error', message: error.message };
+        }
+    },
+    
+    /**
+     * Получает логи пользователя (только для админов)
+     */
+    async getUserLogs(userId) {
+        try {
+            const response = await fetch(`${API_BASE}/api/logs/${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Ошибка получения логов:', error);
+            return { error: error.message };
         }
     }
 };
