@@ -1,6 +1,6 @@
 // ========== test.js ==========
-// ПОЛНЫЙ ТЕСТ ИЗ 5 ЭТАПОВ
-// ТОЧНАЯ КОПИЯ ЛОГИКИ ИЗ PYTHON-БОТА
+// ПОЛНЫЙ ТЕСТ ИЗ 5 ЭТАПОВ КАК В TELEGRAM
+// С ЭКРАНАМИ ПОСЛЕ КАЖДОГО ЭТАПА И КНОПКАМИ
 
 const Test = {
     // Текущее состояние
@@ -48,31 +48,31 @@ const Test = {
     stages: [
         { 
             id: 'perception', 
-            name: 'ЭТАП 1/5: КОНФИГУРАЦИЯ ВОСПРИЯТИЯ',
+            name: '🧠 ЭТАП 1/5: КОНФИГУРАЦИЯ ВОСПРИЯТИЯ',
             description: 'Линза, через которую вы смотрите на мир',
             total: 8
         },
         { 
             id: 'thinking', 
-            name: 'ЭТАП 2/5: КОНФИГУРАЦИЯ МЫШЛЕНИЯ',
+            name: '🧠 ЭТАП 2/5: КОНФИГУРАЦИЯ МЫШЛЕНИЯ',
             description: 'Как вы обрабатываете информацию',
             total: null
         },
         { 
             id: 'behavior', 
-            name: 'ЭТАП 3/5: КОНФИГУРАЦИЯ ПОВЕДЕНИЯ',
+            name: '🧠 ЭТАП 3/5: КОНФИГУРАЦИЯ ПОВЕДЕНИЯ',
             description: 'Ваши автоматические реакции',
             total: 8
         },
         { 
             id: 'growth', 
-            name: 'ЭТАП 4/5: ТОЧКА РОСТА',
+            name: '🧠 ЭТАП 4/5: ТОЧКА РОСТА',
             description: 'Где находится рычаг изменений',
             total: 8
         },
         { 
             id: 'deep', 
-            name: 'ЭТАП 5/5: ГЛУБИННЫЕ ПАТТЕРНЫ',
+            name: '🧠 ЭТАП 5/5: ГЛУБИННЫЕ ПАТТЕРНЫ',
             description: 'Тип привязанности, защитные механизмы',
             total: 10
         }
@@ -1035,14 +1035,13 @@ const Test = {
                 <div class="test-messages-list" id="testMessagesList"></div>
             </div>
         `;
-        this.addTestStyles();
     },
     
     sendStageIntro() {
         const stage = this.stages[this.currentStage];
-        let text = `🧠 <b>${stage.name}</b>\n\n${stage.description}`;
+        let text = `${stage.name}\n\n${stage.description}`;
         if (stage.id === 'thinking' && this.perceptionType) {
-            text += `\n\n🧠 Ваш тип восприятия: ${this.perceptionType}`;
+            text += `\n\nВаш тип восприятия: ${this.perceptionType}`;
         }
         text += `\n\n📊 Всего вопросов: ${stage.total}`;
         this.addBotMessage(text);
@@ -1220,7 +1219,7 @@ const Test = {
             "ПРАКТИКО-ОРИЕНТИРОВАННЫЙ": "Вы ориентированы на практические результаты и конкретные действия. Ваше внимание направлено внутрь, а тревога — о потере контроля."
         }[result.type];
         
-        const text = `✨ <b>РЕЗУЛЬТАТ ЭТАПА 1</b>\n\n<b>Ваш тип восприятия:</b> ${result.type}\n\n${feedback}\n\n▶️ <b>ЧТО ДАЛЬШЕ?</b>\n\nЭтап 2: КОНФИГУРАЦИЯ МЫШЛЕНИЯ\n\nМы узнали, как вы воспринимаете мир. Теперь исследуем, как вы обрабатываете информацию.\n\n📊 Вопросов: ${result.questionsCount}\n⏱ Время: ~3-4 минуты`;
+        const text = `✨ РЕЗУЛЬТАТ ЭТАПА 1\n\nВаш тип восприятия: ${result.type}\n\n${feedback}\n\n▶️ ЧТО ДАЛЬШЕ?\n\nЭтап 2: КОНФИГУРАЦИЯ МЫШЛЕНИЯ\n\nМы узнали, как вы воспринимаете мир. Теперь исследуем, как вы обрабатываете информацию.\n\n📊 Вопросов: ${result.questionsCount}\n⏱ Время: ~3-4 минуты`;
         
         this.addMessageWithButtons(text, [
             { text: "▶️ Перейти к этапу 2", callback: () => this.goToNextStage() }
@@ -1263,7 +1262,7 @@ const Test = {
             }
         }[this.perceptionType]?.[group] || desc;
         
-        const text = `✨ <b>РЕЗУЛЬТАТ ЭТАПА 2</b>\n\n<b>Уровень мышления:</b> ${level}/9\n\n${feedback}\n\n▶️ <b>ЧТО ДАЛЬШЕ?</b>\n\nЭтап 3: КОНФИГУРАЦИЯ ПОВЕДЕНИЯ\n\nТеперь посмотрим, как вы действуете на автомате.\n\n📊 Вопросов: 8\n⏱ Время: ~3 минуты`;
+        const text = `✨ РЕЗУЛЬТАТ ЭТАПА 2\n\nУровень мышления: ${level}/9\n\n${feedback}\n\n▶️ ЧТО ДАЛЬШЕ?\n\nЭтап 3: КОНФИГУРАЦИЯ ПОВЕДЕНИЯ\n\nТеперь посмотрим, как вы действуете на автомате.\n\n📊 Вопросов: 8\n⏱ Время: ~3 минуты`;
         
         this.addMessageWithButtons(text, [
             { text: "▶️ Перейти к этапу 3", callback: () => this.goToNextStage() }
@@ -1305,7 +1304,7 @@ const Test = {
             5: "Поведение становится инструментом для достижения целей."
         }[behaviorLevel] || "Вы по-разному реагируете в разных ситуациях.";
         
-        const text = `✨ <b>РЕЗУЛЬТАТ ЭТАПА 3</b>\n\n<b>Ваши поведенческие уровни:</b>\n• Реакция на давление (СБ): ${sbAvg}/6\n• Отношение к деньгам (ТФ): ${tfAvg}/6\n• Понимание мира (УБ): ${ubAvg}/6\n• Отношения с людьми (ЧВ): ${chvAvg}/6\n\n<b>Финальный уровень:</b> ${finalLevel}/9\n\n${feedback}\n\n▶️ <b>ЧТО ДАЛЬШЕ?</b>\n\nЭтап 4: ТОЧКА РОСТА\n\nНайдем, где находится рычаг изменений.\n\n📊 Вопросов: 8\n⏱ Время: ~3 минуты`;
+        const text = `✨ РЕЗУЛЬТАТ ЭТАПА 3\n\nВаши поведенческие уровни:\n• Реакция на давление (СБ): ${sbAvg}/6\n• Отношение к деньгам (ТФ): ${tfAvg}/6\n• Понимание мира (УБ): ${ubAvg}/6\n• Отношения с людьми (ЧВ): ${chvAvg}/6\n\nФинальный уровень: ${finalLevel}/9\n\n${feedback}\n\n▶️ ЧТО ДАЛЬШЕ?\n\nЭтап 4: ТОЧКА РОСТА\n\nНайдем, где находится рычаг изменений.\n\n📊 Вопросов: 8\n⏱ Время: ~3 минуты`;
         
         this.addMessageWithButtons(text, [
             { text: "▶️ Перейти к этапу 4", callback: () => this.goToNextStage() }
@@ -1320,7 +1319,7 @@ const Test = {
         const confidence = this.calculateProfileConfidence();
         const bar = "█".repeat(Math.floor(confidence * 10)) + "░".repeat(10 - Math.floor(confidence * 10));
         
-        const text = `🧠 <b>ПРЕДВАРИТЕЛЬНЫЙ ПОРТРЕТ</b>\n\n${simple.attentionDesc}\n\n${simple.thinkingDesc}\n\n📊 <b>ТВОИ ВЕКТОРЫ:</b>\n• <b>Реакция на давление:</b> ${simple.sbDesc}\n• <b>Отношение к деньгам:</b> ${simple.tfDesc}\n• <b>Понимание мира:</b> ${simple.ubDesc}\n• <b>Отношения с людьми:</b> ${simple.chvDesc}\n\n🎯 <b>Точка роста:</b> ${simple.growthPoint}\n\n📊 <b>Уверенность:</b> ${bar} ${Math.floor(confidence * 100)}%\n\n👇 <b>ЭТО ПОХОЖЕ НА ВАС?</b>`;
+        const text = `🧠 ПРЕДВАРИТЕЛЬНЫЙ ПОРТРЕТ\n\n${simple.attentionDesc}\n\n${simple.thinkingDesc}\n\n📊 ТВОИ ВЕКТОРЫ:\n• Реакция на давление: ${simple.sbDesc}\n• Отношение к деньгам: ${simple.tfDesc}\n• Понимание мира: ${simple.ubDesc}\n• Отношения с людьми: ${simple.chvDesc}\n\n🎯 Точка роста: ${simple.growthPoint}\n\n📊 Уверенность: ${bar} ${Math.floor(confidence * 100)}%\n\n👇 ЭТО ПОХОЖЕ НА ВАС?`;
         
         this.addMessageWithButtons(text, [
             { text: "✅ ДА", callback: () => this.profileConfirm() },
@@ -1333,7 +1332,7 @@ const Test = {
     // ЭКРАН 5: УТОЧНЕНИЯ (при сомнениях)
     // ============================================
     profileDoubt() {
-        const text = `🔍 <b>ДАВАЙ УТОЧНИМ</b>\n\nЧто именно вам не подходит?\n(можно выбрать несколько)\n\n🎭 Про людей — я не так сильно завишу от чужого мнения\n💰 Про деньги — у меня с ними по-другому\n🔍 Про знаки — я вполне себе анализирую\n🤝 Про отношения — я знаю, чего хочу\n🛡 Про давление — я реагирую иначе\n\n👇 <b>Выберите и нажмите ДАЛЬШЕ</b>`;
+        const text = `🔍 ДАВАЙ УТОЧНИМ\n\nЧто именно вам не подходит?\n(можно выбрать несколько)\n\n🎭 Про людей — я не так сильно завишу от чужого мнения\n💰 Про деньги — у меня с ними по-другому\n🔍 Про знаки — я вполне себе анализирую\n🤝 Про отношения — я знаю, чего хочу\n🛡 Про давление — я реагирую иначе\n\n👇 Выберите и нажмите ДАЛЬШЕ`;
         
         this.addMessageWithButtons(text, [
             { text: "🎭 Про людей", callback: () => this.toggleDiscrepancy("people") },
@@ -1384,7 +1383,7 @@ const Test = {
         }
         
         const q = this.clarifyingQuestions[this.clarifyingCurrent];
-        const text = `🔍 <b>УТОЧНЯЮЩИЙ ВОПРОС ${this.clarifyingCurrent + 1}/${this.clarifyingQuestions.length}</b>\n\n${q.text}`;
+        const text = `🔍 УТОЧНЯЮЩИЙ ВОПРОС ${this.clarifyingCurrent + 1}/${this.clarifyingQuestions.length}\n\n${q.text}`;
         
         this.addMessageWithButtons(text, q.options.map((opt, i) => ({
             text: opt,
@@ -1409,7 +1408,7 @@ const Test = {
     // ЭКРАН 6: АНЕКДОТ (при нажатии НЕТ)
     // ============================================
     profileReject() {
-        const anecdote = `🧠 <b>ЧЕСТНОСТЬ - ЛУЧШАЯ ПОЛИТИКА</b>\n\nДве подруги решили сходить на ипподром. Приходят, а там скачки, все ставки делают. Решили и они ставку сделать — вдруг повезёт? Одна другой и говорит: «Слушай, у тебя какой размер груди?». Вторая: «Второй… а у тебя?». Первая: «Третий… ну давай на пятую поставим — чтоб сумма была…».\n\nПоставили на пятую, лошадь приходит первая, они счастливые прибегают домой с деньгами и мужьям рассказывают, как было дело.\n\nНа следующий день мужики тоже решили сходить на скачки — а вдруг им повезёт? Когда решали, на какую ставить, один говорит: «Ты сколько раз за ночь свою жену можешь удовлетворить?». Другой говорит: «Ну, три…». Первый: «А я четыре… ну давай на седьмую поставим».\n\nПоставили на седьмую, первой пришла вторая.\n\nМужики переглянулись: «Не напиздили бы — выиграли…».\n\n<b>Мораль:</b> Если врать в тесте — результат будет как у мужиков на скачках. Хотите попробовать еще раз?`;
+        const anecdote = `🧠 ЧЕСТНОСТЬ - ЛУЧШАЯ ПОЛИТИКА\n\nДве подруги решили сходить на ипподром. Приходят, а там скачки, все ставки делают. Решили и они ставку сделать — вдруг повезёт? Одна другой и говорит: «Слушай, у тебя какой размер груди?». Вторая: «Второй… а у тебя?». Первая: «Третий… ну давай на пятую поставим — чтоб сумма была…».\n\nПоставили на пятую, лошадь приходит первая, они счастливые прибегают домой с деньгами и мужьям рассказывают, как было дело.\n\nНа следующий день мужики тоже решили сходить на скачки — а вдруг им повезёт? Когда решали, на какую ставить, один говорит: «Ты сколько раз за ночь свою жену можешь удовлетворить?». Другой говорит: «Ну, три…». Первый: «А я четыре… ну давай на седьмую поставим».\n\nПоставили на седьмую, первой пришла вторая.\n\nМужики переглянулись: «Не напиздили бы — выиграли…».\n\nМораль: Если врать в тесте — результат будет как у мужиков на скачках. Хотите попробовать еще раз?`;
         
         this.addMessageWithButtons(anecdote, [
             { text: "🔄 ПРОЙТИ ТЕСТ ЕЩЕ РАЗ", callback: () => this.restartTest() },
@@ -1434,7 +1433,7 @@ const Test = {
     },
     
     goToChat() {
-        this.addBotMessage('👋 <b>До свидания!</b>\n\nБуду рад помочь, если решите вернуться.');
+        this.addBotMessage('👋 До свидания!\n\nБуду рад помочь, если решите вернуться.');
         setTimeout(() => {
             if (App && App.showMainChat) {
                 App.showMainChat();
@@ -1447,7 +1446,7 @@ const Test = {
     // ============================================
     showStage5Result() {
         const deep = this.deepPatterns || { attachment: "🤗 Надежный" };
-        const text = `✨ <b>РЕЗУЛЬТАТ ЭТАПА 5</b>\n\n<b>Тип привязанности:</b> ${deep.attachment}\n\n✅ <b>ТЕСТ ЗАВЕРШЕН!</b>\n\nСейчас я сформирую ваш полный психологический портрет...`;
+        const text = `✨ РЕЗУЛЬТАТ ЭТАПА 5\n\nТип привязанности: ${deep.attachment}\n\n✅ ТЕСТ ЗАВЕРШЕН!\n\nСейчас я сформирую ваш полный психологический портрет...`;
         this.addBotMessage(text);
         setTimeout(() => this.showFinalProfile(), 2000);
     },
@@ -1495,7 +1494,7 @@ const Test = {
             6: "Создаёте сообщества"
         }[profile.chvLevel] || "Информация уточняется";
         
-        const text = `🧠 <b>ВАШ ПСИХОЛОГИЧЕСКИЙ ПОРТРЕТ</b>\n\n<b>Профиль:</b> ${profile.displayName}\n<b>Тип восприятия:</b> ${profile.perceptionType}\n<b>Уровень мышления:</b> ${profile.thinkingLevel}/9\n\n📊 <b>ТВОИ ВЕКТОРЫ:</b>\n\n• <b>Реакция на давление (СБ ${profile.sbLevel}/6):</b> ${sbDesc}\n\n• <b>Отношение к деньгам (ТФ ${profile.tfLevel}/6):</b> ${tfDesc}\n\n• <b>Понимание мира (УБ ${profile.ubLevel}/6):</b> ${ubDesc}\n\n• <b>Отношения с людьми (ЧВ ${profile.chvLevel}/6):</b> ${chvDesc}\n\n🧠 <b>Глубинный паттерн:</b> ${deep.attachment}\n\n👇 <b>Что дальше?</b>`;
+        const text = `🧠 ВАШ ПСИХОЛОГИЧЕСКИЙ ПОРТРЕТ\n\nПрофиль: ${profile.displayName}\nТип восприятия: ${profile.perceptionType}\nУровень мышления: ${profile.thinkingLevel}/9\n\n📊 ТВОИ ВЕКТОРЫ:\n\n• Реакция на давление (СБ ${profile.sbLevel}/6): ${sbDesc}\n\n• Отношение к деньгам (ТФ ${profile.tfLevel}/6): ${tfDesc}\n\n• Понимание мира (УБ ${profile.ubLevel}/6): ${ubDesc}\n\n• Отношения с людьми (ЧВ ${profile.chvLevel}/6): ${chvDesc}\n\n🧠 Глубинный паттерн: ${deep.attachment}\n\n👇 Что дальше?`;
         
         if (App?.userId) {
             localStorage.setItem(`test_results_${App.userId}`, JSON.stringify({
@@ -1550,63 +1549,6 @@ const Test = {
         } else {
             alert("Выбор режима будет доступен позже");
         }
-    },
-    
-    addTestStyles() {
-        if (document.getElementById('testStyles')) return;
-        
-        const style = document.createElement('style');
-        style.id = 'testStyles';
-        style.textContent = `
-            .test-messages-container {
-                display: flex;
-                flex-direction: column;
-                height: 100%;
-                overflow-y: auto;
-                padding: 16px;
-            }
-            .test-messages-list {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-            .message-buttons {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-top: 12px;
-            }
-            .message-button {
-                width: 100%;
-                padding: 12px 16px;
-                background: var(--glass-bg);
-                border: 1px solid var(--glass-border);
-                border-radius: 30px;
-                color: var(--max-text);
-                font-size: 15px;
-                text-align: left;
-                cursor: pointer;
-                transition: all 0.2s;
-                backdrop-filter: blur(8px);
-            }
-            .message-button:hover {
-                background: var(--max-hover);
-                border-color: var(--max-blue);
-                transform: translateY(-1px);
-            }
-            .message-button:active {
-                transform: translateY(0);
-            }
-            @keyframes slideIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .message, .message-button {
-                animation: slideIn 0.3s ease;
-            }
-        `;
-        document.head.appendChild(style);
     }
 };
 
