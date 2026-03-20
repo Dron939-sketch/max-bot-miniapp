@@ -1,7 +1,112 @@
 /* ========== STYLES.CSS ========== */
-/* ОРИГИНАЛЬНЫЕ ЦВЕТА MAX + ФОРМА ТЕЛЕФОНА + ЦЕНТРИРОВАНИЕ + ОБЛАЧКА КАК В TELEGRAM */
-/* + СВЕТЛАЯ ТЕМА + ИНДИКАТОР ПРОЧИТАНО + РЕАКЦИИ */
+/* ПОЛНАЯ ПОДДЕРЖКА ЭМОДЗИ + ВСЕ ФИЧИ */
 
+/* 1. ГЛОБАЛЬНАЯ ПОДДЕРЖКА ЭМОДЗИ - В САМОМ НАЧАЛЕ */
+* {
+    /* Системные шрифты с поддержкой эмодзи - ВАЖНО: порядок имеет значение */
+    font-family: 
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI Emoji',        /* Windows эмодзи */
+        'Segoe UI',
+        'Noto Color Emoji',      /* Android/Linux цветные эмодзи */
+        'Apple Color Emoji',     /* iOS/macOS цветные эмодзи */
+        'EmojiOne Color',
+        'Android Emoji',
+        'Twemoji Mozilla',
+        'Helvetica Neue',
+        Arial,
+        sans-serif !important;
+    
+    /* Принудительное использование эмодзи-шрифтов */
+    font-variant-emoji: emoji;
+    
+    /* Сглаживание для эмодзи */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* 2. СПЕЦИАЛЬНО ДЛЯ ЭМОДЗИ */
+.emoji,
+.emoji-text,
+.reaction-emoji,
+.reaction-option,
+.gender-emoji,
+.onboarding-avatar,
+.message-emoji,
+.status-emoji {
+    /* Отключаем все трансформации текста для эмодзи */
+    font-family: inherit !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+    
+    /* Правильные размеры */
+    font-size: 1.2em;
+    line-height: 1;
+    display: inline-block;
+    
+    /* Запрещаем искажения */
+    transform: none !important;
+    filter: none !important;
+    
+    /* Явно указываем цвет (оставляем оригинальный цвет эмодзи) */
+    color: inherit;
+}
+
+/* 3. КОНКРЕТНО ДЛЯ РЕАКЦИЙ */
+.reaction-emoji {
+    font-size: 1.4em;  /* Чуть больше для реакций */
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+.reaction-option {
+    font-size: 1.6em;  /* Крупные эмодзи в палитре */
+    padding: 4px;
+    transition: transform 0.2s;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 1;
+}
+
+.reaction-option:hover {
+    transform: scale(1.3);
+}
+
+/* 4. ДЛЯ ГЕНДЕРНЫХ ЭМОДЗИ */
+.gender-emoji {
+    font-size: 2.5em;  /* Большие эмодзи для выбора пола */
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* 5. ДЛЯ АВАТАРОК-ЭМОДЗИ */
+.onboarding-avatar {
+    font-size: 5em;  /* Огромные эмодзи в приветствии */
+    line-height: 1.2;
+    display: block;
+    text-align: center;
+}
+
+/* 6. ЗАПАСНОЙ ВАРИАНТ ДЛЯ СТАРЫХ БРАУЗЕРОВ */
+@supports not (font-variant-emoji: emoji) {
+    * {
+        /* Альтернативный набор для старых браузеров */
+        font-family: 
+            'Segoe UI',
+            'Arial Unicode MS',
+            'Lucida Grande',
+            Tahoma,
+            Verdana,
+            sans-serif;
+    }
+}
+
+/* ===== ОРИГИНАЛЬНЫЕ ЦВЕТА MAX ===== */
 :root {
     /* Оригинальные цвета MAX (из вашего бота) - ТЕМНАЯ ТЕМА ПО УМОЛЧАНИЮ */
     --max-bg: #0e1621;              /* Тёмный фон как в MAX */
@@ -100,7 +205,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    /* Шрифты уже объявлены в глобальном правиле выше */
 }
 
 html, body {
@@ -369,7 +474,10 @@ body {
 }
 
 .gender-emoji {
-    font-size: 32px;
+    font-size: 2.5em;  /* Большие эмодзи */
+    margin-bottom: 8px;
+    display: block;
+    line-height: 1;
 }
 
 .gender-text {
@@ -930,7 +1038,7 @@ body {
     color: var(--max-blue);
 }
 
-/* ===== РЕАКЦИИ НА СООБЩЕНИЯ ===== */
+/* ===== РЕАКЦИИ НА СООБЩЕНИЯ С ЭМОДЗИ ===== */
 .message-reactions {
     display: flex;
     gap: 6px;
@@ -972,7 +1080,11 @@ body {
 }
 
 .reaction-emoji {
-    font-size: 14px;
+    font-size: 1.4em;  /* Размер эмодзи в реакциях */
+    line-height: 1;
+    display: inline-block;
+    vertical-align: middle;
+    font-family: inherit;
 }
 
 .reaction-count {
@@ -994,11 +1106,13 @@ body {
     background-color: var(--max-panel-bg);
     border: 1px solid var(--max-border);
     border-radius: 30px;
-    padding: 6px 10px;
-    gap: 8px;
+    padding: 8px 12px;
+    gap: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 10;
     margin-bottom: 8px;
+    flex-wrap: wrap;
+    max-width: 200px;
 }
 
 .message.user-message .reactions-picker {
@@ -1015,10 +1129,13 @@ body {
 }
 
 .reaction-option {
-    font-size: 18px;
+    font-size: 1.8em;  /* Крупные эмодзи */
     cursor: pointer;
     transition: transform 0.2s;
-    padding: 2px;
+    padding: 4px;
+    display: inline-block;
+    line-height: 1;
+    font-family: inherit;
 }
 
 .reaction-option:hover {
@@ -1182,7 +1299,10 @@ body {
 }
 
 .onboarding-avatar {
-    font-size: 64px;
+    font-size: 5em;  /* Огромные эмодзи */
+    line-height: 1.2;
+    display: block;
+    text-align: center;
     margin-bottom: var(--spacing-lg);
 }
 
