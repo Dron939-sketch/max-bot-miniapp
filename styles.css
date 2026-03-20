@@ -1,5 +1,5 @@
 /* ========== STYLES.CSS ========== */
-/* ОРИГИНАЛЬНЫЕ ЦВЕТА MAX + ФОРМА ТЕЛЕФОНА + ЦЕНТРИРОВАНИЕ */
+/* ОРИГИНАЛЬНЫЕ ЦВЕТА MAX + ФОРМА ТЕЛЕФОНА + ЦЕНТРИРОВАНИЕ + ПРАВИЛЬНЫЕ ОБЛАЧКА */
 
 :root {
     /* Оригинальные цвета MAX (из вашего бота) */
@@ -560,22 +560,24 @@ body {
     gap: var(--message-gap);
 }
 
-/* Сообщения */
+/* ========== ИСПРАВЛЕННЫЕ ОБЛАЧКА СООБЩЕНИЙ ========== */
 .message {
     display: flex;
     flex-direction: column;
-    max-width: var(--message-max-width);
+    max-width: var(--message-max-width, 85%);
+    min-width: 80px;
+    width: fit-content;  /* Ширина по содержимому */
     animation: fadeIn 0.2s ease;
 }
 
 .message.bot-message {
     align-items: flex-start;
-    margin-right: auto;
+    margin-right: auto;  /* Прижимает к левому краю */
 }
 
 .message.user-message {
     align-items: flex-end;
-    margin-left: auto;
+    margin-left: auto;   /* Прижимает к правому краю */
 }
 
 .message-bubble {
@@ -583,7 +585,8 @@ body {
     border-radius: 18px 18px 18px 4px;
     padding: 8px 12px;
     word-wrap: break-word;
-    min-width: 80px;
+    width: fit-content;  /* Ширина по тексту */
+    max-width: 100%;      /* Но не больше контейнера */
 }
 
 .user-message .message-bubble {
@@ -596,7 +599,8 @@ body {
     line-height: 1.5;
     color: var(--max-text);
     white-space: pre-wrap;
-    text-align: left;  /* Текст сообщений всегда по левому краю */
+    text-align: left;      /* Текст всегда слева */
+    word-break: break-word; /* Перенос длинных слов */
 }
 
 .message-time {
@@ -604,6 +608,17 @@ body {
     color: var(--max-text-secondary);
     text-align: right;
     margin-top: 4px;
+}
+
+/* Тестовые сообщения (заглушки) */
+.message.test-message {
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.message.test-message .message-bubble {
+    background-color: var(--max-panel-bg);
+    border: 1px dashed var(--max-text-secondary);
 }
 
 /* Индикатор печати */
@@ -1001,6 +1016,88 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ===== */
+
+/* Эффекты для кнопок */
+.onboarding-btn:active,
+.gender-btn:active,
+.context-submit:active,
+.send-btn:active {
+    transform: scale(0.97);
+    transition: transform 0.1s;
+}
+
+/* Плавный скролл */
+.screen-container {
+    scroll-behavior: smooth;
+}
+
+/* Кастомный скроллбар */
+.screen-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.screen-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.screen-container::-webkit-scrollbar-thumb {
+    background: var(--max-text-secondary);
+    border-radius: 2px;
+}
+
+.screen-container::-webkit-scrollbar-thumb:hover {
+    background: var(--max-blue);
+}
+
+/* Увеличенные области для сенсорных экранов */
+.onboarding-btn,
+.gender-btn,
+.context-submit,
+.send-btn {
+    min-height: 48px;  /* Минимальный размер для сенсорных экранов */
+}
+
+/* Маркдаун-форматирование */
+.markdown-content {
+    line-height: 1.6;
+}
+
+.markdown-content strong {
+    color: var(--max-blue);
+    font-weight: 600;
+}
+
+.markdown-content em {
+    color: var(--max-text-secondary);
+    font-style: italic;
+}
+
+.markdown-content ul, 
+.markdown-content ol {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.markdown-content li {
+    margin-bottom: 5px;
+}
+
+.markdown-content blockquote {
+    border-left: 3px solid var(--max-blue);
+    padding-left: 15px;
+    color: var(--max-text-secondary);
+    margin: 10px 0;
+}
+
+.markdown-content code {
+    background-color: var(--max-panel-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
 }
 
 /* Поддержка безопасной зоны на iPhone */
