@@ -1,6 +1,6 @@
 // ========== test.js ==========
 // ПОЛНЫЙ ТЕСТ ИЗ 5 ЭТАПОВ КАК В TELEGRAM
-// С ОТПРАВКОЙ РЕЗУЛЬТАТОВ НА СЕРВЕР
+// С ОТПРАВКОЙ РЕЗУЛЬТАТОВ И ПОЛУЧЕНИЕМ ИНТЕРПРЕТАЦИИ В ПРИЛОЖЕНИЕ
 
 const Test = {
     // Текущее состояние
@@ -8,6 +8,8 @@ const Test = {
     currentQuestionIndex: 0,
     userId: null,
     answers: [],
+    pollingInterval: null,
+    statusMessageElement: null,
     
     // Данные для расчетов
     perceptionScores: {
@@ -950,6 +952,12 @@ const Test = {
         this.discrepancies = [];
         this.clarifyingAnswers = [];
         
+        // Останавливаем предыдущий опрос если был
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
+            this.pollingInterval = null;
+        }
+        
         this.loadProgress();
         console.log('📝 Тест инициализирован для пользователя:', this.userId);
     },
@@ -1056,6 +1064,7 @@ const Test = {
         msg.innerHTML = `<div class="message-bubble"><div class="message-text">${text}</div><div class="message-time">только что</div></div>`;
         list.appendChild(msg);
         this.scrollToBottom();
+        return msg;
     },
     
     addUserMessage(text) {
@@ -1068,7 +1077,6 @@ const Test = {
         this.scrollToBottom();
     },
     
-    // ===== ИСПРАВЛЕННЫЙ МЕТОД addQuestionMessage =====
     addQuestionMessage(text, options, callback, current, total) {
         const list = document.getElementById('testMessagesList');
         if (!list) return;
@@ -1076,20 +1084,16 @@ const Test = {
         const msg = document.createElement('div');
         msg.className = 'message bot-message';
         
-        // Создаем пузырек сообщения
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         
-        // Текст вопроса
         const textDiv = document.createElement('div');
         textDiv.className = 'message-text';
         textDiv.textContent = text;
         
-        // Контейнер для кнопок
         const buttonsDiv = document.createElement('div');
         buttonsDiv.className = 'message-buttons';
         
-        // Добавляем кнопки
         options.forEach((opt, idx) => {
             const optText = typeof opt === 'object' ? opt.text : opt;
             const btn = document.createElement('button');
@@ -1097,7 +1101,6 @@ const Test = {
             btn.setAttribute('data-option-index', idx);
             btn.innerHTML = `<span>${optText}</span>`;
             
-            // Добавляем обработчик
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const index = parseInt(btn.dataset.optionIndex);
@@ -1106,7 +1109,6 @@ const Test = {
                 
                 this.addUserMessage(optionText);
                 
-                // Удаляем контейнер с кнопками
                 const buttonsContainer = msg.querySelector('.message-buttons');
                 if (buttonsContainer) {
                     buttonsContainer.remove();
@@ -1118,25 +1120,19 @@ const Test = {
             buttonsDiv.appendChild(btn);
         });
         
-        // Время и прогресс
         const timeDiv = document.createElement('div');
         timeDiv.className = 'message-time';
         timeDiv.textContent = `📊 Вопрос ${current}/${total}`;
         
-        // Собираем сообщение
         bubble.appendChild(textDiv);
         bubble.appendChild(buttonsDiv);
         bubble.appendChild(timeDiv);
         msg.appendChild(bubble);
         
-        // Добавляем в список
         list.appendChild(msg);
-        
-        // Прокрутка вниз
         this.scrollToBottom();
     },
     
-    // ===== ИСПРАВЛЕННЫЙ МЕТОД addMessageWithButtons =====
     addMessageWithButtons(text, buttons) {
         const list = document.getElementById('testMessagesList');
         if (!list) return;
@@ -1144,20 +1140,16 @@ const Test = {
         const msg = document.createElement('div');
         msg.className = 'message bot-message';
         
-        // Создаем пузырек сообщения
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         
-        // Текст сообщения
         const textDiv = document.createElement('div');
         textDiv.className = 'message-text';
         textDiv.textContent = text;
         
-        // Контейнер для кнопок
         const buttonsDiv = document.createElement('div');
         buttonsDiv.className = 'message-buttons';
         
-        // Добавляем кнопки
         buttons.forEach((btn, i) => {
             const button = document.createElement('button');
             button.className = 'message-button';
@@ -1168,7 +1160,6 @@ const Test = {
                 e.stopPropagation();
                 const idx = parseInt(button.dataset.callback);
                 
-                // Удаляем контейнер с кнопками
                 const buttonsContainer = msg.querySelector('.message-buttons');
                 if (buttonsContainer) {
                     buttonsContainer.remove();
@@ -1180,25 +1171,20 @@ const Test = {
             buttonsDiv.appendChild(button);
         });
         
-        // Время
         const timeDiv = document.createElement('div');
         timeDiv.className = 'message-time';
         timeDiv.textContent = 'только что';
         
-        // Собираем сообщение
         bubble.appendChild(textDiv);
         bubble.appendChild(buttonsDiv);
         bubble.appendChild(timeDiv);
         msg.appendChild(bubble);
         
-        // Добавляем в список
         list.appendChild(msg);
-        
-        // Прокрутка вниз
         this.scrollToBottom();
+        return msg;
     },
     
-    // ===== НОВЫЙ МЕТОД ДЛЯ АВТО-ПРОКРУТКИ =====
     scrollToBottom() {
         setTimeout(() => {
             const container = document.getElementById('testMessagesContainer');
@@ -1443,7 +1429,6 @@ const Test = {
             return;
         }
         
-        // Упрощенные уточняющие вопросы
         const questions = [
             {
                 text: "Расскажите подробнее, что именно не так с описанием вашей реакции на давление?",
@@ -1525,31 +1510,34 @@ const Test = {
     },
     
     // ============================================
-    // ЭКРАН 7: РЕЗУЛЬТАТ ЭТАПА 5 (краткий)
+    // ЭКРАН 7: РЕЗУЛЬТАТ ЭТАПА 5 + ОПРОС СЕРВЕРА
     // ============================================
     showStage5Result() {
         const deep = this.deepPatterns || { attachment: "🤗 Надежный" };
         
-        // Показываем краткий результат
-        const text = `✨ РЕЗУЛЬТАТ ЭТАПА 5\n\nТип привязанности: ${deep.attachment}\n\n✅ ТЕСТ ЗАВЕРШЕН!\n\n🧠 Анализирую данные...\n\nСобираю воедино результаты 5 этапов тестирования.\nЭто займёт около 20-30 секунд.\n\nФормирую ваш точный психологический портрет...`;
+        // Показываем статусное сообщение
+        const statusMsg = this.addBotMessage(
+            `✨ РЕЗУЛЬТАТ ЭТАПА 5\n\nТип привязанности: ${deep.attachment}\n\n✅ ТЕСТ ЗАВЕРШЕН!\n\n🧠 Анализирую данные...\n\nСобираю воедино результаты 5 этапов тестирования.\nЭто займёт около 20-30 секунд.\n\nФормирую ваш точный психологический портрет...`
+        );
         
-        this.addBotMessage(text);
+        // Сохраняем элемент статусного сообщения
+        this.statusMessageElement = statusMsg;
         
         // Отправляем результаты на сервер
         this.sendTestResultsToServer();
         
-        // Через 2 секунды показываем, что ждем ответ
-        setTimeout(() => {
-            this.addBotMessage("⏳ Жду ответ от сервера... Результаты уже в обработке.");
-        }, 2000);
+        // Запускаем опрос сервера
+        this.startPollingForInterpretation();
     },
     
-    // ===== НОВЫЙ МЕТОД: ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР =====
+    // ===== ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР =====
     async sendTestResultsToServer() {
         if (!this.userId) {
             console.error('❌ Нет userId для отправки результатов');
             return;
         }
+        
+        const profile = this.calculateFinalProfile();
         
         const results = {
             user_id: this.userId,
@@ -1559,17 +1547,16 @@ const Test = {
                 behavioral_levels: this.behavioralLevels,
                 dilts_counts: this.diltsCounts,
                 deep_patterns: this.deepPatterns || { attachment: "🤗 Надежный" },
-                profile_data: this.calculateFinalProfile(),
+                profile_data: profile,
                 all_answers: this.answers,
                 test_completed: true,
                 test_completed_at: new Date().toISOString()
             }
         };
         
-        console.log('📤 Отправка результатов на сервер:', results);
+        console.log('📤 Отправка результатов на сервер...');
         
         try {
-            // Отправляем на сервер
             const response = await fetch('/api/save-test-results', {
                 method: 'POST',
                 headers: {
@@ -1582,23 +1569,88 @@ const Test = {
             
             if (data.success) {
                 console.log('✅ Результаты теста успешно отправлены на сервер');
-                
-                // Добавляем сообщение, что ответ придет в Telegram
-                this.addBotMessage("📨 Результаты отправлены. Ожидайте ответ от психолога в Telegram...");
             } else {
                 console.error('❌ Ошибка при отправке:', data.error);
-                this.addBotMessage("❌ Не удалось отправить результаты. Попробуйте позже.");
             }
         } catch (error) {
             console.error('❌ Ошибка сети:', error);
-            this.addBotMessage("❌ Ошибка соединения с сервером. Проверьте интернет.");
         }
     },
     
+    // ===== ОПРОС СЕРВЕРА ДЛЯ ПОЛУЧЕНИЯ ИНТЕРПРЕТАЦИИ =====
+    startPollingForInterpretation() {
+        let attempts = 0;
+        const maxAttempts = 60; // 60 попыток * 2 секунды = 120 секунд
+        let dots = 0;
+        
+        // Останавливаем предыдущий опрос если был
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
+        }
+        
+        this.pollingInterval = setInterval(async () => {
+            attempts++;
+            
+            // Обновляем статусное сообщение с анимацией точек
+            if (this.statusMessageElement && attempts % 5 === 0) {
+                dots = (dots + 1) % 4;
+                const dotText = '.'.repeat(dots);
+                const deep = this.deepPatterns || { attachment: "🤗 Надежный" };
+                const newText = `✨ РЕЗУЛЬТАТ ЭТАПА 5\n\nТип привязанности: ${deep.attachment}\n\n✅ ТЕСТ ЗАВЕРШЕН!\n\n🧠 Анализирую данные${dotText}\n\nСобираю воедино результаты 5 этапов тестирования.\nЭто займёт около 20-30 секунд.\n\nФормирую ваш точный психологический портрет...`;
+                
+                const textDiv = this.statusMessageElement.querySelector('.message-text');
+                if (textDiv) {
+                    textDiv.textContent = newText;
+                }
+            }
+            
+            try {
+                const response = await fetch(`/api/get-test-interpretation?user_id=${this.userId}`);
+                const data = await response.json();
+                
+                if (data.success && data.interpretation) {
+                    // Получили интерпретацию!
+                    clearInterval(this.pollingInterval);
+                    this.pollingInterval = null;
+                    
+                    // Удаляем статусное сообщение
+                    if (this.statusMessageElement) {
+                        this.statusMessageElement.remove();
+                        this.statusMessageElement = null;
+                    }
+                    
+                    // Показываем интерпретацию
+                    this.addBotMessage(data.interpretation);
+                    
+                    // Показываем финальные кнопки
+                    this.showFinalProfileButtons();
+                    
+                    console.log('✅ Интерпретация получена');
+                }
+                
+                if (attempts >= maxAttempts) {
+                    clearInterval(this.pollingInterval);
+                    this.pollingInterval = null;
+                    
+                    // Удаляем статусное сообщение
+                    if (this.statusMessageElement) {
+                        this.statusMessageElement.remove();
+                        this.statusMessageElement = null;
+                    }
+                    
+                    this.addBotMessage("⏳ Интерпретация еще не готова. Она придет позже в Telegram.");
+                    this.showFinalProfileButtons();
+                }
+            } catch (error) {
+                console.error('❌ Ошибка опроса:', error);
+            }
+        }, 2000); // каждые 2 секунды
+    },
+    
     // ============================================
-    // ЭКРАН 8: ФИНАЛЬНЫЙ ПРОФИЛЬ (после этапа 5)
+    // ЭКРАН 8: ФИНАЛЬНЫЙ ПРОФИЛЬ (с кнопками)
     // ============================================
-    showFinalProfile() {
+    showFinalProfileButtons() {
         const profile = this.calculateFinalProfile();
         const deep = this.deepPatterns || { attachment: "🤗 Надежный" };
         
