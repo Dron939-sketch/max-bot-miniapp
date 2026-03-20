@@ -1,5 +1,6 @@
 // ========== script.js ==========
 // ПОЛНАЯ ВЕРСИЯ С ПРАВИЛЬНОЙ ЛОГИКОЙ + СОХРАНЕНИЕ ИМЕНИ + ИНТЕГРАЦИЯ С MAX + ТЕСТ + ЭКРАНЫ ПОСЛЕ ТЕСТА
+// ДОБАВЛЕНЫ: ГОЛОСОВОЙ ВВОД (Web Speech API) + УМНЫЕ ВОПРОСЫ
 
 const App = {
     userId: 'test_user_123',
@@ -15,6 +16,9 @@ const App = {
     currentMode: 'coach',     // Текущий режим: coach, psychologist, trainer
     psychologistThought: null, // Сохраненная мысль психолога
     currentGoals: [],         // Список целей
+    recognition: null,        // Для Web Speech API
+    smartQuestions: [],       // Умные вопросы
+    isRecording: false,       // Флаг записи голоса
 
     async init() {
         console.log('🚀 Фреди: инициализация');
@@ -61,6 +65,9 @@ const App = {
         
         // Добавляем обработчики для левой панели
         this.setupEventListeners();
+        
+        // Инициализируем Web Speech API
+        this.initSpeechRecognition();
     },
     
     setupEventListeners() {
@@ -107,8 +114,338 @@ const App = {
         }
     },
     
+    // ========== ГОЛОСОВОЙ ВВОД ==========
+    
+    initSpeechRecognition() {
+        // Проверяем поддержку Web Speech API
+        if ('webkitSpeechRecognition' in window) {
+            this.recognition = new webkitSpeechRecognition();
+            this.recognition.lang = 'ru-RU';
+            this.recognition.interimResults = false;
+            this.recognition.maxAlternatives = 1;
+            
+            this.recognition.onstart = () => {
+                this.isRecording = true;
+                this.showVoiceStatus('🎤 Слушаю...');
+            };
+            
+            this.recognition.onresult = async (event) => {
+                const text = event.results[0][0].transcript;
+                this.showVoiceStatus(`📝 Вы сказали: ${text}`);
+                
+                // Отправляем распознанный текст
+                await this.sendQuestion(text);
+            };
+            
+            this.recognition.onerror = (event) => {
+                console.error('Ошибка распознавания:', event.error);
+                this.showVoiceStatus('❌ Ошибка распознавания');
+                this.isRecording = false;
+            };
+            
+            this.recognition.onend = () => {
+                this.isRecording = false;
+                this.hideVoiceStatus();
+            };
+            
+            console.log('🎤 Web Speech API инициализирован');
+        } else {
+            console.warn('⚠️ Web Speech API не поддерживается в этом браузере');
+        }
+    },
+    
+    showVoiceStatus(message) {
+        // Создаем или обновляем статусное сообщение
+        let statusDiv = document.getElementById('voiceStatus');
+        if (!statusDiv) {
+            statusDiv = document.createElement('div');
+            statusDiv.id = 'voiceStatus';
+            statusDiv.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--max-blue);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 30px;
+                font-size: 14px;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease;
+                white-space: nowrap;
+            `;
+            document.body.appendChild(statusDiv);
+        }
+        statusDiv.textContent = message;
+        statusDiv.style.display = 'block';
+    },
+    
+    hideVoiceStatus() {
+        const statusDiv = document.getElementById('voiceStatus');
+        if (statusDiv) {
+            statusDiv.style.display = 'none';
+        }
+    },
+    
+    startVoiceRecognition() {
+        if (this.recognition && !this.isRecording) {
+            try {
+                this.recognition.start();
+            } catch (e) {
+                console.error('Ошибка запуска распознавания:', e);
+                this.showVoiceStatus('❌ Попробуйте еще раз');
+                setTimeout(() => this.hideVoiceStatus(), 2000);
+            }
+        } else if (!this.recognition) {
+            alert('Ваш браузер не поддерживает голосовой ввод.\nПопробуйте Chrome, Edge или Safari.');
+        }
+    },
+    
+    // ========== УМНЫЕ ВОПРОСЫ ==========
+    
+    async showSmartQuestions() {
+        try {
+            // Получаем умные вопросы с бэкенда
+            let questions = [];
+            
+            if (window.api && window.api.getSmartQuestions) {
+                const data = await window.api.getSmartQuestions(this.userId);
+                questions = data.questions || [];
+            } else {
+                // Генерируем локально на основе профиля
+                questions = this.generateLocalSmartQuestions();
+            }
+            
+            this.smartQuestions = questions;
+            
+            // Показываем вопросы в виде кнопок
+            const container = document.getElementById('screenContainer');
+            const originalContent = container.innerHTML;
+            
+            const questionsHtml = `
+                <div class="smart-questions-container">
+                    <div class="smart-questions-header">
+                        <div class="smart-questions-emoji">❓</div>
+                        <h2 class="smart-questions-title">УМНЫЕ ВОПРОСЫ</h2>
+                        <p class="smart-questions-desc">Выберите вопрос или напишите свой</p>
+                    </div>
+                    <div class="smart-questions-list" id="smartQuestionsList">
+                        ${questions.map((q, i) => `
+                            <div class="smart-question-item" data-question="${escapeHtml(q)}">
+                                <span class="smart-question-emoji">💭</span>
+                                <span class="smart-question-text">${escapeHtml(q)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="smart-questions-input">
+                        <div class="input-group">
+                            <input type="text" id="smartQuestionInput" class="smart-question-input" 
+                                   placeholder="Или напишите свой вопрос...">
+                            <button id="sendSmartQuestionBtn" class="smart-question-submit">➡️</button>
+                        </div>
+                    </div>
+                    <div class="smart-questions-back">
+                        <button class="onboarding-btn secondary" id="backFromSmartQuestionsBtn">◀️ НАЗАД</button>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = questionsHtml;
+            
+            // Добавляем стили
+            this.addSmartQuestionsStyles();
+            
+            // Обработчики
+            document.querySelectorAll('.smart-question-item').forEach(item => {
+                item.addEventListener('click', async () => {
+                    const question = item.dataset.question;
+                    await this.sendQuestion(question);
+                });
+            });
+            
+            const sendBtn = document.getElementById('sendSmartQuestionBtn');
+            const input = document.getElementById('smartQuestionInput');
+            if (sendBtn && input) {
+                sendBtn.addEventListener('click', async () => {
+                    const question = input.value.trim();
+                    if (question) {
+                        await this.sendQuestion(question);
+                        input.value = '';
+                    }
+                });
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendBtn.click();
+                });
+            }
+            
+            const backBtn = document.getElementById('backFromSmartQuestionsBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    this.showFinalProfile();
+                });
+            }
+            
+        } catch (error) {
+            console.error('Ошибка загрузки умных вопросов:', error);
+            alert('Не удалось загрузить умные вопросы');
+        }
+    },
+    
+    generateLocalSmartQuestions() {
+        const scores = this.profileData?.scores || { СБ: 3, ТФ: 3, УБ: 3, ЧВ: 3 };
+        const questions = [];
+        
+        const tf = scores['ТФ'] || 3;
+        const sb = scores['СБ'] || 3;
+        const ub = scores['УБ'] || 3;
+        const cv = scores['ЧВ'] || 3;
+        
+        if (tf <= 2) {
+            questions.push('Как начать зарабатывать, если нет денег?');
+            questions.push('Почему мне не везет с деньгами?');
+        } else if (tf <= 4) {
+            questions.push('Как увеличить доход без новых вложений?');
+            questions.push('Как создать финансовую подушку?');
+        }
+        
+        if (sb <= 2) {
+            questions.push('Как перестать бояться конфликтов?');
+            questions.push('Как научиться говорить "нет"?');
+        } else if (sb <= 4) {
+            questions.push('Почему я злюсь внутри, но молчу?');
+            questions.push('Как защищать границы без агрессии?');
+        }
+        
+        if (ub <= 2) {
+            questions.push('Как понять, что происходит в жизни?');
+        } else if (ub == 4) {
+            questions.push('Как перестать искать заговоры?');
+        }
+        
+        if (cv <= 2) {
+            questions.push('Как перестать зависеть от других?');
+        } else if (cv <= 4) {
+            questions.push('Почему отношения поверхностные?');
+        }
+        
+        const general = [
+            'С чего начать изменения?',
+            'Что мне делать с этой ситуацией?',
+            'Как не срываться на близких?'
+        ];
+        
+        while (questions.length < 5) {
+            for (const q of general) {
+                if (!questions.includes(q) && questions.length < 5) {
+                    questions.push(q);
+                }
+            }
+        }
+        
+        return questions.slice(0, 5);
+    },
+    
+    addSmartQuestionsStyles() {
+        if (document.getElementById('smartQuestionsStyles')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'smartQuestionsStyles';
+        style.textContent = `
+            .smart-questions-container {
+                padding: 20px;
+                overflow-y: auto;
+                height: 100%;
+            }
+            .smart-questions-header {
+                text-align: center;
+                margin-bottom: 24px;
+            }
+            .smart-questions-emoji {
+                font-size: 48px;
+                margin-bottom: 12px;
+            }
+            .smart-questions-title {
+                font-size: 22px;
+                margin-bottom: 8px;
+                color: var(--max-text);
+            }
+            .smart-questions-desc {
+                color: var(--max-text-secondary);
+                font-size: 14px;
+            }
+            .smart-questions-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            .smart-question-item {
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                border-radius: 20px;
+                padding: 14px 18px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .smart-question-item:hover {
+                border-color: var(--max-blue);
+                transform: translateX(4px);
+                background: rgba(36, 139, 242, 0.05);
+            }
+            .smart-question-emoji {
+                font-size: 20px;
+            }
+            .smart-question-text {
+                font-size: 15px;
+                line-height: 1.4;
+                flex: 1;
+            }
+            .smart-questions-input {
+                margin: 20px 0;
+            }
+            .smart-question-input {
+                flex: 1;
+                padding: 14px 18px;
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                border-radius: 30px;
+                color: var(--max-text);
+                font-size: 16px;
+                outline: none;
+            }
+            .smart-question-input:focus {
+                border-color: var(--max-blue);
+            }
+            .smart-question-submit {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: var(--max-blue);
+                border: none;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+            }
+            .smart-questions-back {
+                text-align: center;
+                margin-top: 16px;
+            }
+            @media (max-width: 480px) {
+                .smart-question-item {
+                    padding: 12px 14px;
+                }
+                .smart-question-text {
+                    font-size: 14px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    },
+    
     showContextMenu() {
-        // Можно добавить контекстное меню
         console.log('Контекстное меню');
     },
 
@@ -755,6 +1092,21 @@ const App = {
                     this.showChooseModeScreen();
                 });
             }
+            
+            // 🔥 НОВАЯ КНОПКА "УМНЫЕ ВОПРОСЫ"
+            const smartQuestionsBtn = document.createElement('button');
+            smartQuestionsBtn.className = 'onboarding-btn secondary';
+            smartQuestionsBtn.id = 'smartQuestionsBtn';
+            smartQuestionsBtn.textContent = '❓ УМНЫЕ ВОПРОСЫ';
+            smartQuestionsBtn.style.marginTop = '12px';
+            
+            const profileButtons = document.querySelector('.profile-buttons');
+            if (profileButtons) {
+                profileButtons.appendChild(smartQuestionsBtn);
+                smartQuestionsBtn.addEventListener('click', () => {
+                    this.showSmartQuestions();
+                });
+            }
         }, 100);
     },
 
@@ -862,6 +1214,33 @@ const App = {
                     this.showFinalProfile();
                 });
             }
+            
+            // 🔥 ДОБАВЛЯЕМ ГОЛОСОВУЮ КНОПКУ
+            const voiceHint = document.querySelector('.voice-input-hint');
+            if (voiceHint) {
+                const voiceButton = document.createElement('button');
+                voiceButton.className = 'voice-input-button';
+                voiceButton.innerHTML = '🎤';
+                voiceButton.style.cssText = `
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    background: var(--max-blue);
+                    border: none;
+                    color: white;
+                    font-size: 24px;
+                    cursor: pointer;
+                    margin-left: 8px;
+                `;
+                voiceButton.addEventListener('click', () => {
+                    this.startVoiceRecognition();
+                });
+                
+                const inputGroup = document.querySelector('.input-group');
+                if (inputGroup) {
+                    inputGroup.appendChild(voiceButton);
+                }
+            }
         }, 100);
     },
 
@@ -903,7 +1282,7 @@ const App = {
                 botMessage.className = 'message bot-message';
                 botMessage.innerHTML = `
                     <div class="message-bubble">
-                        <div class="message-text">${response}</div>
+                        <div class="message-text">${escapeHtml(response)}</div>
                         <div class="message-time">только что</div>
                     </div>
                 `;
@@ -1500,9 +1879,10 @@ const App = {
                 });
             }
             
+            // 🔥 ГОЛОСОВАЯ КНОПКА В ЧАТЕ
             if (voiceBtn) {
                 voiceBtn.addEventListener('click', () => {
-                    alert('Голосовой ввод будет доступен в следующей версии');
+                    this.startVoiceRecognition();
                 });
             }
             
@@ -1553,5 +1933,17 @@ window.api = window.api || {
 Попробуйте в ближайшие дни задавать себе вопрос: "Это действительно моё желание или я хочу понравиться другим?"
 
 Вы увидите, как много решений принимается на автомате. Осознанность — первый шаг к свободе.`;
+    },
+    
+    async getSmartQuestions(userId) {
+        return {
+            questions: [
+                'Как перестать бояться конфликтов?',
+                'Как увеличить доход без новых вложений?',
+                'С чего начать изменения?',
+                'Почему я злюсь внутри, но молчу?',
+                'Как защищать границы без агрессии?'
+            ]
+        };
     }
 };
