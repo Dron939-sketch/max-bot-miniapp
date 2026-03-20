@@ -1,5 +1,5 @@
 // ========== script.js ==========
-// ПОЛНАЯ ВЕРСИЯ С ПРАВИЛЬНОЙ ЛОГИКОЙ + СОХРАНЕНИЕ ИМЕНИ + ИНТЕГРАЦИЯ С MAX + ТЕСТ
+// ПОЛНАЯ ВЕРСИЯ С ПРАВИЛЬНОЙ ЛОГИКОЙ + СОХРАНЕНИЕ ИМЕНИ + ИНТЕГРАЦИЯ С MAX + ТЕСТ + ЭКРАНЫ ПОСЛЕ ТЕСТА
 
 const App = {
     userId: 'test_user_123',
@@ -11,6 +11,10 @@ const App = {
         age: null
     },
     testProgress: {},
+    profileData: null,        // Данные профиля после теста
+    currentMode: 'coach',     // Текущий режим: coach, psychologist, trainer
+    psychologistThought: null, // Сохраненная мысль психолога
+    currentGoals: [],         // Список целей
 
     async init() {
         console.log('🚀 Фреди: инициализация');
@@ -33,9 +37,19 @@ const App = {
         
         // Загружаем данные пользователя если есть API
         if (window.api) {
-            const userData = await window.api.getUserStatus(this.userId);
-            if (userData?.user_name) {
-                this.saveUserName(userData.user_name);
+            try {
+                const userData = await window.api.getUserStatus(this.userId);
+                if (userData?.user_name) {
+                    this.saveUserName(userData.user_name);
+                }
+                if (userData?.profile_data) {
+                    this.profileData = userData.profile_data;
+                }
+                if (userData?.communication_mode) {
+                    this.currentMode = userData.communication_mode;
+                }
+            } catch (e) {
+                console.warn('Ошибка загрузки данных:', e);
             }
         }
         
@@ -83,6 +97,19 @@ const App = {
                 alert('Новая переписка будет доступна позже');
             });
         }
+        
+        // Меню в шапке
+        const menuBtn = document.getElementById('menuBtn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                this.showContextMenu();
+            });
+        }
+    },
+    
+    showContextMenu() {
+        // Можно добавить контекстное меню
+        console.log('Контекстное меню');
     },
 
     // Загрузка имени из localStorage
@@ -135,8 +162,8 @@ const App = {
         const nameSpan = document.getElementById('userNamePlaceholder');
         if (nameSpan) nameSpan.textContent = this.userName;
         
-        const welcomeNameSpan = document.getElementById('welcomeUserName');
-        if (welcomeNameSpan) welcomeNameSpan.textContent = this.userName;
+        const goalUserName = document.getElementById('goalUserName');
+        if (goalUserName) goalUserName.textContent = this.userName;
         
         // 4. В аватарке
         const avatarImg = document.getElementById('userAvatar');
@@ -181,105 +208,109 @@ const App = {
             </div>
         `;
         
-        // Добавляем стили для модального окна
-        const style = document.createElement('style');
-        style.id = 'modalStyles';
-        style.textContent = `
-            .modal {
-                display: flex;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.7);
-                backdrop-filter: blur(5px);
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                animation: modalFadeIn 0.3s ease;
-            }
-            
-            @keyframes modalFadeIn {
-                from { opacity: 0; transform: scale(0.9); }
-                to { opacity: 1; transform: scale(1); }
-            }
-            
-            .modal-content {
-                width: 90%;
-                max-width: 320px;
-                padding: 24px;
-                border-radius: 30px;
-                text-align: center;
-            }
-            
-            .modal-title {
-                font-size: 24px;
-                margin-bottom: 8px;
-                color: var(--max-text);
-            }
-            
-            .modal-subtitle {
-                color: var(--max-text-secondary);
-                margin-bottom: 20px;
-                font-size: 14px;
-            }
-            
-            .input-group {
-                display: flex;
-                gap: 8px;
-                margin-bottom: 12px;
-            }
-            
-            .modal-input {
-                flex: 1;
-                padding: 12px 16px;
-                background: var(--glass-bg);
-                border: 1px solid var(--glass-border);
-                border-radius: 30px;
-                color: var(--max-text);
-                font-size: 16px;
-                outline: none;
-                transition: border-color 0.2s;
-            }
-            
-            .modal-input:focus {
-                border-color: var(--max-blue);
-            }
-            
-            .modal-btn {
-                width: 100%;
-                padding: 12px;
-                border-radius: 30px;
-                font-size: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-                border: none;
-                margin-bottom: 8px;
-            }
-            
-            .modal-btn.primary {
-                background: linear-gradient(135deg, var(--max-blue), #5a9eff);
-                color: white;
-            }
-            
-            .modal-btn.secondary {
-                background: transparent;
-                color: var(--max-text);
-                border: 1px solid var(--glass-border);
-            }
-            
-            .modal-btn:hover {
-                transform: scale(1.02);
-            }
-            
-            .modal-btn:active {
-                transform: scale(0.98);
-            }
-        `;
+        // Добавляем стили для модального окна если их нет
+        if (!document.getElementById('modalStyles')) {
+            const style = document.createElement('style');
+            style.id = 'modalStyles';
+            style.textContent = `
+                .modal {
+                    display: flex;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(5px);
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    animation: modalFadeIn 0.3s ease;
+                }
+                
+                @keyframes modalFadeIn {
+                    from { opacity: 0; transform: scale(0.9); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                
+                .modal-content {
+                    width: 90%;
+                    max-width: 320px;
+                    padding: 24px;
+                    border-radius: 30px;
+                    text-align: center;
+                    background: var(--max-panel-bg);
+                    border: 1px solid var(--glass-border);
+                }
+                
+                .modal-title {
+                    font-size: 24px;
+                    margin-bottom: 8px;
+                    color: var(--max-text);
+                }
+                
+                .modal-subtitle {
+                    color: var(--max-text-secondary);
+                    margin-bottom: 20px;
+                    font-size: 14px;
+                }
+                
+                .input-group {
+                    display: flex;
+                    gap: 8px;
+                    margin-bottom: 12px;
+                }
+                
+                .modal-input {
+                    flex: 1;
+                    padding: 12px 16px;
+                    background: var(--glass-bg);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 30px;
+                    color: var(--max-text);
+                    font-size: 16px;
+                    outline: none;
+                    transition: border-color 0.2s;
+                }
+                
+                .modal-input:focus {
+                    border-color: var(--max-blue);
+                }
+                
+                .modal-btn {
+                    width: 100%;
+                    padding: 12px;
+                    border-radius: 30px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border: none;
+                    margin-bottom: 8px;
+                }
+                
+                .modal-btn.primary {
+                    background: var(--max-blue);
+                    color: white;
+                }
+                
+                .modal-btn.secondary {
+                    background: transparent;
+                    color: var(--max-text);
+                    border: 1px solid var(--glass-border);
+                }
+                
+                .modal-btn:hover {
+                    transform: scale(1.02);
+                }
+                
+                .modal-btn:active {
+                    transform: scale(0.98);
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
-        document.head.appendChild(style);
         document.body.appendChild(modal);
         
         // Фокус на поле ввода
@@ -314,8 +345,6 @@ const App = {
             modal.style.animation = 'modalFadeIn 0.3s reverse';
             setTimeout(() => {
                 modal.remove();
-                const style = document.getElementById('modalStyles');
-                if (style) style.remove();
             }, 300);
         }
     },
@@ -332,22 +361,20 @@ const App = {
 
     async checkUserStatus() {
         try {
-            // Здесь должен быть запрос к вашему API
-            // Пока используем тестовые данные
-            const status = {
-                first_visit: true,
-                context_complete: false,
-                test_completed: false
-            };
+            // Проверяем, есть ли данные профиля
+            if (this.profileData) {
+                // Тест пройден - показываем финальный профиль
+                await this.showFinalProfile();
+                return;
+            }
             
-            if (status.first_visit || !status.context_complete) {
+            // Проверяем, есть ли контекст
+            const hasContext = this.userContext.city || this.userContext.gender || this.userContext.age;
+            
+            if (!hasContext) {
                 this.showOnboardingScreen1();
-            } else if (!status.test_completed) {
-                // Контекст есть, тест не пройден - показываем экран с кнопкой начала теста
-                this.showCompleteScreen();
             } else {
-                // Всё пройдено - показываем чат
-                this.showMainChat();
+                this.showCompleteScreen();
             }
             
         } catch (error) {
@@ -355,6 +382,8 @@ const App = {
             this.showOnboardingScreen1();
         }
     },
+
+    // ========== ЭКРАНЫ ОНБОРДИНГА И КОНТЕКСТА ==========
 
     showOnboardingScreen1() {
         const template = document.getElementById('onboardingScreen1');
@@ -384,7 +413,6 @@ const App = {
             
             if (startBtn) {
                 startBtn.addEventListener('click', () => {
-                    // Начинаем сбор контекста (город, пол, возраст)
                     this.showContextScreen('city');
                 });
             }
@@ -410,7 +438,6 @@ const App = {
             const letsGoBtn = document.getElementById('letsGoBtn');
             if (letsGoBtn) {
                 letsGoBtn.addEventListener('click', () => {
-                    // Начинаем сбор контекста (город, пол, возраст)
                     this.showContextScreen('city');
                 });
             }
@@ -508,7 +535,6 @@ const App = {
                         const age = parseInt(input.value);
                         if (age && age > 0 && age < 120) {
                             this.userContext.age = age;
-                            // После сбора возраста показываем экран с предложением теста
                             this.showCompleteScreen();
                         } else {
                             alert('Введите корректный возраст');
@@ -524,7 +550,6 @@ const App = {
                 
                 if (skipBtn) {
                     skipBtn.addEventListener('click', () => {
-                        // Если пропустили возраст, всё равно показываем экран с предложением теста
                         this.showCompleteScreen();
                     });
                 }
@@ -567,7 +592,6 @@ const App = {
             
             if (startTestBtn) {
                 startTestBtn.addEventListener('click', () => {
-                    // ЗАПУСК ТЕСТА после сбора контекста
                     if (typeof Test !== 'undefined') {
                         Test.init(this.userId);
                         Test.start();
@@ -606,7 +630,6 @@ const App = {
             
             if (startTestBtn) {
                 startTestBtn.addEventListener('click', () => {
-                    // ЗАПУСК ТЕСТА
                     if (typeof Test !== 'undefined') {
                         Test.init(this.userId);
                         Test.start();
@@ -624,8 +647,679 @@ const App = {
         }, 100);
     },
 
+    // ========== ЭКРАНЫ ПОСЛЕ ТЕСТА ==========
+
+    async showFinalProfile() {
+        console.log('📊 Показываем финальный профиль');
+        
+        const template = document.getElementById('finalProfileScreen');
+        if (!template) {
+            console.error('❌ Шаблон finalProfileScreen не найден!');
+            return;
+        }
+        
+        const clone = document.importNode(template.content, true);
+        const profileTextDiv = clone.querySelector('#profileText');
+        
+        // Генерируем текст профиля
+        let profileHtml = '';
+        
+        if (this.profileData) {
+            const profileCode = this.profileData.display_name || 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
+            const scores = this.profileData.scores || {};
+            
+            profileHtml = `
+                <div class="profile-section">
+                    <h3>🧠 Твой профиль: ${profileCode}</h3>
+                </div>
+                
+                <div class="profile-section">
+                    <h4>🎭 Восприятие</h4>
+                    <p>${this.getPerceptionDescription()}</p>
+                </div>
+                
+                <div class="profile-section">
+                    <h4>💭 Мышление</h4>
+                    <p>${this.getThinkingDescription()}</p>
+                </div>
+                
+                <div class="profile-section">
+                    <h4>⚡ Поведение</h4>
+                    <p>${this.getBehaviorDescription(scores)}</p>
+                </div>
+                
+                <div class="profile-section">
+                    <h4>🎯 Точка роста</h4>
+                    <p>${this.getGrowthPoint(scores)}</p>
+                </div>
+            `;
+        } else {
+            profileHtml = `
+                <div class="profile-section">
+                    <p>🧠 Психологический портрет формируется...</p>
+                    <p>Пройдите тест, чтобы получить полный анализ.</p>
+                </div>
+            `;
+        }
+        
+        if (profileTextDiv) profileTextDiv.innerHTML = profileHtml;
+        
+        const container = document.getElementById('screenContainer');
+        container.innerHTML = '';
+        container.appendChild(clone);
+        
+        // Показываем шапку чата
+        const chatHeader = document.getElementById('chatHeader');
+        if (chatHeader) chatHeader.style.display = 'flex';
+        
+        // Обновляем статус в шапке
+        const botStatus = document.getElementById('botStatus');
+        if (botStatus) {
+            const modeNames = {
+                coach: '🔮 коуч',
+                psychologist: '🧠 психолог',
+                trainer: '⚡ тренер'
+            };
+            botStatus.textContent = modeNames[this.currentMode] || '🧠 психолог';
+        }
+        
+        setTimeout(() => {
+            // Кнопка "Мысли психолога"
+            const thoughtBtn = document.getElementById('psychologistThoughtBtn');
+            if (thoughtBtn) {
+                thoughtBtn.addEventListener('click', () => {
+                    this.showPsychologistThought();
+                });
+            }
+            
+            // Кнопка "Хочу высказаться"
+            const askBtn = document.getElementById('askQuestionBtn');
+            if (askBtn) {
+                askBtn.addEventListener('click', () => {
+                    this.showAskQuestionScreen();
+                });
+            }
+            
+            // Кнопка "Выбрать цель"
+            const goalBtn = document.getElementById('chooseGoalBtn');
+            if (goalBtn) {
+                goalBtn.addEventListener('click', () => {
+                    this.showChooseGoalScreen();
+                });
+            }
+            
+            // Кнопка "Выбрать режим"
+            const modeBtn = document.getElementById('chooseModeBtn');
+            if (modeBtn) {
+                modeBtn.addEventListener('click', () => {
+                    this.showChooseModeScreen();
+                });
+            }
+        }, 100);
+    },
+
+    getPerceptionDescription() {
+        const perceptionType = this.profileData?.perception_type || 'СОЦИАЛЬНО-ОРИЕНТИРОВАННЫЙ';
+        const descriptions = {
+            'СОЦИАЛЬНО-ОРИЕНТИРОВАННЫЙ': 'Ты тонко чувствуешь настроение окружающих. Часто ориентируешься на мнение других. Это делает тебя хорошим собеседником, но иногда сложно услышать себя.',
+            'ИНТРОВЕРТИРОВАННЫЙ': 'Твой внутренний мир богаче внешнего. Ты много рефлексируешь, анализируешь. Это даёт глубину, но может вызывать перегрузку.',
+            'СИМВОЛИЧЕСКИЙ': 'Ты видишь знаки и смыслы там, где другие видят случайности. Развитая интуиция помогает находить нестандартные решения.',
+            'МАТЕРИАЛИСТИЧНЫЙ': 'Ты ценишь факты, доказательства, практичность. Твои решения взвешенны, но иногда не хватает гибкости.'
+        };
+        return descriptions[perceptionType] || descriptions['СОЦИАЛЬНО-ОРИЕНТИРОВАННЫЙ'];
+    },
+
+    getThinkingDescription() {
+        const thinkingLevel = this.profileData?.thinking_level || 5;
+        if (thinkingLevel <= 3) {
+            return 'Ты склонен к быстрым, интуитивным решениям. Это помогает действовать быстро, но иногда хочется большей глубины анализа.';
+        } else if (thinkingLevel <= 6) {
+            return 'Ты умеешь анализировать, видишь причинно-следственные связи. Баланс между скоростью и глубиной — твоя сильная сторона.';
+        } else {
+            return 'Твоё мышление системное, ты видишь сложные взаимосвязи. Это позволяет находить неочевидные решения, но иногда приводит к излишней рефлексии.';
+        }
+    },
+
+    getBehaviorDescription(scores) {
+        const sb = scores['СБ'] || 3;
+        const tf = scores['ТФ'] || 3;
+        const ub = scores['УБ'] || 3;
+        const chv = scores['ЧВ'] || 3;
+        
+        let desc = '';
+        if (sb <= 2) desc += '• Давление выбивает из колеи. ';
+        else if (sb >= 4) desc += '• Спокоен под давлением. ';
+        
+        if (tf <= 2) desc += '• С деньгами сложно. ';
+        else if (tf >= 4) desc += '• Деньги — инструмент. ';
+        
+        if (ub <= 2) desc += '• Мир кажется хаотичным. ';
+        else if (ub >= 4) desc += '• Видишь системность. ';
+        
+        if (chv <= 2) desc += '• Отношения напрягают. ';
+        else if (chv >= 4) desc += '• Ценишь людей. ';
+        
+        return desc || 'Сбалансированный профиль, есть куда расти.';
+    },
+
+    getGrowthPoint(scores) {
+        const vectors = ['СБ', 'ТФ', 'УБ', 'ЧВ'];
+        let minVector = 'СБ';
+        let minValue = 5;
+        
+        for (const v of vectors) {
+            const val = scores[v] || 3;
+            if (val < minValue) {
+                minValue = val;
+                minVector = v;
+            }
+        }
+        
+        const growthPoints = {
+            'СБ': 'Работа с реакцией на давление и страхи. Научиться защищать свои границы.',
+            'ТФ': 'Проработка денежных блоков. Формирование мышления изобилия.',
+            'УБ': 'Развитие системного мышления. Поиск смыслов и паттернов.',
+            'ЧВ': 'Исцеление привязанности. Углубление отношений.'
+        };
+        
+        return growthPoints[minVector] || 'Исследование себя и своих паттернов.';
+    },
+
+    // ========== ЭКРАН "ЗАДАТЬ ВОПРОС" ==========
+
+    showAskQuestionScreen() {
+        const template = document.getElementById('askQuestionScreen');
+        if (!template) return;
+        
+        const clone = document.importNode(template.content, true);
+        const container = document.getElementById('screenContainer');
+        container.innerHTML = '';
+        container.appendChild(clone);
+        
+        setTimeout(() => {
+            const sendBtn = document.getElementById('sendQuestionBtn');
+            const questionInput = document.getElementById('questionInput');
+            const backBtn = document.getElementById('backToProfileBtn');
+            
+            if (sendBtn && questionInput) {
+                sendBtn.addEventListener('click', async () => {
+                    const question = questionInput.value.trim();
+                    if (question) {
+                        await this.sendQuestion(question);
+                        questionInput.value = '';
+                    }
+                });
+                
+                questionInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendBtn.click();
+                    }
+                });
+            }
+            
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    this.showFinalProfile();
+                });
+            }
+        }, 100);
+    },
+
+    async sendQuestion(question) {
+        // Показываем индикатор загрузки
+        const container = document.getElementById('screenContainer');
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'thought-loading-container';
+        loadingDiv.innerHTML = `
+            <div class="thought-loading-content">
+                <div class="loading-spinner">🤔</div>
+                <div class="loading-text">Думаю над ответом...</div>
+            </div>
+        `;
+        
+        const originalContent = container.innerHTML;
+        container.innerHTML = '';
+        container.appendChild(loadingDiv);
+        
+        try {
+            // Отправляем вопрос через API
+            let response = '';
+            if (window.api && window.api.sendQuestion) {
+                const result = await window.api.sendQuestion(this.userId, question);
+                response = result.response || 'Я вас слушаю. Расскажите подробнее.';
+            } else {
+                // Имитация ответа
+                await new Promise(r => setTimeout(r, 2000));
+                response = `Спасибо за вопрос, ${this.userName}! Это интересная тема. Давай разберёмся вместе. Что именно тебя беспокоит?`;
+            }
+            
+            // Показываем ответ
+            container.innerHTML = originalContent;
+            
+            // Добавляем ответ в виде сообщения
+            const messagesList = document.getElementById('messagesList');
+            if (messagesList) {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot-message';
+                botMessage.innerHTML = `
+                    <div class="message-bubble">
+                        <div class="message-text">${response}</div>
+                        <div class="message-time">только что</div>
+                    </div>
+                `;
+                messagesList.appendChild(botMessage);
+                
+                const messagesContainer = document.querySelector('.messages-container');
+                if (messagesContainer) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            } else {
+                // Если нет чата, показываем просто текст
+                alert(response);
+            }
+            
+        } catch (error) {
+            console.error('Ошибка:', error);
+            container.innerHTML = originalContent;
+            alert('Извините, произошла ошибка. Попробуйте позже.');
+        }
+    },
+
+    // ========== ЭКРАН "ВЫБРАТЬ ЦЕЛЬ" ==========
+
+    async showChooseGoalScreen() {
+        const template = document.getElementById('chooseGoalScreen');
+        if (!template) return;
+        
+        const clone = document.importNode(template.content, true);
+        
+        // Заполняем данные
+        const goalUserName = clone.querySelector('#goalUserName');
+        if (goalUserName) goalUserName.textContent = this.userName;
+        
+        const profileCodeSpan = clone.querySelector('#profileCode');
+        if (profileCodeSpan && this.profileData) {
+            profileCodeSpan.textContent = this.profileData.display_name || 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
+        }
+        
+        const modeCodeSpan = clone.querySelector('#modeCode');
+        if (modeCodeSpan) {
+            const modeNames = {
+                coach: '🔮 КОУЧ',
+                psychologist: '🧠 ПСИХОЛОГ',
+                trainer: '⚡ ТРЕНЕР'
+            };
+            modeCodeSpan.textContent = modeNames[this.currentMode] || '🔮 КОУЧ';
+        }
+        
+        // Генерируем цели
+        const goalsList = clone.querySelector('#goalsList');
+        if (goalsList) {
+            const goals = this.getGoalsForProfile();
+            this.currentGoals = goals;
+            
+            goalsList.innerHTML = goals.map(goal => `
+                <div class="goal-item" data-goal-id="${goal.id}">
+                    <div class="goal-name">${goal.emoji || '🎯'} ${goal.name}</div>
+                    <div class="goal-time">⏱ ${goal.time}</div>
+                    <div class="goal-difficulty">${this.getDifficultyEmoji(goal.difficulty)} ${goal.difficulty}</div>
+                </div>
+            `).join('');
+            
+            // Добавляем обработчики кликов на цели
+            setTimeout(() => {
+                const goalItems = goalsList.querySelectorAll('.goal-item');
+                goalItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const goalId = item.dataset.goalId;
+                        const goal = goals.find(g => g.id === goalId);
+                        if (goal) {
+                            this.selectGoal(goal);
+                        }
+                    });
+                });
+            }, 100);
+        }
+        
+        const container = document.getElementById('screenContainer');
+        container.innerHTML = '';
+        container.appendChild(clone);
+        
+        setTimeout(() => {
+            const customGoalBtn = document.getElementById('customGoalBtn');
+            const backBtn = document.getElementById('backToProfileFromGoalBtn');
+            
+            if (customGoalBtn) {
+                customGoalBtn.addEventListener('click', () => {
+                    this.showCustomGoalInput();
+                });
+            }
+            
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    this.showFinalProfile();
+                });
+            }
+        }, 100);
+    },
+
+    getGoalsForProfile() {
+        // Определяем слабые и сильные стороны на основе профиля
+        const scores = this.profileData?.scores || { СБ: 3, ТФ: 3, УБ: 3, ЧВ: 3 };
+        
+        // Находим самый слабый вектор
+        let weakest = 'СБ';
+        let weakestValue = 5;
+        for (const [key, val] of Object.entries(scores)) {
+            if (val < weakestValue) {
+                weakestValue = val;
+                weakest = key;
+            }
+        }
+        
+        // База целей
+        const goalsDb = {
+            coach: {
+                weak: {
+                    'СБ': [
+                        { id: 'fear_work', name: 'Проработать страхи', time: '3-4 недели', difficulty: 'medium', emoji: '🛡️' },
+                        { id: 'boundaries', name: 'Научиться защищать границы', time: '2-3 недели', difficulty: 'medium', emoji: '🔒' },
+                        { id: 'calm', name: 'Найти внутреннее спокойствие', time: '3-5 недель', difficulty: 'hard', emoji: '🧘' }
+                    ],
+                    'ТФ': [
+                        { id: 'money_blocks', name: 'Проработать денежные блоки', time: '3-4 недели', difficulty: 'medium', emoji: '💰' },
+                        { id: 'income_growth', name: 'Увеличить доход', time: '4-6 недель', difficulty: 'hard', emoji: '📈' },
+                        { id: 'financial_plan', name: 'Создать финансовый план', time: '2-3 недели', difficulty: 'easy', emoji: '📊' }
+                    ],
+                    'УБ': [
+                        { id: 'meaning', name: 'Найти смысл и предназначение', time: '4-6 недель', difficulty: 'hard', emoji: '🎯' },
+                        { id: 'system_thinking', name: 'Развить системное мышление', time: '3-5 недель', difficulty: 'medium', emoji: '🧩' },
+                        { id: 'trust', name: 'Научиться доверять миру', time: '3-4 недели', difficulty: 'medium', emoji: '🤝' }
+                    ],
+                    'ЧВ': [
+                        { id: 'relations', name: 'Улучшить отношения', time: '4-6 недель', difficulty: 'hard', emoji: '💕' },
+                        { id: 'boundaries_people', name: 'Выстроить границы с людьми', time: '3-4 недели', difficulty: 'medium', emoji: '🚧' },
+                        { id: 'attachment', name: 'Проработать тип привязанности', time: '5-7 недель', difficulty: 'hard', emoji: '🪢' }
+                    ]
+                },
+                general: [
+                    { id: 'purpose', name: 'Найти предназначение', time: '5-7 недель', difficulty: 'hard', emoji: '🌟' },
+                    { id: 'balance', name: 'Обрести баланс', time: '4-6 недель', difficulty: 'medium', emoji: '⚖️' },
+                    { id: 'growth', name: 'Личностный рост', time: '6-8 недель', difficulty: 'medium', emoji: '🌱' }
+                ]
+            },
+            psychologist: {
+                weak: {
+                    'СБ': [
+                        { id: 'fear_origin', name: 'Найти источник страхов', time: '4-6 недель', difficulty: 'hard', emoji: '🔍' },
+                        { id: 'trauma', name: 'Проработать травму', time: '6-8 недель', difficulty: 'hard', emoji: '🩹' },
+                        { id: 'safety', name: 'Сформировать чувство безопасности', time: '5-7 недель', difficulty: 'hard', emoji: '🛡️' }
+                    ],
+                    'ТФ': [
+                        { id: 'money_psychology', name: 'Понять психологию денег', time: '4-5 недель', difficulty: 'medium', emoji: '🧠💰' },
+                        { id: 'worth', name: 'Проработать чувство ценности', time: '5-7 недель', difficulty: 'hard', emoji: '💎' },
+                        { id: 'scarcity', name: 'Проработать сценарий дефицита', time: '4-6 недель', difficulty: 'medium', emoji: '🔄' }
+                    ],
+                    'УБ': [
+                        { id: 'core_beliefs', name: 'Найти глубинные убеждения', time: '5-7 недель', difficulty: 'hard', emoji: '🏛️' },
+                        { id: 'schemas', name: 'Проработать жизненные сценарии', time: '6-8 недель', difficulty: 'hard', emoji: '📜' },
+                        { id: 'meaning_deep', name: 'Экзистенциальный поиск', time: '7-9 недель', difficulty: 'hard', emoji: '🌌' }
+                    ],
+                    'ЧВ': [
+                        { id: 'attachment_style', name: 'Проработать тип привязанности', time: '6-8 недель', difficulty: 'hard', emoji: '🪢' },
+                        { id: 'inner_child', name: 'Исцелить внутреннего ребёнка', time: '5-7 недель', difficulty: 'hard', emoji: '🧸' },
+                        { id: 'family_system', name: 'Проработать семейную систему', time: '6-8 недель', difficulty: 'hard', emoji: '🏠' }
+                    ]
+                },
+                general: [
+                    { id: 'self_discovery', name: 'Глубинное самопознание', time: '7-9 недель', difficulty: 'hard', emoji: '🔮' },
+                    { id: 'healing', name: 'Исцеление внутренних ран', time: '8-10 недель', difficulty: 'hard', emoji: '💖' },
+                    { id: 'integration', name: 'Интеграция личности', time: '9-12 недель', difficulty: 'hard', emoji: '🧩' }
+                ]
+            },
+            trainer: {
+                weak: {
+                    'СБ': [
+                        { id: 'assertiveness', name: 'Развить ассертивность', time: '3-4 недели', difficulty: 'medium', emoji: '💪' },
+                        { id: 'conflict_skills', name: 'Освоить навыки конфликта', time: '4-5 недель', difficulty: 'medium', emoji: '⚔️' },
+                        { id: 'courage', name: 'Тренировка смелости', time: '3-5 недель', difficulty: 'hard', emoji: '🦁' }
+                    ],
+                    'ТФ': [
+                        { id: 'money_skills', name: 'Освоить навыки управления деньгами', time: '3-4 недели', difficulty: 'easy', emoji: '💰' },
+                        { id: 'income_skills', name: 'Навыки увеличения дохода', time: '4-6 недель', difficulty: 'medium', emoji: '📊' },
+                        { id: 'investment_skills', name: 'Навыки инвестирования', time: '5-7 недель', difficulty: 'hard', emoji: '📈' }
+                    ],
+                    'УБ': [
+                        { id: 'thinking_tools', name: 'Освоить инструменты мышления', time: '4-5 недель', difficulty: 'medium', emoji: '🧠' },
+                        { id: 'triz', name: 'Научиться ТРИЗ', time: '5-7 недель', difficulty: 'hard', emoji: '💡' },
+                        { id: 'decision_making', name: 'Навыки принятия решений', time: '3-4 недели', difficulty: 'easy', emoji: '✅' }
+                    ],
+                    'ЧВ': [
+                        { id: 'communication_skills', name: 'Развить навыки общения', time: '3-4 недели', difficulty: 'easy', emoji: '💬' },
+                        { id: 'negotiation', name: 'Навыки переговоров', time: '4-6 недель', difficulty: 'medium', emoji: '🤝' },
+                        { id: 'influence', name: 'Навыки влияния', time: '5-7 недель', difficulty: 'hard', emoji: '⚡' }
+                    ]
+                },
+                general: [
+                    { id: 'productivity', name: 'Повысить продуктивность', time: '4-6 недель', difficulty: 'medium', emoji: '⚡' },
+                    { id: 'habit_building', name: 'Сформировать полезные привычки', time: '3-5 недель', difficulty: 'easy', emoji: '🔄' },
+                    { id: 'skill_mastery', name: 'Мастерство в ключевых навыках', time: '8-10 недель', difficulty: 'hard', emoji: '🏆' }
+                ]
+            }
+        };
+        
+        const modeDb = goalsDb[this.currentMode] || goalsDb.coach;
+        const goals = [];
+        
+        // Добавляем цели для слабого вектора
+        if (modeDb.weak && modeDb.weak[weakest]) {
+            goals.push(...modeDb.weak[weakest]);
+        }
+        
+        // Добавляем общие цели
+        if (modeDb.general) {
+            goals.push(...modeDb.general);
+        }
+        
+        // Возвращаем первые 6 целей
+        return goals.slice(0, 6);
+    },
+
+    getDifficultyEmoji(difficulty) {
+        const emojis = {
+            'easy': '🟢',
+            'medium': '🟡',
+            'hard': '🔴'
+        };
+        return emojis[difficulty] || '⚪';
+    },
+
+    selectGoal(goal) {
+        alert(`Цель выбрана: ${goal.name}\n\nВремя: ${goal.time}\n\nСкоро появится подробный план достижения!`);
+        console.log('Выбрана цель:', goal);
+    },
+
+    showCustomGoalInput() {
+        const goal = prompt('Сформулируйте свою цель своими словами:');
+        if (goal && goal.trim()) {
+            alert(`Цель принята: "${goal}"\n\nСкоро появится план достижения!`);
+        }
+    },
+
+    // ========== ЭКРАН "ВЫБРАТЬ РЕЖИМ" ==========
+
+    showChooseModeScreen() {
+        const template = document.getElementById('chooseModeScreen');
+        if (!template) return;
+        
+        const clone = document.importNode(template.content, true);
+        
+        // Заполняем профиль
+        const profileCodeSpan = clone.querySelector('#modeProfileCode');
+        if (profileCodeSpan && this.profileData) {
+            profileCodeSpan.textContent = this.profileData.display_name || 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
+        }
+        
+        const container = document.getElementById('screenContainer');
+        container.innerHTML = '';
+        container.appendChild(clone);
+        
+        setTimeout(() => {
+            const modeCards = document.querySelectorAll('.mode-card');
+            const backBtn = document.getElementById('backToProfileFromModeBtn');
+            
+            modeCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Убираем выделение со всех
+                    modeCards.forEach(c => c.classList.remove('selected'));
+                    // Выделяем выбранный
+                    card.classList.add('selected');
+                    
+                    const mode = card.dataset.mode;
+                    this.setMode(mode);
+                });
+            });
+            
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    this.showFinalProfile();
+                });
+            }
+        }, 100);
+    },
+
+    setMode(mode) {
+        this.currentMode = mode;
+        
+        const modeNames = {
+            coach: '🔮 КОУЧ',
+            psychologist: '🧠 ПСИХОЛОГ',
+            trainer: '⚡ ТРЕНЕР'
+        };
+        
+        // Обновляем статус в шапке
+        const botStatus = document.getElementById('botStatus');
+        if (botStatus) {
+            botStatus.textContent = modeNames[mode] || '🧠 психолог';
+        }
+        
+        // Сохраняем в API если есть
+        if (window.api && window.api.setMode) {
+            window.api.setMode(this.userId, mode);
+        }
+        
+        alert(`Режим ${modeNames[mode]} активирован!`);
+        
+        // Возвращаемся к профилю
+        this.showFinalProfile();
+    },
+
+    // ========== ЭКРАН "МЫСЛИ ПСИХОЛОГА" ==========
+
+    async showPsychologistThought() {
+        // Показываем загрузку
+        const loadingTemplate = document.getElementById('psychologistThoughtLoadingScreen');
+        if (loadingTemplate) {
+            const clone = document.importNode(loadingTemplate.content, true);
+            const container = document.getElementById('screenContainer');
+            container.innerHTML = '';
+            container.appendChild(clone);
+        }
+        
+        try {
+            let thought = '';
+            
+            if (window.api && window.api.generateThought) {
+                thought = await window.api.generateThought(this.userId);
+            } else {
+                // Имитация генерации
+                await new Promise(r => setTimeout(r, 3000));
+                thought = this.generateMockThought();
+            }
+            
+            this.psychologistThought = thought;
+            this.showPsychologistThoughtResult(thought);
+            
+        } catch (error) {
+            console.error('Ошибка:', error);
+            this.showPsychologistThoughtResult('Не удалось сгенерировать мысли психолога. Попробуйте позже.');
+        }
+    },
+
+    generateMockThought() {
+        const scores = this.profileData?.scores || { СБ: 3, ТФ: 3, УБ: 3, ЧВ: 3 };
+        const weakVectors = [];
+        
+        for (const [key, val] of Object.entries(scores)) {
+            if (val <= 2.5) weakVectors.push(key);
+        }
+        
+        let thought = `🧠 ${this.userName}, я проанализировал твой профиль.\n\n`;
+        
+        if (weakVectors.includes('СБ')) {
+            thought += `Я вижу, что давление и конфликты выводят тебя из равновесия. Это не слабость — это твоя чувствительность. Ты словно радар, который ловит каждую вибрацию. Но этот радар иногда мешает слышать себя.\n\n`;
+        }
+        
+        if (weakVectors.includes('ТФ')) {
+            thought += `С деньгами у тебя особая история. Они для тебя не просто цифры — это что-то более глубокое, связанное с ценностью себя. Посмотри, в каких моментах ты обесцениваешь свой труд.\n\n`;
+        }
+        
+        if (weakVectors.includes('УБ')) {
+            thought += `Ты часто ищешь систему в хаосе, но мир не всегда подчиняется логике. Может быть, стоит иногда позволить себе просто быть, не анализируя?\n\n`;
+        }
+        
+        if (weakVectors.includes('ЧВ')) {
+            thought += `В отношениях ты либо слишком близко, либо слишком далеко. Золотая середина — это не компромисс, это способность быть рядом, сохраняя себя.\n\n`;
+        }
+        
+        thought += `Твой главный вызов сейчас — не исправить то, что "сломано", а увидеть, как твои особенности становятся твоей суперсилой.\n\n`;
+        thought += `Что скажешь? Это откликается?`;
+        
+        return thought;
+    },
+
+    showPsychologistThoughtResult(thought) {
+        const resultTemplate = document.getElementById('psychologistThoughtResultScreen');
+        if (!resultTemplate) return;
+        
+        const clone = document.importNode(resultTemplate.content, true);
+        const thoughtTextDiv = clone.querySelector('#thoughtText');
+        
+        if (thoughtTextDiv) {
+            thoughtTextDiv.innerHTML = thought.replace(/\n/g, '<br>');
+        }
+        
+        const container = document.getElementById('screenContainer');
+        container.innerHTML = '';
+        container.appendChild(clone);
+        
+        setTimeout(() => {
+            const backBtn = document.getElementById('backToProfileFromThoughtBtn');
+            const askBtn = document.getElementById('askQuestionFromThoughtBtn');
+            
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    this.showFinalProfile();
+                });
+            }
+            
+            if (askBtn) {
+                askBtn.addEventListener('click', () => {
+                    this.showAskQuestionScreen();
+                });
+            }
+        }, 100);
+    },
+
+    // ========== ОСНОВНОЙ ЧАТ ==========
+
     showMainChat() {
         console.log('💬 Показываем основной чат');
+        
+        // Показываем шапку чата
+        const chatHeader = document.getElementById('chatHeader');
+        if (chatHeader) chatHeader.style.display = 'flex';
+        
         const container = document.getElementById('screenContainer');
         container.innerHTML = `
             <div class="messages-container">
@@ -639,77 +1333,194 @@ const App = {
                 </div>
             </div>
             <div class="input-panel">
-                <button class="attach-btn">📎</button>
+                <button class="attach-btn" id="attachBtn">📎</button>
                 <div class="message-input-wrapper">
                     <input type="text" class="message-input" placeholder="Сообщение..." id="messageInput">
                     <button class="send-btn" id="sendMessageBtn">➡️</button>
                 </div>
-                <button class="voice-btn">🎤</button>
+                <button class="voice-btn" id="voiceBtn">🎤</button>
             </div>
         `;
         
-        const chatHeader = document.getElementById('chatHeader');
-        if (chatHeader) chatHeader.style.display = 'flex';
+        // Добавляем стили для чата если их нет
+        if (!document.getElementById('chatStyles')) {
+            const style = document.createElement('style');
+            style.id = 'chatStyles';
+            style.textContent = `
+                .messages-container {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .messages-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                
+                .message {
+                    display: flex;
+                    width: 100%;
+                }
+                
+                .message.user-message {
+                    justify-content: flex-end;
+                }
+                
+                .message.bot-message {
+                    justify-content: flex-start;
+                }
+                
+                .message-bubble {
+                    max-width: 80%;
+                    padding: 12px 16px;
+                    border-radius: 18px;
+                    position: relative;
+                }
+                
+                .user-message .message-bubble {
+                    background: var(--max-message-user);
+                    border-bottom-right-radius: 4px;
+                }
+                
+                .bot-message .message-bubble {
+                    background: var(--max-message-bot);
+                    border-bottom-left-radius: 4px;
+                }
+                
+                .message-text {
+                    font-size: 15px;
+                    line-height: 1.4;
+                }
+                
+                .message-time {
+                    font-size: 10px;
+                    color: var(--max-text-secondary);
+                    margin-top: 4px;
+                    text-align: right;
+                }
+                
+                .input-panel {
+                    padding: 12px 16px;
+                    background: var(--max-panel-bg);
+                    border-top: 1px solid var(--max-border);
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+                
+                .attach-btn, .voice-btn {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: var(--glass-bg);
+                    border: none;
+                    color: var(--max-text);
+                    font-size: 20px;
+                    cursor: pointer;
+                }
+                
+                .message-input-wrapper {
+                    flex: 1;
+                    display: flex;
+                    gap: 8px;
+                    background: var(--glass-bg);
+                    border-radius: 24px;
+                    padding: 4px 4px 4px 16px;
+                }
+                
+                .message-input {
+                    flex: 1;
+                    background: transparent;
+                    border: none;
+                    color: var(--max-text);
+                    font-size: 16px;
+                    outline: none;
+                    padding: 8px 0;
+                }
+                
+                .send-btn {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: var(--max-blue);
+                    border: none;
+                    color: white;
+                    font-size: 18px;
+                    cursor: pointer;
+                }
+                
+                @media (max-width: 480px) {
+                    .message-bubble {
+                        max-width: 90%;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
         setTimeout(() => {
             const sendBtn = document.getElementById('sendMessageBtn');
             const messageInput = document.getElementById('messageInput');
             const messagesList = document.getElementById('messagesList');
+            const voiceBtn = document.getElementById('voiceBtn');
+            const attachBtn = document.getElementById('attachBtn');
             
-            if (sendBtn && messageInput && messagesList) {
-                const sendMessage = () => {
-                    const text = messageInput.value.trim();
-                    if (text) {
-                        // Сообщение пользователя
-                        const userMessage = document.createElement('div');
-                        userMessage.className = 'message user-message';
-                        userMessage.innerHTML = `
-                            <div class="message-bubble">
-                                <div class="message-text">${text}</div>
-                                <div class="message-time">только что</div>
-                                <div class="message-status">
-                                    <span class="status-icon sent"></span>
-                                </div>
-                            </div>
-                        `;
-                        messagesList.appendChild(userMessage);
-                        
-                        messageInput.value = '';
-                        
-                        const container = document.querySelector('.messages-container');
-                        if (container) {
-                            container.scrollTop = container.scrollHeight;
-                        }
-                        
-                        // Ответ бота
-                        setTimeout(() => {
-                            const botMessage = document.createElement('div');
-                            botMessage.className = 'message bot-message';
-                            botMessage.innerHTML = `
-                                <div class="message-bubble">
-                                    <div class="message-text">Спасибо за сообщение, ${this.userName}! Я обязательно отвечу.</div>
-                                    <div class="message-time">только что</div>
-                                </div>
-                            `;
-                            messagesList.appendChild(botMessage);
-                            
-                            if (container) {
-                                container.scrollTop = container.scrollHeight;
-                            }
-                        }, 1000);
-                    }
-                };
-                
-                sendBtn.addEventListener('click', sendMessage);
+            const sendMessage = async () => {
+                const text = messageInput.value.trim();
+                if (text) {
+                    // Сообщение пользователя
+                    const userMessage = document.createElement('div');
+                    userMessage.className = 'message user-message';
+                    userMessage.innerHTML = `
+                        <div class="message-bubble">
+                            <div class="message-text">${escapeHtml(text)}</div>
+                            <div class="message-time">только что</div>
+                        </div>
+                    `;
+                    messagesList.appendChild(userMessage);
+                    
+                    messageInput.value = '';
+                    
+                    const container = document.querySelector('.messages-container');
+                    if (container) container.scrollTop = container.scrollHeight;
+                    
+                    // Отправляем вопрос
+                    await this.sendQuestion(text);
+                }
+            };
+            
+            if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+            if (messageInput) {
                 messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        sendMessage();
-                    }
+                    if (e.key === 'Enter') sendMessage();
+                });
+            }
+            
+            if (voiceBtn) {
+                voiceBtn.addEventListener('click', () => {
+                    alert('Голосовой ввод будет доступен в следующей версии');
+                });
+            }
+            
+            if (attachBtn) {
+                attachBtn.addEventListener('click', () => {
+                    alert('Прикрепление файлов будет доступно позже');
                 });
             }
         }, 100);
     }
 };
+
+// Вспомогательная функция для экранирования HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 
 // Запуск
 document.addEventListener('DOMContentLoaded', () => App.init());
@@ -724,7 +1535,23 @@ window.api = window.api || {
         return {
             user_name: localStorage.getItem('userName') || 'Гость',
             context_complete: false,
-            test_completed: false
+            test_completed: false,
+            profile_data: null
         };
+    },
+    
+    async sendQuestion(userId, question) {
+        console.log('📝 Вопрос от', userId, ':', question);
+        return {
+            response: `Спасибо за вопрос, ${localStorage.getItem('userName') || 'друг'}! Давайте разберёмся вместе. Что именно вас беспокоит?`
+        };
+    },
+    
+    async generateThought(userId) {
+        return `🧠 Анализ показывает, что вы находитесь в поиске. Ваш профиль указывает на сильную чувствительность к внешней оценке. Это не слабость — это ваш внутренний компас, который иногда даёт ложные сигналы.
+
+Попробуйте в ближайшие дни задавать себе вопрос: "Это действительно моё желание или я хочу понравиться другим?"
+
+Вы увидите, как много решений принимается на автомате. Осознанность — первый шаг к свободе.`;
     }
 };
