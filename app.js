@@ -34,6 +34,14 @@ let recordingTimer = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Мини-приложение запущено');
+    // 🔥 ВСТАВИТЬ ЭТОТ БЛОК 🔥
+    if (window.MAX?.WebApp?.initDataUnsafe?.user?.id) {
+        currentUserId = window.MAX.WebApp.initDataUnsafe.user.id;
+        currentUser = window.MAX.WebApp.initDataUnsafe.user;
+        console.log('👤 Пользователь MAX:', currentUserId);
+        window.MAX.WebApp.ready();
+        window.MAX.WebApp.expand();
+    }
     
     // Получаем ID пользователя из Telegram WebApp
     if (window.Telegram && window.Telegram.WebApp) {
