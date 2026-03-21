@@ -90,7 +90,7 @@ const App = {
             // Проверяем статус пользователя через API
             const status = await this.apiCall('/api/user-status', {
             user_id: this.userId
-            }, 'POST');
+            });
             
             if (status.success) {
                 if (status.profile_data) {
