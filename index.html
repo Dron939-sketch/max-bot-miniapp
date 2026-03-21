@@ -14,6 +14,105 @@
             margin: 0;
             padding: 0;
         }
+        
+        /* ===== СТИЛИ ДЛЯ ГОЛОСОВЫХ ФУНКЦИЙ ===== */
+        .voice-input-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+        }
+        
+        .voice-record-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--max-blue, #248bf2);
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .voice-record-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .voice-record-btn.recording {
+            background: #ff4444;
+            animation: pulse-red 1s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,68,68,0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(255,68,68,0); }
+        }
+        
+        .recording-timer {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+        }
+        
+        .voice-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--max-text-secondary);
+            margin-top: 8px;
+            justify-content: center;
+        }
+        
+        .voice-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Аудиоплеер (скрытый) */
+        #hiddenAudioPlayer {
+            display: none;
+        }
+        
+        /* Адаптация для мобильных */
+        @media (max-width: 480px) {
+            .voice-record-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+            
+            .recording-timer {
+                bottom: 80px;
+                padding: 6px 16px;
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -79,6 +178,10 @@
                 // Кнопки
                 root.style.setProperty('--max-button-primary', theme.button_color || '#248bf2');
                 root.style.setProperty('--max-button-secondary', theme.section_bg_color || '#2b3b4a');
+                
+                // Стеклянный фон
+                root.style.setProperty('--glass-bg', 'rgba(255,255,255,0.05)');
+                root.style.setProperty('--glass-border', 'rgba(255,255,255,0.1)');
                 
                 // Применяем к body
                 document.body.style.backgroundColor = theme.bg_color || '#0e1621';
@@ -176,6 +279,12 @@
             <div id="screenContainer" class="screen-container"></div>
         </div>
     </div>
+
+    <!-- ===== СКРЫТЫЙ АУДИОПЛЕЕР ДЛЯ ВОСПРОИЗВЕДЕНИЯ ОТВЕТОВ ===== -->
+    <audio id="hiddenAudioPlayer" preload="auto"></audio>
+
+    <!-- ===== ТАЙМЕР ЗАПИСИ (будет показываться при записи) ===== -->
+    <div id="recordingTimer" class="recording-timer" style="display: none;">0s</div>
 
     <!-- ===== ШАБЛОНЫ ЭКРАНОВ ===== -->
 
@@ -425,7 +534,7 @@
         </div>
     </template>
 
-    <!-- Экран 9: Задать вопрос -->
+    <!-- Экран 9: Задать вопрос (С ГОЛОСОВОЙ КНОПКОЙ) -->
     <template id="askQuestionScreen">
         <div class="ask-question-container">
             <div class="ask-question-content">
@@ -444,8 +553,17 @@
                         <input type="text" id="questionInput" class="question-input" placeholder="Напишите ваш вопрос...">
                         <button id="sendQuestionBtn" class="question-submit">➡️</button>
                     </div>
-                    <div class="voice-input-hint">
-                        🎙️ Или нажмите на микрофон в углу экрана
+                    
+                    <!-- 🔥 ГОЛОСОВАЯ КНОПКА 🔥 -->
+                    <div class="voice-input-area">
+                        <button id="voiceRecordBtn" class="voice-record-btn">🎤</button>
+                        <div class="voice-status" id="voiceStatus" style="display: none;">
+                            <span class="voice-status-dot"></span>
+                            <span>Запись...</span>
+                        </div>
+                        <div class="voice-hint-text">
+                            Нажмите и говорите (до 30 сек)
+                        </div>
                     </div>
                 </div>
                 
@@ -572,7 +690,7 @@
         </div>
     </template>
 
-    <!-- Подключение скриптов с правильными путями (БЕЗ /miniapp/) -->
+    <!-- Подключение скриптов -->
     <link rel="stylesheet" href="styles.css">
     <script src="api.js"></script>
     <script src="onboarding.js"></script>
@@ -580,7 +698,7 @@
     <script src="test.js"></script>
     <script src="script.js"></script>
     
-    <!-- Дополнительные стили для новых экранов -->
+    <!-- Дополнительные стили для голосовых функций -->
     <style>
         /* Стили для финального профиля */
         .final-profile-container {
@@ -667,6 +785,12 @@
             margin-bottom: 30px;
         }
         
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
         .question-input {
             flex: 1;
             padding: 14px 18px;
@@ -691,6 +815,89 @@
             color: white;
             font-size: 20px;
             cursor: pointer;
+        }
+        
+        .voice-input-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            margin-top: 8px;
+        }
+        
+        .voice-record-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--max-blue);
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .voice-record-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .voice-record-btn.recording {
+            background: #ff4444;
+            animation: pulse-red 1s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,68,68,0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(255,68,68,0); }
+        }
+        
+        .voice-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #ff4444;
+        }
+        
+        .voice-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .voice-hint-text {
+            font-size: 12px;
+            color: var(--max-text-secondary);
+        }
+        
+        .recording-timer {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
         }
         
         .voice-input-hint {
@@ -946,6 +1153,18 @@
             
             .thought-buttons {
                 flex-direction: column;
+            }
+            
+            .voice-record-btn {
+                width: 56px;
+                height: 56px;
+                font-size: 28px;
+            }
+            
+            .recording-timer {
+                bottom: 80px;
+                padding: 6px 16px;
+                font-size: 16px;
             }
         }
     </style>
