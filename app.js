@@ -173,7 +173,7 @@ const api = {
         formData.append('voice', audioBlob, 'voice.webm');
         
         try {
-            const response = await fetch('/api/voice/process', {
+            const response = await fetch('https://max-bot-1-ywpz.onrender.com/api/voice/process', {
                 method: 'POST',
                 body: formData
             });
@@ -555,7 +555,7 @@ async function sendVoiceToServer(audioBlob) {
         formData.append('user_id', currentUserId);
         formData.append('voice', audioBlob, 'voice.webm');
         
-        const response = await fetch('/api/voice/process', {
+        const response = await fetch('https://max-bot-1-ywpz.onrender.com/api/voice/process', {
             method: 'POST',
             body: formData
         });
