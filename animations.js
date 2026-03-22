@@ -1,6 +1,6 @@
 // ============================================
 // АНИМАЦИИ ПОЯВЛЕНИЯ
-// Версия 1.0 - Плавное появление элементов
+// Версия 1.1 - Добавлены view transitions
 // ============================================
 
 class AnimationManager {
@@ -34,10 +34,95 @@ class AnimationManager {
         }
         
         this.setupIntersectionObserver();
-        this.setupViewTransitions();
+        this.setupViewTransitions();  // ✅ теперь метод существует
         this.injectStyles();
         
         console.log('✅ Менеджер анимаций готов');
+    }
+    
+    // ============================================
+    // НАСТРОЙКА VIEW TRANSITIONS API
+    // ============================================
+    
+    setupViewTransitions() {
+        // Проверяем поддержку View Transitions API
+        if (!document.startViewTransition) {
+            console.log('⚠️ View Transitions API не поддерживается в этом браузере');
+            return;
+        }
+        
+        // Добавляем обработчики для элементов с атрибутом data-transition
+        const transitionElements = document.querySelectorAll('[data-transition]');
+        transitionElements.forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = el.dataset.transition;
+                if (target) {
+                    document.startViewTransition(() => {
+                        window.location.hash = target;
+                    });
+                }
+            });
+        });
+        
+        // Слушаем изменения hash для плавных переходов
+        window.addEventListener('hashchange', () => {
+            if (document.startViewTransition) {
+                document.startViewTransition(() => {
+                    this.handleHashChange();
+                });
+            } else {
+                this.handleHashChange();
+            }
+        });
+        
+        console.log('✅ View Transitions настроены');
+    }
+    
+    handleHashChange() {
+        // Обработка смены хэша
+        const hash = window.location.hash.slice(1);
+        if (hash === 'profile') {
+            this.showProfileScreen();
+        } else if (hash === 'thoughts') {
+            this.showThoughtsScreen();
+        } else if (hash === 'goals') {
+            this.showGoalsScreen();
+        } else if (hash === 'test') {
+            this.showTestScreen();
+        } else {
+            this.showDashboardScreen();
+        }
+    }
+    
+    showDashboardScreen() {
+        if (window.dashboard && window.dashboard.renderDashboard) {
+            window.dashboard.renderDashboard();
+        }
+    }
+    
+    showProfileScreen() {
+        if (window.dashboard && window.dashboard.renderProfileScreen) {
+            window.dashboard.renderProfileScreen();
+        }
+    }
+    
+    showThoughtsScreen() {
+        if (window.dashboard && window.dashboard.renderPsychologistThoughtScreen) {
+            window.dashboard.renderPsychologistThoughtScreen();
+        }
+    }
+    
+    showGoalsScreen() {
+        if (window.dashboard && window.dashboard.renderGoalsScreen) {
+            window.dashboard.renderGoalsScreen();
+        }
+    }
+    
+    showTestScreen() {
+        if (window.Test && window.Test.start) {
+            window.Test.start();
+        }
     }
     
     // ============================================
@@ -49,12 +134,8 @@ class AnimationManager {
         style.textContent = `
             /* Базовые анимации */
             @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                }
-                to {
-                    opacity: 1;
-                }
+                from { opacity: 0; }
+                to { opacity: 1; }
             }
             
             @keyframes fadeInUp {
@@ -186,49 +267,17 @@ class AnimationManager {
             }
             
             /* Классы анимаций */
-            .animate-fade-in {
-                animation: fadeIn 0.4s ease forwards;
-            }
-            
-            .animate-fade-in-up {
-                animation: fadeInUp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards;
-            }
-            
-            .animate-fade-in-down {
-                animation: fadeInDown 0.5s ease forwards;
-            }
-            
-            .animate-fade-in-left {
-                animation: fadeInLeft 0.5s ease forwards;
-            }
-            
-            .animate-fade-in-right {
-                animation: fadeInRight 0.5s ease forwards;
-            }
-            
-            .animate-scale-in {
-                animation: scaleIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
-            }
-            
-            .animate-bounce-in {
-                animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            }
-            
-            .animate-slide-in {
-                animation: slideIn 0.5s ease forwards;
-            }
-            
-            .animate-rotate-in {
-                animation: rotateIn 0.5s ease forwards;
-            }
-            
-            .animate-glitch-in {
-                animation: glitchIn 0.5s ease forwards;
-            }
-            
-            .animate-blur-in {
-                animation: blurIn 0.4s ease forwards;
-            }
+            .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+            .animate-fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards; }
+            .animate-fade-in-down { animation: fadeInDown 0.5s ease forwards; }
+            .animate-fade-in-left { animation: fadeInLeft 0.5s ease forwards; }
+            .animate-fade-in-right { animation: fadeInRight 0.5s ease forwards; }
+            .animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+            .animate-bounce-in { animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+            .animate-slide-in { animation: slideIn 0.5s ease forwards; }
+            .animate-rotate-in { animation: rotateIn 0.5s ease forwards; }
+            .animate-glitch-in { animation: glitchIn 0.5s ease forwards; }
+            .animate-blur-in { animation: blurIn 0.4s ease forwards; }
             
             /* Задержки */
             .delay-1 { animation-delay: 0.05s; }
@@ -243,108 +292,72 @@ class AnimationManager {
             .delay-10 { animation-delay: 0.5s; }
             
             /* Анимация при наведении */
-            .hover-lift {
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-            }
-            
-            .hover-lift:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            }
-            
-            .hover-scale {
-                transition: transform 0.2s ease;
-            }
-            
-            .hover-scale:hover {
-                transform: scale(1.05);
-            }
-            
-            .hover-glow {
-                transition: box-shadow 0.2s ease, filter 0.2s ease;
-            }
-            
-            .hover-glow:hover {
-                filter: drop-shadow(0 0 8px var(--max-blue));
-            }
+            .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+            .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); }
+            .hover-scale { transition: transform 0.2s ease; }
+            .hover-scale:hover { transform: scale(1.05); }
+            .hover-glow { transition: box-shadow 0.2s ease, filter 0.2s ease; }
+            .hover-glow:hover { filter: drop-shadow(0 0 8px var(--max-blue)); }
             
             /* Анимация пульсации */
             @keyframes pulse {
-                0%, 100% {
-                    transform: scale(1);
-                    opacity: 1;
-                }
-                50% {
-                    transform: scale(1.05);
-                    opacity: 0.9;
-                }
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.05); opacity: 0.9; }
             }
-            
-            .animate-pulse {
-                animation: pulse 1.5s ease-in-out infinite;
-            }
+            .animate-pulse { animation: pulse 1.5s ease-in-out infinite; }
             
             /* Анимация для лоадера */
             @keyframes spin {
-                from {
-                    transform: rotate(0deg);
-                }
-                to {
-                    transform: rotate(360deg);
-                }
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
             }
-            
-            .animate-spin {
-                animation: spin 1s linear infinite;
-            }
+            .animate-spin { animation: spin 1s linear infinite; }
             
             /* Анимация для уведомлений */
             @keyframes slideInRight {
-                from {
-                    opacity: 0;
-                    transform: translateX(100%);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
+                from { opacity: 0; transform: translateX(100%); }
+                to { opacity: 1; transform: translateX(0); }
             }
-            
-            .animate-slide-in-right {
-                animation: slideInRight 0.3s ease forwards;
-            }
+            .animate-slide-in-right { animation: slideInRight 0.3s ease forwards; }
             
             /* Анимация для модальных окон */
             @keyframes modalIn {
-                from {
-                    opacity: 0;
-                    transform: scale(0.9) translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: scale(1) translateY(0);
-                }
+                from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
             }
-            
-            .animate-modal-in {
-                animation: modalIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
-            }
+            .animate-modal-in { animation: modalIn 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
             
             /* Анимация для перехода между экранами */
             @keyframes screenTransition {
-                from {
-                    opacity: 0;
-                    transform: translateX(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
+                from { opacity: 0; transform: translateX(20px); }
+                to { opacity: 1; transform: translateX(0); }
             }
+            .animate-screen-transition { animation: screenTransition 0.3s ease forwards; }
             
-            .animate-screen-transition {
-                animation: screenTransition 0.3s ease forwards;
+            /* Анимация для удаления */
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
             }
+            .animate-fade-out { animation: fadeOut 0.3s ease forwards; }
+            
+            @keyframes slideOutLeft {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(-100%); opacity: 0; }
+            }
+            .animate-slide-out-left { animation: slideOutLeft 0.3s ease forwards; }
+            
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            .animate-slide-out-right { animation: slideOutRight 0.3s ease forwards; }
+            
+            @keyframes scaleOut {
+                from { transform: scale(1); opacity: 1; }
+                to { transform: scale(0.8); opacity: 0; }
+            }
+            .animate-scale-out { animation: scaleOut 0.3s ease forwards; }
             
             /* Состояние до анимации */
             .animation-ready {
@@ -370,12 +383,8 @@ class AnimationManager {
             }
             
             @keyframes skeletonLoading {
-                0% {
-                    background-position: 200% 0;
-                }
-                100% {
-                    background-position: -200% 0;
-                }
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
             }
         `;
         
@@ -395,7 +404,6 @@ class AnimationManager {
             }
         );
         
-        // Наблюдаем за элементами с атрибутом data-animate
         this.observeElements('[data-animate]');
         this.observeElements('.animate-on-scroll');
     }
@@ -439,7 +447,6 @@ class AnimationManager {
         element.style.opacity = '0';
         element.style.animation = 'none';
         
-        // Принудительный reflow
         void element.offsetHeight;
         
         element.style.animation = `${animationClass} ${duration}s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards`;
@@ -666,7 +673,6 @@ class AnimationManager {
     // ============================================
     
     refresh() {
-        // Перезапускаем наблюдение за новыми элементами
         this.observeElements('[data-animate]');
         this.observeElements('.animate-on-scroll');
     }
