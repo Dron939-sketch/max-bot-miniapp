@@ -1,6 +1,7 @@
 // ========== test.js ==========
 // ПОЛНЫЙ ТЕСТ ИЗ 5 ЭТАПОВ КАК В TELEGRAM
 // С ОТПРАВКОЙ РЕЗУЛЬТАТОВ И ПОЛУЧЕНИЕМ ИНТЕРПРЕТАЦИИ В ПРИЛОЖЕНИЕ
+// ИСПРАВЛЕНО: корректное получение user_id + защита от null
 
 const Test = {
     // Текущее состояние
@@ -45,6 +46,8 @@ const Test = {
     clarificationIteration: 0,
     discrepancies: [],
     clarifyingAnswers: [],
+    clarifyingQuestions: [],
+    clarifyingCurrent: 0,
     
     // Структура теста
     stages: [
@@ -175,8 +178,7 @@ const Test = {
                     { text: '🧩 Раскладываете на части и анализируете', level: 8 },
                     { text: '💫 Доверяете интуиции', level: 3 },
                     { text: '🤝 Советуетесь с экспертами', level: 6 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't2',
@@ -186,8 +188,7 @@ const Test = {
                     { text: '📈 Видеть тренды и тенденции', level: 8 },
                     { text: '🎯 Находить нестандартные решения', level: 7 },
                     { text: '📝 Действовать по инструкции', level: 4 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't3',
@@ -197,8 +198,7 @@ const Test = {
                     { text: '💭 Прислушиваетесь к внутреннему голосу', level: 5 },
                     { text: '👥 Советуетесь с близкими', level: 4 },
                     { text: '⏰ Откладываете, пока всё не решится само', level: 2 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't4',
@@ -208,8 +208,7 @@ const Test = {
                     { text: '❓ Задаю много вопросов', level: 6 },
                     { text: '📝 Запоминаю основные моменты', level: 5 },
                     { text: '🤔 Думаю, как это можно применить', level: 8 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't5',
@@ -219,8 +218,7 @@ const Test = {
                     { text: '📚 Могу разобраться, если нужно', level: 5 },
                     { text: '💡 Люблю искать глубинные смыслы', level: 8 },
                     { text: '🛠 Ищу практическое применение', level: 6 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't6',
@@ -230,8 +228,7 @@ const Test = {
                     { text: '🎨 Используете метафоры и образы', level: 7 },
                     { text: '📊 Показываете схему или структуру', level: 8 },
                     { text: '🤷 Затрудняетесь объяснить', level: 3 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't7',
@@ -241,8 +238,7 @@ const Test = {
                     { text: '🔄 Гибкость и возможность менять план', level: 7 },
                     { text: '📋 Четкая последовательность шагов', level: 5 },
                     { text: '🌈 Вдохновение и идеи', level: 8 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't8',
@@ -252,8 +248,7 @@ const Test = {
                     { text: '🛡️ Защищаюсь и объясняю свою позицию', level: 5 },
                     { text: '😔 Расстраиваюсь и переживаю', level: 3 },
                     { text: '🤷 Пропускаю мимо ушей', level: 4 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't9',
@@ -263,8 +258,7 @@ const Test = {
                     { text: '👂 Лучше слышу и проговариваю', level: 5 },
                     { text: '✍️ Лучше записываю', level: 7 },
                     { text: '🔄 Лучше проживаю на практике', level: 8 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't10',
@@ -274,8 +268,7 @@ const Test = {
                     { text: '💕 Эмоции и атмосфера', level: 5 },
                     { text: '🔍 Смысл и содержание', level: 8 },
                     { text: '🎭 Впечатление и статус', level: 4 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't11',
@@ -285,8 +278,7 @@ const Test = {
                     { text: '💡 Ищу нестандартный подход', level: 8 },
                     { text: '👥 Привлекаю команду', level: 5 },
                     { text: '⚡ Делаю быстро, не задумываясь', level: 4 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't12',
@@ -296,8 +288,7 @@ const Test = {
                     { text: '❤️ Отношения и поддержка', level: 5 },
                     { text: '🎯 Цели и мечты', level: 8 },
                     { text: '🌈 Красота и гармония', level: 7 }
-                ],
-                measures: 'thinking'
+                ]
             }
         ],
         internal: [
@@ -309,8 +300,7 @@ const Test = {
                     { text: '🧩 Раскладываете на части и анализируете', level: 8 },
                     { text: '💫 Доверяете интуиции и первому впечатлению', level: 4 },
                     { text: '🤝 Советуетесь с другими', level: 3 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't2',
@@ -320,8 +310,7 @@ const Test = {
                     { text: '📈 Видеть общую картину и тенденции', level: 8 },
                     { text: '🎯 Находить нестандартные решения', level: 6 },
                     { text: '📝 Действовать по инструкции', level: 4 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't3',
@@ -331,8 +320,7 @@ const Test = {
                     { text: '💭 Прислушиваетесь к внутреннему голосу', level: 6 },
                     { text: '👥 Советуетесь с близкими', level: 4 },
                     { text: '⏰ Откладываете, пока всё не решится само', level: 2 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't4',
@@ -342,8 +330,7 @@ const Test = {
                     { text: '❓ Задаю много вопросов', level: 5 },
                     { text: '📝 Запоминаю основные моменты', level: 4 },
                     { text: '🤔 Думаю, как это можно применить', level: 8 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't5',
@@ -353,8 +340,7 @@ const Test = {
                     { text: '📚 Могу разобраться, если нужно', level: 5 },
                     { text: '💡 Люблю искать глубинные смыслы', level: 8 },
                     { text: '🛠 Ищу практическое применение', level: 6 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't6',
@@ -364,8 +350,7 @@ const Test = {
                     { text: '🎨 Используете метафоры и образы', level: 7 },
                     { text: '📊 Показываете схему или структуру', level: 8 },
                     { text: '🤷 Затрудняетесь объяснить', level: 3 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't7',
@@ -375,8 +360,7 @@ const Test = {
                     { text: '🔄 Гибкость и возможность менять план', level: 6 },
                     { text: '📋 Четкая последовательность шагов', level: 5 },
                     { text: '🌈 Вдохновение и идеи', level: 8 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't8',
@@ -386,8 +370,7 @@ const Test = {
                     { text: '🛡️ Защищаюсь и объясняю свою позицию', level: 5 },
                     { text: '😔 Расстраиваюсь и переживаю', level: 3 },
                     { text: '🤷 Пропускаю мимо ушей', level: 4 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't9',
@@ -397,8 +380,7 @@ const Test = {
                     { text: '👂 Лучше слышу и проговариваю', level: 5 },
                     { text: '✍️ Лучше записываю', level: 7 },
                     { text: '🔄 Лучше проживаю на практике', level: 8 }
-                ],
-                measures: 'thinking'
+                ]
             },
             {
                 id: 't10',
@@ -408,8 +390,7 @@ const Test = {
                     { text: '💕 Эмоции и атмосфера', level: 5 },
                     { text: '🔍 Смысл и содержание', level: 8 },
                     { text: '🎭 Впечатление и статус', level: 4 }
-                ],
-                measures: 'thinking'
+                ]
             }
         ]
     },
@@ -705,6 +686,18 @@ const Test = {
     ],
     
     // ============================================
+    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // ============================================
+    
+    // Получение user_id из разных источников
+    getUserId() {
+        return window.maxContext?.user_id || 
+               localStorage.getItem('fredi_user_id') || 
+               (window.App && window.App.userId) ||
+               null;
+    },
+    
+    // ============================================
     // ФУНКЦИИ РАСЧЕТА
     // ============================================
     
@@ -936,7 +929,25 @@ const Test = {
     },
     
     init(userId) {
-        this.userId = userId || App?.userId || 'test_user';
+        // Получаем userId из разных источников
+        const userIdFromContext = window.maxContext?.user_id;
+        const userIdFromStorage = localStorage.getItem('fredi_user_id');
+        const userIdFromApp = window.App?.userId;
+        
+        this.userId = userId || 
+                      userIdFromContext || 
+                      userIdFromStorage || 
+                      userIdFromApp;
+        
+        // Если userId всё ещё не найден или равен null
+        if (!this.userId || this.userId === 'null' || this.userId === 'undefined') {
+            console.warn('⚠️ userId не найден! Тест будет работать в локальном режиме');
+            this.userId = 'local_test';
+        }
+        
+        console.log('📝 Тест инициализирован для пользователя:', this.userId);
+        
+        // Сброс состояния
         this.currentStage = 0;
         this.currentQuestionIndex = 0;
         this.answers = [];
@@ -1037,6 +1048,7 @@ const Test = {
     
     showTestScreen() {
         const container = document.getElementById('screenContainer');
+        if (!container) return;
         container.innerHTML = `
             <div class="test-messages-container" id="testMessagesContainer">
                 <div class="test-messages-list" id="testMessagesList"></div>
@@ -1060,7 +1072,6 @@ const Test = {
         if (!list) return;
         const msg = document.createElement('div');
         msg.className = 'message bot-message';
-        // Защита эмодзи: используем textContent вместо innerHTML
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         const textDiv = document.createElement('div');
@@ -1090,14 +1101,8 @@ const Test = {
         const timeDiv = document.createElement('div');
         timeDiv.className = 'message-time';
         timeDiv.textContent = 'только что';
-        const statusDiv = document.createElement('div');
-        statusDiv.className = 'message-status';
-        const statusSpan = document.createElement('span');
-        statusSpan.className = 'status-icon sent';
-        statusDiv.appendChild(statusSpan);
         bubble.appendChild(textDiv);
         bubble.appendChild(timeDiv);
-        bubble.appendChild(statusDiv);
         msg.appendChild(bubble);
         list.appendChild(msg);
         this.scrollToBottom();
@@ -1125,7 +1130,6 @@ const Test = {
             const btn = document.createElement('button');
             btn.className = 'message-button';
             btn.setAttribute('data-option-index', idx);
-            // Защита эмодзи: используем textContent
             const span = document.createElement('span');
             span.textContent = optText;
             btn.appendChild(span);
@@ -1559,15 +1563,39 @@ const Test = {
     
     // ===== ОТПРАВКА РЕЗУЛЬТАТОВ НА СЕРВЕР =====
     async sendTestResultsToServer() {
-        if (!this.userId) {
-            console.error('❌ Нет userId для отправки результатов');
+        // Проверяем, что userId существует и не равен test_user/null
+        if (!this.userId || this.userId === 'test_user' || this.userId === 'null' || this.userId === 'local_test') {
+            console.warn('⚠️ Нет корректного user_id, результаты сохранены локально');
+            
+            // Сохраняем результаты локально
+            const profile = this.calculateFinalProfile();
+            const deep = this.deepPatterns || { attachment: "🤗 Надежный" };
+            
+            localStorage.setItem(`test_results_${this.userId || 'local'}`, JSON.stringify({
+                profile,
+                deepPatterns: deep,
+                perceptionType: this.perceptionType,
+                thinkingLevel: this.thinkingLevel,
+                answers: this.answers
+            }));
+            
+            // Показываем финальный экран без опроса сервера
+            if (this.statusMessageElement) {
+                this.statusMessageElement.remove();
+                this.statusMessageElement = null;
+            }
+            
+            // Показываем финальный профиль с кнопками
+            setTimeout(() => {
+                this.showFinalProfileButtons();
+            }, 1000);
             return;
         }
         
         const profile = this.calculateFinalProfile();
         
         const results = {
-            user_id: this.userId,
+            user_id: parseInt(this.userId) || this.userId,
             results: {
                 perception_type: this.perceptionType,
                 thinking_level: this.thinkingLevel,
@@ -1581,7 +1609,7 @@ const Test = {
             }
         };
         
-        console.log('📤 Отправка результатов на сервер...');
+        console.log('📤 Отправка результатов на сервер...', { userId: this.userId });
         
         try {
             const response = await fetch('/api/save-test-results', {
@@ -1606,6 +1634,27 @@ const Test = {
     
     // ===== ОПРОС СЕРВЕРА ДЛЯ ПОЛУЧЕНИЯ ИНТЕРПРЕТАЦИИ =====
     startPollingForInterpretation() {
+        // Проверяем, что userId существует и не равен test_user/null
+        if (!this.userId || this.userId === 'test_user' || this.userId === 'null' || this.userId === 'local_test') {
+            console.warn('⚠️ Нет корректного user_id, интерпретация не будет запрошена');
+            
+            if (this.statusMessageElement) {
+                const textDiv = this.statusMessageElement.querySelector('.message-text');
+                if (textDiv) {
+                    textDiv.textContent = `✨ РЕЗУЛЬТАТ ЭТАПА 5\n\n✅ ТЕСТ ЗАВЕРШЕН!\n\n📝 Результаты сохранены локально.\n\n🧠 Ваш профиль готов! Нажмите кнопку ниже.`;
+                }
+            }
+            
+            setTimeout(() => {
+                if (this.statusMessageElement) {
+                    this.statusMessageElement.remove();
+                    this.statusMessageElement = null;
+                }
+                this.showFinalProfileButtons();
+            }, 2000);
+            return;
+        }
+        
         let attempts = 0;
         const maxAttempts = 60;
         let dots = 0;
@@ -1710,8 +1759,8 @@ const Test = {
         
         const text = `🧠 ВАШ ПСИХОЛОГИЧЕСКИЙ ПОРТРЕТ\n\nПрофиль: ${profile.displayName}\nТип восприятия: ${profile.perceptionType}\nУровень мышления: ${profile.thinkingLevel}/9\n\n📊 ТВОИ ВЕКТОРЫ:\n\n• Реакция на давление (СБ ${profile.sbLevel}/6): ${sbDesc}\n\n• Отношение к деньгам (ТФ ${profile.tfLevel}/6): ${tfDesc}\n\n• Понимание мира (УБ ${profile.ubLevel}/6): ${ubDesc}\n\n• Отношения с людьми (ЧВ ${profile.chvLevel}/6): ${chvDesc}\n\n🧠 Глубинный паттерн: ${deep.attachment}\n\n👇 Что дальше?`;
         
-        if (App?.userId) {
-            localStorage.setItem(`test_results_${App.userId}`, JSON.stringify({
+        if (this.userId) {
+            localStorage.setItem(`test_results_${this.userId}`, JSON.stringify({
                 profile,
                 deepPatterns: deep,
                 perceptionType: this.perceptionType,
@@ -1741,27 +1790,37 @@ const Test = {
         this.sendStageIntro();
     },
     
+    showFinalProfile() {
+        this.showFinalProfileButtons();
+    },
+    
     showPsychologistThought() {
-        if (App && App.showPsychologistThought) {
+        if (window.dashboard && window.dashboard.renderPsychologistThoughtScreen) {
+            window.dashboard.renderPsychologistThoughtScreen();
+        } else if (App && App.showPsychologistThought) {
             App.showPsychologistThought();
         } else {
-            alert("Мысли психолога будут доступны позже");
+            this.addBotMessage("🧠 Мысли психолога будут доступны в личном кабинете.");
         }
     },
     
     showGoals() {
-        if (App && App.showDynamicDestinations) {
+        if (window.dashboard && window.dashboard.renderGoalsScreen) {
+            window.dashboard.renderGoalsScreen();
+        } else if (App && App.showDynamicDestinations) {
             App.showDynamicDestinations();
         } else {
-            alert("Выбор целей будет доступен позже");
+            this.addBotMessage("🎯 Выбор целей будет доступен в личном кабинете.");
         }
     },
     
     showModes() {
-        if (App && App.showModeSelection) {
+        if (window.dashboard && window.dashboard.renderModeSelectionScreen) {
+            window.dashboard.renderModeSelectionScreen();
+        } else if (App && App.showModeSelection) {
             App.showModeSelection();
         } else {
-            alert("Выбор режима будет доступен позже");
+            this.addBotMessage("⚙️ Выбор режима будет доступен в личном кабинете.");
         }
     }
 };
