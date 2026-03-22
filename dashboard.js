@@ -1,6 +1,6 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 2.0 - полная интеграция с улучшениями
+// Версия 2.2 - полная интеграция со всеми модулями
 // ============================================
 
 class FrediDashboard {
@@ -14,6 +14,8 @@ class FrediDashboard {
         this.currentScreen = 'dashboard';
         this.daysActive = 3;
         this.sessionsCount = 12;
+        this.profileText = null;
+        this.psychologistThought = null;
         
         // Модули улучшений
         this.challengeManager = null;
@@ -53,7 +55,12 @@ class FrediDashboard {
             return;
         }
         
+        // Проверяем поддержку микрофона
+        this.checkMicrophoneSupport();
+        
         await this.loadUserData();
+        await this.loadProfileData();
+        await this.loadPsychologistThought();
         this.renderDashboard();
         this.initVoiceInput();
         
@@ -67,19 +74,36 @@ class FrediDashboard {
     }
     
     // ============================================
+    // ПРОВЕРКА ПОДДЕРЖКИ МИКРОФОНА
+    // ============================================
+    
+    checkMicrophoneSupport() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.warn('⚠️ getUserMedia не поддерживается в этом браузере');
+            const voiceBtn = document.getElementById('dashboardVoiceBtn');
+            if (voiceBtn) {
+                voiceBtn.disabled = true;
+                voiceBtn.style.opacity = '0.5';
+                voiceBtn.title = 'Голосовой ввод не поддерживается в этом браузере';
+            }
+            return false;
+        }
+        console.log('✅ Микрофон поддерживается');
+        return true;
+    }
+    
+    // ============================================
     // ЗАГРУЗКА ДАННЫХ
     // ============================================
     
     async loadUserData() {
         try {
-            // 1. Получаем статус пользователя
             const statusResponse = await fetch(`/api/user-status?user_id=${this.userId}`);
             const status = await statusResponse.json();
             
             this.isTestCompleted = status.test_completed || status.has_profile;
             this.profileCode = status.profile_code;
             
-            // 2. Загружаем имя пользователя из БД
             try {
                 const userDataResponse = await fetch(`/api/user-data?user_id=${this.userId}`);
                 const userData = await userDataResponse.json();
@@ -91,20 +115,17 @@ class FrediDashboard {
                 console.warn('Не удалось загрузить имя из БД:', nameError);
             }
             
-            // 3. Если имя всё ещё не загружено, пробуем из MAX.WebApp
             if (this.userName === 'Друг' && window.MAX?.WebApp?.initDataUnsafe?.user?.first_name) {
                 this.userName = window.MAX.WebApp.initDataUnsafe.user.first_name;
                 console.log('👤 Имя получено из MAX.WebApp:', this.userName);
             }
             
-            // 4. Если тест пройден, загружаем полные данные профиля
             if (status.has_profile || status.has_interpretation) {
                 const profileResponse = await fetch(`/api/get-profile?user_id=${this.userId}`);
                 const profile = await profileResponse.json();
                 this.userData = profile;
             }
             
-            // 5. Загружаем статистику
             try {
                 const statsResponse = await fetch(`/api/user-full-status?user_id=${this.userId}`);
                 const stats = await statsResponse.json();
@@ -125,6 +146,82 @@ class FrediDashboard {
             console.error('Ошибка загрузки данных:', error);
             this.isTestCompleted = false;
         }
+    }
+    
+    async loadProfileData() {
+        try {
+            const response = await fetch(`/api/get-profile?user_id=${this.userId}`);
+            const data = await response.json();
+            
+            if (data.ai_generated_profile) {
+                this.profileText = data.ai_generated_profile;
+            } else if (data.profile_data) {
+                this.profileText = this.formatProfileText(data);
+            } else {
+                this.profileText = 'Профиль пока не сформирован. Пройдите тест.';
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки профиля:', error);
+            this.profileText = 'Ошибка загрузки профиля. Попробуйте позже.';
+        }
+    }
+    
+    async loadPsychologistThought() {
+        try {
+            const response = await fetch(`/api/thought?user_id=${this.userId}`);
+            const data = await response.json();
+            this.psychologistThought = data.thought || 'Мысли психолога еще не сгенерированы. Пройдите тест для получения персонального анализа.';
+        } catch (error) {
+            console.error('Ошибка загрузки мыслей психолога:', error);
+            this.psychologistThought = 'Мысли психолога пока недоступны. Попробуйте позже.';
+        }
+    }
+    
+    formatProfileText(data) {
+        const profile = data.profile_data || {};
+        const profileCode = profile.display_name || 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
+        const perceptionType = data.perception_type || 'не определен';
+        const thinkingLevel = data.thinking_level || 5;
+        
+        return `
+            <div class="profile-section">
+                <h3>🧠 ВАШ ПСИХОЛОГИЧЕСКИЙ ПОРТРЕТ</h3>
+                <p><strong>Профиль:</strong> ${profileCode}</p>
+                <p><strong>Тип восприятия:</strong> ${perceptionType}</p>
+                <p><strong>Уровень мышления:</strong> ${thinkingLevel}/9</p>
+            </div>
+            <div class="profile-section">
+                <h4>📊 ВАШИ ВЕКТОРЫ:</h4>
+                <p>• Реакция на давление (СБ): ${profile.sb_level || 4}/6</p>
+                <p>• Отношение к деньгам (ТФ): ${profile.tf_level || 4}/6</p>
+                <p>• Понимание мира (УБ): ${profile.ub_level || 4}/6</p>
+                <p>• Отношения с людьми (ЧВ): ${profile.chv_level || 4}/6</p>
+            </div>
+            <div class="profile-section">
+                <h4>🎯 ТОЧКА РОСТА:</h4>
+                <p>${this.getGrowthPoint(profile)}</p>
+            </div>
+        `;
+    }
+    
+    getGrowthPoint(profile) {
+        const scores = {
+            sb: profile.sb_level || 4,
+            tf: profile.tf_level || 4,
+            ub: profile.ub_level || 4,
+            chv: profile.chv_level || 4
+        };
+        
+        const weakest = Object.entries(scores).sort((a, b) => a[1] - b[1])[0]?.[0] || 'sb';
+        
+        const growthPoints = {
+            sb: 'Работа с реакцией на давление и страхи. Учитесь говорить "нет" и защищать свои границы.',
+            tf: 'Проработка денежных блоков и развитие финансового мышления.',
+            ub: 'Развитие системного мышления и поиск глубинных смыслов.',
+            chv: 'Исцеление привязанности и развитие навыков здорового общения.'
+        };
+        
+        return growthPoints[weakest] || 'Исследование себя и своих паттернов.';
     }
     
     // ============================================
@@ -355,6 +452,154 @@ class FrediDashboard {
     }
     
     // ============================================
+    // ЭКРАНЫ
+    // ============================================
+    
+    renderProfileScreen() {
+        const container = document.getElementById('screenContainer');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="final-profile-container">
+                <div class="final-profile-content">
+                    <div class="profile-header">
+                        <div class="profile-emoji">🧠</div>
+                        <h2 class="profile-title">ВАШ ПСИХОЛОГИЧЕСКИЙ ПОРТРЕТ</h2>
+                    </div>
+                    <div class="profile-text" id="profileText">
+                        ${this.formatTextForDisplay(this.profileText || 'Загрузка профиля...')}
+                    </div>
+                    <div class="profile-buttons">
+                        <button class="onboarding-btn primary" id="backToDashboardBtn">◀️ НАЗАД</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const backBtn = document.getElementById('backToDashboardBtn');
+        if (backBtn) backBtn.onclick = () => this.renderDashboard();
+    }
+    
+    renderPsychologistThoughtScreen() {
+        const container = document.getElementById('screenContainer');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="thought-result-container">
+                <div class="thought-result-content">
+                    <div class="thought-header">
+                        <div class="thought-emoji">🧠</div>
+                        <h2 class="thought-title">МЫСЛИ ПСИХОЛОГА</h2>
+                    </div>
+                    <div class="thought-text" id="thoughtText">
+                        ${this.formatTextForDisplay(this.psychologistThought || 'Загрузка...')}
+                    </div>
+                    <div class="thought-buttons">
+                        <button class="onboarding-btn secondary" id="backToDashboardFromThoughtBtn">◀️ НАЗАД</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const backBtn = document.getElementById('backToDashboardFromThoughtBtn');
+        if (backBtn) backBtn.onclick = () => this.renderDashboard();
+    }
+    
+    renderGoalsScreen() {
+        const container = document.getElementById('screenContainer');
+        if (!container) return;
+        
+        const goals = this.getGoalsForDisplay();
+        
+        container.innerHTML = `
+            <div class="choose-goal-container">
+                <div class="choose-goal-content">
+                    <h2 class="choose-goal-title">🎯 ВАШИ ЦЕЛИ</h2>
+                    <div class="goal-description">
+                        ${this.userName}, вот цели, которые подобраны под ваш профиль:
+                    </div>
+                    <div class="goals-list" id="goalsList">
+                        ${goals.map(goal => `
+                            <div class="goal-item" data-goal-id="${goal.id}">
+                                <div class="goal-name">${goal.emoji || '🎯'} ${goal.name}</div>
+                                <div class="goal-time">⏱ ${goal.time}</div>
+                                <div class="goal-difficulty">${this.getDifficultyEmoji(goal.difficulty)} ${goal.difficulty}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="custom-goal">
+                        <button class="onboarding-btn secondary" id="customGoalBtn">✏️ Сформулирую сам</button>
+                    </div>
+                    <div class="goal-back">
+                        <button class="onboarding-btn secondary" id="backToDashboardFromGoalBtn">◀️ НАЗАД</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.querySelectorAll('.goal-item').forEach(item => {
+            item.addEventListener('click', () => {
+                this.showFloatingMessage('Цель выбрана! Скоро появится план достижения.', 'success');
+            });
+        });
+        
+        const customBtn = document.getElementById('customGoalBtn');
+        if (customBtn) customBtn.onclick = () => this.showCustomGoalInput();
+        
+        const backBtn = document.getElementById('backToDashboardFromGoalBtn');
+        if (backBtn) backBtn.onclick = () => this.renderDashboard();
+    }
+    
+    renderModeSelectionScreen() {
+        const container = document.getElementById('screenContainer');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="choose-mode-container">
+                <div class="choose-mode-content">
+                    <h2 class="choose-mode-title">⚙️ ВЫБЕРИТЕ РЕЖИМ</h2>
+                    <div class="mode-description">
+                        Слушай, я могу быть разным. Хочешь конкретики — давай определимся.
+                    </div>
+                    <div class="mode-cards" id="modeCards">
+                        <div class="mode-card" data-mode="coach">
+                            <div class="mode-emoji">🔮</div>
+                            <div class="mode-name">КОУЧ</div>
+                            <div class="mode-desc">Помогаю найти ответы внутри себя</div>
+                        </div>
+                        <div class="mode-card" data-mode="psychologist">
+                            <div class="mode-emoji">🧠</div>
+                            <div class="mode-name">ПСИХОЛОГ</div>
+                            <div class="mode-desc">Исследую глубинные паттерны</div>
+                        </div>
+                        <div class="mode-card" data-mode="trainer">
+                            <div class="mode-emoji">⚡</div>
+                            <div class="mode-name">ТРЕНЕР</div>
+                            <div class="mode-desc">Даю чёткие инструменты и задачи</div>
+                        </div>
+                    </div>
+                    <div class="mode-back">
+                        <button class="onboarding-btn secondary" id="backToDashboardFromModeBtn">◀️ НАЗАД</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', async () => {
+                const mode = card.dataset.mode;
+                this.mode = mode;
+                await this.saveMode(mode);
+                this.showFloatingMessage(`Режим ${card.querySelector('.mode-name').textContent} активирован!`, 'success');
+                this.renderDashboard();
+            });
+        });
+        
+        const backBtn = document.getElementById('backToDashboardFromModeBtn');
+        if (backBtn) backBtn.onclick = () => this.renderDashboard();
+    }
+    
+    // ============================================
     // ВИДЖЕТЫ
     // ============================================
     
@@ -423,7 +668,7 @@ class FrediDashboard {
     }
     
     // ============================================
-    // ПЕРСОНАЛИЗАЦИЯ МОДУЛЕЙ
+    // ПЕРСОНАЛИЗАЦИЯ
     // ============================================
     
     getPersonalizedModules() {
@@ -438,7 +683,6 @@ class FrediDashboard {
         const profileScores = this.extractProfileScores();
         const modules = [];
         
-        // Добавляем модули в зависимости от слабых векторов
         if (profileScores.sb < 3) {
             modules.push({ ...this.modules.strategy, description: 'Укрепляем границы' });
         }
@@ -452,7 +696,6 @@ class FrediDashboard {
             modules.push({ ...this.modules.communication, description: 'Улучшаем отношения' });
         }
         
-        // Добавляем общие модули
         const commonModules = [
             { ...this.modules.goals, description: 'Ваши цели и задачи' },
             { ...this.modules.habits, description: 'Полезные привычки' },
@@ -462,7 +705,6 @@ class FrediDashboard {
         
         modules.push(...commonModules);
         
-        // Удаляем дубликаты и ограничиваем количество
         const unique = modules.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
         return unique.slice(0, 9);
     }
@@ -480,6 +722,43 @@ class FrediDashboard {
             ub: this.userData.profile_data.ub_level || 4,
             chv: this.userData.profile_data.chv_level || 4
         };
+    }
+    
+    getGoalsForDisplay() {
+        const scores = this.extractProfileScores();
+        const weakest = Object.entries(scores).sort((a, b) => a[1] - b[1])[0]?.[0] || 'sb';
+        
+        const goalsMap = {
+            sb: [
+                { id: 'fear_work', name: 'Проработать страхи', time: '3-4 недели', difficulty: 'medium', emoji: '🛡️' },
+                { id: 'boundaries', name: 'Научиться защищать границы', time: '2-3 недели', difficulty: 'medium', emoji: '🔒' }
+            ],
+            tf: [
+                { id: 'money_blocks', name: 'Проработать денежные блоки', time: '3-4 недели', difficulty: 'medium', emoji: '💰' },
+                { id: 'income_growth', name: 'Увеличить доход', time: '4-6 недель', difficulty: 'hard', emoji: '📈' }
+            ],
+            ub: [
+                { id: 'meaning', name: 'Найти смысл', time: '4-6 недель', difficulty: 'hard', emoji: '🎯' },
+                { id: 'system_thinking', name: 'Развить системное мышление', time: '3-5 недель', difficulty: 'medium', emoji: '🧩' }
+            ],
+            chv: [
+                { id: 'relations', name: 'Улучшить отношения', time: '4-6 недель', difficulty: 'hard', emoji: '💕' },
+                { id: 'attachment', name: 'Проработать привязанность', time: '5-7 недель', difficulty: 'hard', emoji: '🪢' }
+            ]
+        };
+        
+        const general = [
+            { id: 'purpose', name: 'Найти предназначение', time: '5-7 недель', difficulty: 'hard', emoji: '🌟' },
+            { id: 'balance', name: 'Обрести баланс', time: '4-6 недель', difficulty: 'medium', emoji: '⚖️' }
+        ];
+        
+        const weakGoals = goalsMap[weakest] || goalsMap.sb;
+        return [...weakGoals, ...general].slice(0, 5);
+    }
+    
+    getDifficultyEmoji(difficulty) {
+        const emojis = { easy: '🟢', medium: '🟡', hard: '🔴' };
+        return emojis[difficulty] || '⚪';
     }
     
     getUserName() {
@@ -500,12 +779,17 @@ class FrediDashboard {
         return this.sessionsCount;
     }
     
+    formatTextForDisplay(text) {
+        if (!text) return '';
+        // Заменяем переносы строк на <br> и обрабатываем markdown
+        return text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+    
     // ============================================
     // ОБРАБОТЧИКИ СОБЫТИЙ
     // ============================================
     
     attachDashboardEvents() {
-        // Обработчики для модулей
         document.querySelectorAll('.module-card').forEach(card => {
             card.addEventListener('click', () => {
                 const moduleId = card.dataset.module;
@@ -513,7 +797,6 @@ class FrediDashboard {
             });
         });
         
-        // Быстрые действия
         document.querySelectorAll('.quick-action').forEach(action => {
             action.addEventListener('click', () => {
                 const actionType = action.dataset.action;
@@ -521,7 +804,6 @@ class FrediDashboard {
             });
         });
         
-        // Голосовая кнопка
         const voiceBtn = document.getElementById('dashboardVoiceBtn');
         if (voiceBtn) {
             this.setupVoiceButton(voiceBtn);
@@ -571,7 +853,7 @@ class FrediDashboard {
     }
     
     // ============================================
-    // ГОЛОСОВОЙ ВВОД
+    // ГОЛОСОВОЙ ВВОД (С ДЕТАЛЬНЫМИ ОШИБКАМИ)
     // ============================================
     
     setupVoiceButton(button) {
@@ -586,8 +868,21 @@ class FrediDashboard {
         
         const startRecording = async () => {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
+                console.log('🎤 Запрос доступа к микрофону...');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                });
+                
+                console.log('✅ Доступ к микрофону получен');
+                
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'
+                });
                 audioChunks = [];
                 
                 mediaRecorder.ondataavailable = (event) => {
@@ -622,9 +917,27 @@ class FrediDashboard {
                 }, 1000);
                 
                 setTimeout(() => { if (isRecording) stopRecording(); }, 30000);
+                
             } catch (error) {
                 console.error('Microphone error:', error);
-                this.showFloatingMessage('Не удалось получить доступ к микрофону', 'error');
+                
+                let errorMessage = '❌ Не удалось получить доступ к микрофону.';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage = '❌ Разрешение на использование микрофона отклонено. Нажмите на значок замка 🔒 в адресной строке и разрешите доступ к микрофону.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage = '❌ Микрофон не найден. Подключите микрофон и попробуйте снова.';
+                } else if (error.name === 'NotReadableError') {
+                    errorMessage = '❌ Микрофон занят другим приложением. Закройте другие программы, использующие микрофон.';
+                } else if (error.name === 'SecurityError') {
+                    errorMessage = '❌ Доступ к микрофону запрещён из-за политики безопасности. Используйте HTTPS.';
+                }
+                
+                this.showFloatingMessage(errorMessage, 'error');
+                
+                if (voiceStatus) voiceStatus.style.display = 'none';
+                button.classList.remove('recording');
+                button.innerHTML = '<span class="voice-icon">🎤</span><span class="voice-text">Нажмите и говорите</span>';
             }
         };
         
@@ -640,12 +953,18 @@ class FrediDashboard {
         button.addEventListener('mouseup', stopRecording);
         button.addEventListener('mouseleave', stopRecording);
         
-        button.addEventListener('touchstart', (e) => { e.preventDefault(); startRecording(); });
-        button.addEventListener('touchend', (e) => { e.preventDefault(); stopRecording(); });
+        button.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); 
+            startRecording(); 
+        });
+        button.addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            stopRecording(); 
+        });
     }
     
     async sendVoiceToServer(audioBlob) {
-        this.showFloatingMessage('Распознаю речь...', 'info');
+        this.showFloatingMessage('🎤 Распознаю речь...', 'info');
         
         const formData = new FormData();
         formData.append('user_id', this.userId);
@@ -661,7 +980,7 @@ class FrediDashboard {
             
             if (result.success) {
                 if (result.recognized_text) {
-                    this.showFloatingMessage(`Вы сказали: ${result.recognized_text}`, 'success');
+                    this.showFloatingMessage(`📝 Вы сказали: ${result.recognized_text}`, 'success');
                 }
                 if (result.answer) {
                     this.showFloatingMessage(result.answer, 'info');
@@ -672,7 +991,7 @@ class FrediDashboard {
             }
         } catch (error) {
             console.error('Send voice error:', error);
-            this.showFloatingMessage('Ошибка отправки голоса', 'error');
+            this.showFloatingMessage('❌ Ошибка отправки голоса. Попробуйте позже.', 'error');
         }
     }
     
@@ -688,6 +1007,23 @@ class FrediDashboard {
     // ============================================
     // ОБРАБОТЧИКИ МОДУЛЕЙ
     // ============================================
+    
+    handleQuickAction(actionType) {
+        switch(actionType) {
+            case 'mode':
+                this.renderModeSelectionScreen();
+                break;
+            case 'profile':
+                this.renderProfileScreen();
+                break;
+            case 'thoughts':
+                this.renderPsychologistThoughtScreen();
+                break;
+            case 'goals':
+                this.renderGoalsScreen();
+                break;
+        }
+    }
     
     handleModuleClick(moduleId) {
         const messages = {
@@ -707,26 +1043,46 @@ class FrediDashboard {
         this.showFloatingMessage(message, 'info');
         this.sendQuestionToBot(message);
         
-        // Отмечаем активность для челленджей
         if (this.challengeManager) {
             this.challengeManager.onQuestionAsked();
         }
     }
     
-    handleQuickAction(actionType) {
-        switch(actionType) {
-            case 'mode':
-                this.showModeSelection();
-                break;
-            case 'profile':
-                this.showProfile();
-                break;
-            case 'thoughts':
-                this.showPsychologistThought();
-                break;
-            case 'goals':
-                this.showGoals();
-                break;
+    async sendQuestionToBot(question) {
+        try {
+            const response = await fetch('/api/chat/message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: this.userId,
+                    message: question,
+                    mode: this.mode
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.response) {
+                this.showFloatingMessage(result.response, 'info');
+                if (result.audio_url) {
+                    this.playAudioResponse(result.audio_url);
+                }
+            }
+        } catch (error) {
+            console.error('Send question error:', error);
+            this.showFloatingMessage('❌ Ошибка отправки вопроса. Попробуйте позже.', 'error');
+        }
+    }
+    
+    async saveMode(mode) {
+        try {
+            await fetch('/api/save-mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: this.userId, mode })
+            });
+        } catch (error) {
+            console.error('Ошибка сохранения режима:', error);
         }
     }
     
@@ -751,95 +1107,6 @@ class FrediDashboard {
         const closeBtn = document.getElementById('floatingMessageClose');
         if (closeBtn) {
             closeBtn.onclick = () => floatingMsg.style.display = 'none';
-        }
-    }
-    
-    // ============================================
-    // API ВЫЗОВЫ
-    // ============================================
-    
-    async sendQuestionToBot(question) {
-        try {
-            const response = await fetch('/api/chat/message', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: this.userId,
-                    message: question,
-                    mode: this.mode
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.success && result.response) {
-                this.showFloatingMessage(result.response, 'info');
-                if (result.audio_url) {
-                    this.playAudioResponse(result.audio_url);
-                }
-            }
-        } catch (error) {
-            console.error('Send question error:', error);
-        }
-    }
-    
-    showModeSelection() {
-        if (window.api && window.api.showModeSelection) {
-            window.api.showModeSelection();
-        } else {
-            this.showFloatingMessage('Выберите режим: 🔮 КОУЧ | 🧠 ПСИХОЛОГ | ⚡ ТРЕНЕР', 'info');
-        }
-    }
-    
-    showProfile() {
-        if (window.api && window.api.showProfile) {
-            window.api.showProfile();
-        } else {
-            this.showFloatingMessage('Загружаю ваш психологический портрет...', 'info');
-            window.location.hash = '#profile';
-        }
-    }
-    
-    showPsychologistThought() {
-        if (window.api && window.api.showThoughts) {
-            window.api.showThoughts();
-        } else {
-            this.showFloatingMessage('Генерирую мысли психолога...', 'info');
-            window.location.hash = '#thoughts';
-        }
-    }
-    
-    showGoals() {
-        if (window.api && window.api.showGoals) {
-            window.api.showGoals();
-        } else {
-            this.showFloatingMessage('Загружаю ваши цели...', 'info');
-            window.location.hash = '#goals';
-        }
-    }
-    
-    startTest() {
-        if (window.api && window.api.startTest) {
-            window.api.startTest();
-        } else {
-            window.location.hash = '#test';
-        }
-    }
-    
-    showSkipMessage() {
-        this.showFloatingMessage('Тест поможет лучше понять вас и подобрать персональные рекомендации. Вернётесь к нему позже?', 'info');
-    }
-    
-    showError(message) {
-        const container = document.getElementById('screenContainer');
-        if (container) {
-            container.innerHTML = `
-                <div class="dashboard-error">
-                    <div class="error-icon">⚠️</div>
-                    <div class="error-title">Ошибка</div>
-                    <div class="error-text">${message}</div>
-                </div>
-            `;
         }
     }
     
@@ -908,11 +1175,43 @@ class FrediDashboard {
         this.showFloatingMessage(`👤 ${double.first_name} ${double.last_name || ''}\n📊 Профиль: ${double.profile_code}`, 'info');
     }
     
+    // ============================================
+    // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+    // ============================================
+    
+    startTest() {
+        window.location.hash = '#test';
+    }
+    
+    showSkipMessage() {
+        this.showFloatingMessage('Тест поможет лучше понять вас и подобрать персональные рекомендации.', 'info');
+    }
+    
+    showError(message) {
+        const container = document.getElementById('screenContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="dashboard-error">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-title">Ошибка</div>
+                    <div class="error-text">${message}</div>
+                </div>
+            `;
+        }
+    }
+    
     initVoiceInput() {
         window.startVoiceRecording = () => {
             const voiceBtn = document.getElementById('dashboardVoiceBtn');
             if (voiceBtn) voiceBtn.dispatchEvent(new Event('mousedown'));
         };
+    }
+    
+    showCustomGoalInput() {
+        const goal = prompt('Сформулируйте свою цель своими словами:');
+        if (goal?.trim()) {
+            this.showFloatingMessage(`Цель принята: "${goal}"`, 'success');
+        }
     }
 }
 
@@ -921,5 +1220,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.dashboard = new FrediDashboard();
 });
 
-// Экспорт для использования из других модулей
 window.FrediDashboard = FrediDashboard;
