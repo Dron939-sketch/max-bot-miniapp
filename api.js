@@ -1,6 +1,6 @@
 // ============================================
 // API КЛАСС ДЛЯ РАБОТЫ С СЕРВЕРОМ
-// Версия 2.0 - полная интеграция с личным кабинетом
+// Версия 2.1 - добавлены методы для новых модулей
 // ============================================
 
 class FrediAPI {
@@ -236,7 +236,158 @@ class FrediAPI {
         return data;
     }
     
-    // ===== ОЧИСТКА КЭША =====
+    // ============================================
+    // НОВЫЕ МЕТОДЫ ДЛЯ ЧЕЛЛЕНДЖЕЙ
+    // ============================================
+    
+    async getChallenges(userId) {
+        const data = await this.request(`/api/challenges?user_id=${userId}`);
+        return data;
+    }
+    
+    async getChallengeStats(userId) {
+        const data = await this.request(`/api/challenge/stats?user_id=${userId}`);
+        return data;
+    }
+    
+    async saveChallengeStats(userId, stats) {
+        const data = await this.request('/api/challenge/stats', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, stats })
+        });
+        return data;
+    }
+    
+    async saveChallenges(userId, challenges) {
+        const data = await this.request('/api/challenges/save', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, ...challenges })
+        });
+        return data;
+    }
+    
+    async updateChallengeProgress(userId, challengeId, progress) {
+        const data = await this.request('/api/challenge/progress', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, challenge_id: challengeId, progress })
+        });
+        return data;
+    }
+    
+    // ============================================
+    // НОВЫЕ МЕТОДЫ ДЛЯ УВЕДОМЛЕНИЙ
+    // ============================================
+    
+    async getNotificationSettings(userId) {
+        const data = await this.request(`/api/notification/settings?user_id=${userId}`);
+        return data;
+    }
+    
+    async saveNotificationSettings(userId, settings) {
+        const data = await this.request('/api/notification/settings', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, settings })
+        });
+        return data;
+    }
+    
+    async getNotificationHistory(userId, limit = 50) {
+        const data = await this.request(`/api/notification/history?user_id=${userId}&limit=${limit}`);
+        return data;
+    }
+    
+    async sendTestNotification(userId) {
+        const data = await this.request('/api/notification/test', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId })
+        });
+        return data;
+    }
+    
+    async subscribeToPush(userId, subscription) {
+        const data = await this.request('/api/notification/subscribe', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, subscription })
+        });
+        return data;
+    }
+    
+    async unsubscribeFromPush(userId) {
+        const data = await this.request('/api/notification/unsubscribe', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId })
+        });
+        return data;
+    }
+    
+    async getVapidPublicKey() {
+        const data = await this.request('/api/notification/vapid-key');
+        return data;
+    }
+    
+    // ============================================
+    // НОВЫЕ МЕТОДЫ ДЛЯ ПСИХОМЕТРИЧЕСКИХ ДВОЙНИКОВ
+    // ============================================
+    
+    async findPsychometricDoubles(userId, limit = 10, filters = {}) {
+        const params = new URLSearchParams({ user_id: userId, limit, ...filters });
+        const data = await this.request(`/api/psychometric/find-doubles?${params}`);
+        return data;
+    }
+    
+    async getPsychometricDouble(doubleId, userId) {
+        const data = await this.request(`/api/psychometric/double/${doubleId}?user_id=${userId}`);
+        return data;
+    }
+    
+    async sendMessageToDouble(userId, doubleId, message) {
+        const data = await this.request('/api/psychometric/send-message', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, double_id: doubleId, message })
+        });
+        return data;
+    }
+    
+    async getDoubleMessages(userId, doubleId, limit = 50) {
+        const data = await this.request(`/api/psychometric/messages?user_id=${userId}&double_id=${doubleId}&limit=${limit}`);
+        return data;
+    }
+    
+    async markDoubleViewed(userId, doubleId) {
+        const data = await this.request('/api/psychometric/mark-viewed', {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, double_id: doubleId })
+        });
+        return data;
+    }
+    
+    async getPsychometricStats(userId) {
+        const data = await this.request(`/api/psychometric/stats?user_id=${userId}`);
+        return data;
+    }
+    
+    // ============================================
+    // НОВЫЙ МЕТОД ДЛЯ НАСТРОЕНИЯ (АНИМИРОВАННЫЙ АВАТАР)
+    // ============================================
+    
+    async getUserMood(userId) {
+        const data = await this.request(`/api/user-mood?user_id=${userId}`);
+        return data;
+    }
+    
+    // ============================================
+    // НОВЫЙ МЕТОД ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ ПОЛЬЗОВАТЕЛЯ (ИМЯ)
+    // ============================================
+    
+    async getUserData(userId) {
+        const data = await this.request(`/api/user-data?user_id=${userId}`);
+        return data;
+    }
+    
+    // ============================================
+    // ОЧИСТКА КЭША
+    // ============================================
+    
     clearCache() {
         this.cache.clear();
         console.log('🧹 Кэш API очищен');
