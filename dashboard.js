@@ -1,16 +1,19 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 1.0 - персонализированное меню
+// Версия 1.1 - с загрузкой имени из БД
 // ============================================
 
 class FrediDashboard {
     constructor() {
         this.userId = window.maxContext?.user_id || localStorage.getItem('fredi_user_id');
         this.userData = null;
+        this.userName = 'Друг';
         this.isTestCompleted = false;
         this.profileCode = null;
         this.mode = 'coach';
         this.currentScreen = 'dashboard';
+        this.daysActive = 3;
+        this.sessionsCount = 12;
         
         this.modules = {
             strategy: { name: '🎯 Стратегия', icon: '🎯', color: '#4CAF50', requiresTest: true },
@@ -43,22 +46,51 @@ class FrediDashboard {
     
     async loadUserData() {
         try {
-            // Получаем статус пользователя
+            // 1. Получаем статус пользователя
             const statusResponse = await fetch(`/api/user-status?user_id=${this.userId}`);
             const status = await statusResponse.json();
             
             this.isTestCompleted = status.test_completed || status.has_profile;
             this.profileCode = status.profile_code;
             
+            // 2. Загружаем имя пользователя из БД
+            try {
+                const userDataResponse = await fetch(`/api/user-data?user_id=${this.userId}`);
+                const userData = await userDataResponse.json();
+                if (userData && userData.user_name) {
+                    this.userName = userData.user_name;
+                    console.log('👤 Имя пользователя загружено из БД:', this.userName);
+                }
+            } catch (nameError) {
+                console.warn('Не удалось загрузить имя из БД:', nameError);
+            }
+            
+            // 3. Если имя всё ещё не загружено, пробуем из MAX.WebApp
+            if (this.userName === 'Друг' && window.MAX?.WebApp?.initDataUnsafe?.user?.first_name) {
+                this.userName = window.MAX.WebApp.initDataUnsafe.user.first_name;
+                console.log('👤 Имя получено из MAX.WebApp:', this.userName);
+            }
+            
+            // 4. Если тест пройден, загружаем полные данные профиля
             if (status.has_profile || status.has_interpretation) {
-                // Загружаем полные данные профиля
                 const profileResponse = await fetch(`/api/get-profile?user_id=${this.userId}`);
                 const profile = await profileResponse.json();
                 this.userData = profile;
             }
             
+            // 5. Загружаем статистику (дней активности, сессий)
+            try {
+                const statsResponse = await fetch(`/api/user-full-status?user_id=${this.userId}`);
+                const stats = await statsResponse.json();
+                if (stats.days_active) this.daysActive = stats.days_active;
+                if (stats.sessions_count) this.sessionsCount = stats.sessions_count;
+            } catch (statsError) {
+                console.warn('Не удалось загрузить статистику:', statsError);
+            }
+            
             console.log('📊 Данные пользователя:', { 
                 userId: this.userId, 
+                userName: this.userName,
                 testCompleted: this.isTestCompleted,
                 profileCode: this.profileCode
             });
@@ -87,7 +119,7 @@ class FrediDashboard {
                 <div class="test-required-icon">🧠</div>
                 <div class="test-required-title">Пройдите тест</div>
                 <div class="test-required-text">
-                    Привет! Я пока не знаком с вами.<br><br>
+                    Привет, ${this.userName}! Я пока не знаком с вами.<br><br>
                     Чтобы я мог подобрать для вас персональные модули и рекомендации,<br>
                     нужно пройти психологическое тестирование.<br><br>
                     Это займёт всего 15 минут и поможет:<br>
@@ -127,17 +159,17 @@ class FrediDashboard {
                     <div class="user-welcome">
                         <div class="user-avatar">${this.getUserAvatar()}</div>
                         <div class="user-info">
-                            <div class="user-name">${this.getUserName()}</div>
+                            <div class="user-name">${this.userName}</div>
                             <div class="user-profile">${this.profileCode || 'СБ-4_ТФ-4_УБ-4_ЧВ-4'}</div>
                         </div>
                     </div>
                     <div class="user-stats">
                         <div class="stat-item">
-                            <span class="stat-value">${this.getDaysActive()}</span>
+                            <span class="stat-value">${this.daysActive}</span>
                             <span class="stat-label">дней с вами</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-value">${this.getSessionsCount()}</span>
+                            <span class="stat-value">${this.sessionsCount}</span>
                             <span class="stat-label">сессий</span>
                         </div>
                     </div>
@@ -262,7 +294,7 @@ class FrediDashboard {
     }
     
     getUserName() {
-        return window.maxContext?.user_name || localStorage.getItem('fredi_user_name') || 'Друг';
+        return this.userName;
     }
     
     getUserAvatar() {
@@ -272,13 +304,11 @@ class FrediDashboard {
     }
     
     getDaysActive() {
-        // В реальности брать из БД
-        return '3';
+        return this.daysActive;
     }
     
     getSessionsCount() {
-        // В реальности брать из БД
-        return '12';
+        return this.sessionsCount;
     }
     
     attachDashboardEvents() {
