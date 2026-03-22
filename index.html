@@ -579,6 +579,73 @@
             }
         }
         
+        /* ===== АНИМИРОВАННЫЙ АВАТАР ===== */
+        
+        .animated-avatar {
+            display: block;
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .animated-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Контейнер аватара */
+        .user-avatar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--max-panel-bg), var(--max-bg));
+            width: 80px;
+            height: 80px;
+        }
+        
+        /* Эффект пульсации при клике */
+        .user-avatar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: avatarPulse 0s ease-out;
+        }
+        
+        @keyframes avatarPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(74, 158, 255, 0.4);
+                opacity: 1;
+            }
+            100% {
+                box-shadow: 0 0 0 15px rgba(74, 158, 255, 0);
+                opacity: 0;
+            }
+        }
+        
+        .user-avatar:active::after {
+            animation: avatarPulse 0.5s ease-out;
+        }
+        
+        /* Для мобильных устройств */
+        @media (max-width: 480px) {
+            .user-avatar {
+                width: 64px !important;
+                height: 64px !important;
+            }
+            
+            .animated-avatar {
+                width: 64px !important;
+                height: 64px !important;
+            }
+        }
+        
         /* Стили для онбординга и теста */
         .onboarding-container, .context-container, .benefits-container, .final-profile-container, .ask-question-container, .choose-goal-container, .choose-mode-container, .thought-result-container {
             max-width: 600px;
@@ -1320,6 +1387,14 @@
                 window.dashboard.userId = userId;
                 await window.dashboard.loadUserData();
                 window.dashboard.renderDashboard();
+                
+                // Инициализация анимированного аватара после загрузки дашборда
+                setTimeout(() => {
+                    if (window.dashboard && window.dashboard.isTestCompleted && window.dashboard.initAnimatedAvatar) {
+                        window.dashboard.initAnimatedAvatar();
+                    }
+                }, 500);
+                
                 const userNameEl = document.getElementById('userName');
                 if (userNameEl && window.dashboard.userName) userNameEl.textContent = window.dashboard.userName;
                 const userStatusEl = document.getElementById('userStatus');
