@@ -15,7 +15,8 @@
     
     <!-- MAX Bridge -->
     <script src="https://st.max.ru/js/max-web-app.js"></script>
-   
+    
+    <!-- ========== СТИЛИ ========== -->
     <style>
         * {
             margin: 0;
@@ -578,8 +579,6 @@
             }
         }
         
-        /* ===== АНИМИРОВАННЫЙ АВАТАР ===== */
-        
         .animated-avatar {
             display: block;
             transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
@@ -591,7 +590,6 @@
             transform: scale(1.05);
         }
         
-        /* Контейнер аватара */
         .user-avatar {
             position: relative;
             display: flex;
@@ -604,7 +602,6 @@
             height: 80px;
         }
         
-        /* Эффект пульсации при клике */
         .user-avatar::after {
             content: '';
             position: absolute;
@@ -632,26 +629,25 @@
             animation: avatarPulse 0.5s ease-out;
         }
         
-        /* Для мобильных устройств */
         @media (max-width: 480px) {
             .user-avatar {
                 width: 64px !important;
                 height: 64px !important;
             }
-            
             .animated-avatar {
                 width: 64px !important;
                 height: 64px !important;
             }
         }
         
-        /* Стили для онбординга и теста */
-        .onboarding-container, .context-container, .benefits-container, .final-profile-container, .ask-question-container, .choose-goal-container, .choose-mode-container, .thought-result-container {
+        .onboarding-container, .context-container, .benefits-container, .final-profile-container, 
+        .ask-question-container, .choose-goal-container, .choose-mode-container, .thought-result-container {
             max-width: 600px;
             margin: 0 auto;
         }
         
-        .onboarding-content, .context-content, .benefits-content, .final-profile-content, .ask-question-content, .choose-goal-content, .choose-mode-content, .thought-result-content {
+        .onboarding-content, .context-content, .benefits-content, .final-profile-content, 
+        .ask-question-content, .choose-goal-content, .choose-mode-content, .thought-result-content {
             background: var(--max-panel-bg, #17212b);
             border-radius: 24px;
             padding: 24px;
@@ -1343,247 +1339,340 @@
         </div>
     </template>
 
-    <link rel="stylesheet" href="/styles.css?v=3">
-<script src="/context.js?v=3"></script>
-<script src="/onboarding.js?v=3"></script>
-<script src="/script.js?v=3"></script>
-<script src="/test.js?v=3"></script>
-<script src="/animations.js?v=3"></script>
-<script src="/animated-avatar.js?v=3"></script>
-<script src="/dynamic-bg.js?v=3"></script>
-<script src="/challenges.js?v=3"></script>
-<script src="/notifications.js?v=3"></script>
-<script src="/psychometric.js?v=3"></script>
-
-<!-- ===== КОНФИГУРАЦИЯ API ===== -->
-<script>
-    // Укажите URL вашего бэкенда (FastAPI сервер)
-    // ⚠️ ЗДЕСЬ ВЫ МОЖЕТЕ ИЗМЕНИТЬ URL НА ВАШ БЭКЕНД
-    window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
-    console.log('🌐 API будет обращаться к:', window.API_BASE_URL);
-</script>
-
-<script src="/api.js?v=3"></script>
-<script src="/dashboard.js?v=3"></script>
-
-        <!-- ===== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ===== -->
+    <!-- ========== СКРИПТЫ: ВАЖНЫЙ ПОРЯДОК ========== -->
+    <!-- 1. СНАЧАЛА API и DASHBOARD (ОСНОВНЫЕ) -->
+    <script src="/api.js?v=4"></script>
+    <script src="/dashboard.js?v=4"></script>
+    
+    <!-- 2. ПОТОМ ВСЕ ОСТАЛЬНЫЕ -->
+    <script src="/context.js?v=4"></script>
+    <script src="/onboarding.js?v=4"></script>
+    <script src="/script.js?v=4"></script>
+    <script src="/test.js?v=4"></script>
+    <script src="/animations.js?v=4"></script>
+    <script src="/animated-avatar.js?v=4"></script>
+    <script src="/dynamic-bg.js?v=4"></script>
+    <script src="/challenges.js?v=4"></script>
+    <script src="/notifications.js?v=4"></script>
+    <script src="/psychometric.js?v=4"></script>
+    
+    <!-- ========== КОНФИГУРАЦИЯ API ========== -->
+    <script>
+        // URL вашего бэкенда (FastAPI сервер)
+        window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
+        console.log('🌐 API будет обращаться к:', window.API_BASE_URL);
+    </script>
+    
+    <!-- ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ========== -->
     <script>
         window.dashboard = null;
-        window.api = new FrediAPI();
+        window.api = null;
         window.animationManager = null;
         window.dynamicBg = null;
-
+        
         function showLoading() {
             const container = document.getElementById('screenContainer');
-            if (container) container.innerHTML = '<div class="loading-screen"><div class="loading-spinner">🧠</div><div class="loading-text">Загрузка личного кабинета...</div></div>';
+            if (container) {
+                container.innerHTML = '<div class="loading-screen"><div class="loading-spinner">🧠</div><div class="loading-text">Загрузка личного кабинета...</div></div>';
+            }
         }
-
+        
         function showLoginScreen() {
             const container = document.getElementById('screenContainer');
-            if (container) container.innerHTML = '<div class="login-screen"><div class="login-icon">🔐</div><div class="login-title">Личный кабинет Фреди</div><div class="login-text">Для доступа к личному кабинету необходимо открыть приложение через MAX.</div><button class="login-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
+            if (container) {
+                container.innerHTML = '<div class="login-screen"><div class="login-icon">🔐</div><div class="login-title">Личный кабинет Фреди</div><div class="login-text">Для доступа к личному кабинету необходимо открыть приложение через MAX.</div><button class="login-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
+            }
         }
-
+        
+        // Функция инициализации с защитой от отсутствия dashboard.js
         async function initDashboard() {
+            console.log('🔍 [INIT] initDashboard вызван');
+            console.log('🔍 [INIT] typeof FrediDashboard:', typeof FrediDashboard);
+            console.log('🔍 [INIT] window.FrediDashboard:', window.FrediDashboard);
+            
             const userId = window.maxContext?.user_id || localStorage.getItem('fredi_user_id');
-            if (!userId) { showLoginScreen(); return; }
-            console.log('🚀 Загрузка для:', userId);
+            console.log('🔍 [INIT] userId:', userId);
+            
+            if (!userId) {
+                showLoginScreen();
+                return;
+            }
+            
             showLoading();
+            
             try {
-                window.animationManager = new AnimationManager({ rootMargin: '0px 0px -50px 0px', threshold: 0.1, animationDuration: 0.4, staggerDelay: 0.05 });
-                window.dynamicBg = new DynamicBackground('app', { particlesCount: 50, particleSpeed: 0.5, gradientSpeed: 0.002, waveIntensity: 0.6 });
+                // ✅ Инициализируем API
+                window.api = new FrediAPI();
+                
+                // ✅ Инициализируем анимации
+                if (typeof AnimationManager !== 'undefined') {
+                    window.animationManager = new AnimationManager({ 
+                        rootMargin: '0px 0px -50px 0px', 
+                        threshold: 0.1, 
+                        animationDuration: 0.4, 
+                        staggerDelay: 0.05 
+                    });
+                }
+                
+                // ✅ Инициализируем динамический фон
+                if (typeof DynamicBackground !== 'undefined') {
+                    window.dynamicBg = new DynamicBackground('app', { 
+                        particlesCount: 50, 
+                        particleSpeed: 0.5, 
+                        gradientSpeed: 0.002, 
+                        waveIntensity: 0.6 
+                    });
+                }
+                
+                // ✅ СОЗДАЁМ ДАШБОРД
                 window.dashboard = new FrediDashboard();
                 window.dashboard.userId = userId;
+                
+                // Ждём загрузки данных
                 await window.dashboard.loadUserData();
                 window.dashboard.renderDashboard();
                 
+                // Анимированный аватар (если тест пройден)
                 setTimeout(() => {
                     if (window.dashboard && window.dashboard.isTestCompleted && window.dashboard.initAnimatedAvatar) {
                         window.dashboard.initAnimatedAvatar();
                     }
                 }, 500);
                 
+                // Обновляем UI
                 const userNameEl = document.getElementById('userName');
-                if (userNameEl && window.dashboard.userName) userNameEl.textContent = window.dashboard.userName;
+                if (userNameEl && window.dashboard.userName) {
+                    userNameEl.textContent = window.dashboard.userName;
+                }
+                
                 const userStatusEl = document.getElementById('userStatus');
-                if (userStatusEl) userStatusEl.innerHTML = window.dashboard.isTestCompleted ? `🧠 ${window.dashboard.profileCode || 'профиль готов'}` : `📝 тест не пройден`;
-                if (window.dynamicBg && window.dashboard.userId) window.dynamicBg.updateFromProfile(window.dashboard.userId);
+                if (userStatusEl) {
+                    userStatusEl.innerHTML = window.dashboard.isTestCompleted ? 
+                        `🧠 ${window.dashboard.profileCode || 'профиль готов'}` : 
+                        `📝 тест не пройден`;
+                }
+                
+                // Обновляем фон по профилю
+                if (window.dynamicBg && window.dashboard.userId) {
+                    window.dynamicBg.updateFromProfile(window.dashboard.userId);
+                }
+                
                 console.log('✅ Личный кабинет загружен');
+                
             } catch (error) {
-                console.error('❌ Ошибка:', error);
+                console.error('❌ Ошибка инициализации:', error);
                 const container = document.getElementById('screenContainer');
-                if (container) container.innerHTML = '<div class="dashboard-error"><div class="error-icon">⚠️</div><div class="error-title">Ошибка загрузки</div><div class="error-text">Не удалось загрузить данные профиля.</div><button class="test-required-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
+                if (container) {
+                    container.innerHTML = '<div class="dashboard-error"><div class="error-icon">⚠️</div><div class="error-title">Ошибка загрузки</div><div class="error-text">Не удалось загрузить данные профиля.</div><button class="test-required-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
+                }
             }
         }
-
-        // ========== УНИВЕРСАЛЬНЫЙ ПАРСИНГ WebAppData (работает и в мобильном MAX, и в веб-версии) ==========
+        
+        // ========== УНИВЕРСАЛЬНЫЙ ПАРСИНГ WebAppData ==========
         (function() {
-    let userId = null;
-    let userData = null;
-    let chatData = null;
-    let authData = {};
-    
-    function parseWebAppData() {
-        // 1. Проверяем хэш (#)
-        const hash = window.location.hash.substring(1);
-        console.log('🔍 Хэш:', hash);
-        
-        if (hash) {
-            let encodedData = null;
-            if (hash.startsWith('WebAppData=')) {
-                encodedData = hash.substring('WebAppData='.length);
-            } else {
-                const match = hash.match(/WebAppData=([^&]+)/);
-                if (match) encodedData = match[1];
+            let userId = null;
+            let userData = null;
+            let chatData = null;
+            let authData = {};
+            
+            function parseWebAppData() {
+                // 1. Проверяем хэш (#)
+                const hash = window.location.hash.substring(1);
+                console.log('🔍 Хэш:', hash);
+                
+                if (hash) {
+                    let encodedData = null;
+                    if (hash.startsWith('WebAppData=')) {
+                        encodedData = hash.substring('WebAppData='.length);
+                    } else {
+                        const match = hash.match(/WebAppData=([^&]+)/);
+                        if (match) encodedData = match[1];
+                    }
+                    
+                    if (encodedData) {
+                        try {
+                            const decodedData = decodeURIComponent(encodedData);
+                            const params = new URLSearchParams(decodedData);
+                            console.log('📋 WebAppData из хэша:', Array.from(params.entries()));
+                            return { type: 'url', params: params };
+                        } catch (e) {
+                            console.warn('Ошибка декодирования хэша:', e);
+                        }
+                    }
+                }
+                
+                // 2. Проверяем query-параметры (?)
+                const search = window.location.search;
+                if (search) {
+                    const urlParams = new URLSearchParams(search);
+                    if (urlParams.has('WebAppData')) {
+                        try {
+                            const encodedData = urlParams.get('WebAppData');
+                            const decodedData = decodeURIComponent(encodedData);
+                            const params = new URLSearchParams(decodedData);
+                            console.log('📋 WebAppData из query:', Array.from(params.entries()));
+                            return { type: 'url', params: params };
+                        } catch (e) {
+                            console.warn('Ошибка декодирования query:', e);
+                        }
+                    }
+                }
+                
+                // 3. Проверяем MAX.WebApp (для мобильного приложения)
+                if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.initDataUnsafe) {
+                    const user = window.MAX.WebApp.initDataUnsafe.user;
+                    if (user && user.id) {
+                        console.log('✅ user_id из MAX.WebApp.initDataUnsafe:', user.id);
+                        return { type: 'webapp', user: user, chat: window.MAX.WebApp.initDataUnsafe.chat };
+                    }
+                }
+                
+                // 4. Проверяем Telegram.WebApp (для совместимости)
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                    const user = window.Telegram.WebApp.initDataUnsafe.user;
+                    if (user && user.id) {
+                        console.log('✅ user_id из Telegram.WebApp.initDataUnsafe:', user.id);
+                        return { type: 'webapp', user: user, chat: window.Telegram.WebApp.initDataUnsafe.chat };
+                    }
+                }
+                
+                console.log('❌ WebAppData не найден ни в одном источнике');
+                return null;
             }
             
-            if (encodedData) {
-                try {
-                    const decodedData = decodeURIComponent(encodedData);
-                    const params = new URLSearchParams(decodedData);
-                    console.log('📋 WebAppData из хэша:', Array.from(params.entries()));
-                    return { type: 'url', params: params };
-                } catch (e) {
-                    console.warn('Ошибка декодирования хэша:', e);
-                }
-            }
-        }
-        
-        // 2. Проверяем query-параметры (?)
-        const search = window.location.search;
-        if (search) {
-            const urlParams = new URLSearchParams(search);
-            if (urlParams.has('WebAppData')) {
-                try {
-                    const encodedData = urlParams.get('WebAppData');
-                    const decodedData = decodeURIComponent(encodedData);
-                    const params = new URLSearchParams(decodedData);
-                    console.log('📋 WebAppData из query:', Array.from(params.entries()));
-                    return { type: 'url', params: params };
-                } catch (e) {
-                    console.warn('Ошибка декодирования query:', e);
-                }
-            }
-        }
-        
-        // 3. Проверяем MAX.WebApp (для мобильного приложения)
-        if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.initDataUnsafe) {
-            const user = window.MAX.WebApp.initDataUnsafe.user;
-            if (user && user.id) {
-                console.log('✅ user_id из MAX.WebApp.initDataUnsafe:', user.id);
-                return { type: 'webapp', user: user, chat: window.MAX.WebApp.initDataUnsafe.chat };
-            }
-        }
-        
-        // 4. Проверяем Telegram.WebApp (для совместимости)
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            if (user && user.id) {
-                console.log('✅ user_id из Telegram.WebApp.initDataUnsafe:', user.id);
-                return { type: 'webapp', user: user, chat: window.Telegram.WebApp.initDataUnsafe.chat };
-            }
-        }
-        
-        console.log('❌ WebAppData не найден ни в одном источнике');
-        return null;
-    }
-    
-    const webAppData = parseWebAppData();
-    
-    if (webAppData) {
-        if (webAppData.type === 'url') {
-            const params = webAppData.params;
-            const userParam = params.get('user');
-            if (userParam) {
-                try {
-                    userData = JSON.parse(decodeURIComponent(userParam));
+            const webAppData = parseWebAppData();
+            
+            if (webAppData) {
+                if (webAppData.type === 'url') {
+                    const params = webAppData.params;
+                    const userParam = params.get('user');
+                    if (userParam) {
+                        try {
+                            userData = JSON.parse(decodeURIComponent(userParam));
+                            userId = userData.id;
+                            console.log('✅ user_id из URL:', userId);
+                            console.log('👤 Имя:', userData.first_name);
+                        } catch (e) {
+                            console.error('❌ Ошибка парсинга user:', e);
+                        }
+                    }
+                    
+                    const chatParam = params.get('chat');
+                    if (chatParam) {
+                        try {
+                            chatData = JSON.parse(decodeURIComponent(chatParam));
+                            console.log('💬 Chat ID:', chatData.id);
+                            if (!userId && chatData.id) userId = chatData.id;
+                        } catch (e) {
+                            console.error('❌ Ошибка парсинга chat:', e);
+                        }
+                    }
+                    
+                    authData = {
+                        hash: params.get('hash'),
+                        auth_date: params.get('auth_date'),
+                        query_id: params.get('query_id'),
+                        ip: params.get('ip')
+                    };
+                } else if (webAppData.type === 'webapp') {
+                    userData = webAppData.user;
                     userId = userData.id;
-                    console.log('✅ user_id из URL:', userId);
+                    chatData = webAppData.chat;
+                    console.log('✅ user_id из WebApp:', userId);
                     console.log('👤 Имя:', userData.first_name);
-                } catch (e) {
-                    console.error('❌ Ошибка парсинга user:', e);
                 }
             }
             
-            const chatParam = params.get('chat');
-            if (chatParam) {
-                try {
-                    chatData = JSON.parse(decodeURIComponent(chatParam));
-                    console.log('💬 Chat ID:', chatData.id);
-                    if (!userId && chatData.id) userId = chatData.id;
-                } catch (e) {
-                    console.error('❌ Ошибка парсинга chat:', e);
-                }
-            }
-            
-            authData = {
-                hash: params.get('hash'),
-                auth_date: params.get('auth_date'),
-                query_id: params.get('query_id'),
-                ip: params.get('ip')
+            // Сохраняем в глобальные переменные
+            window.maxData = {
+                user: userData,
+                chat: chatData,
+                auth: authData,
+                user_id: userId
             };
-        } else if (webAppData.type === 'webapp') {
-            userData = webAppData.user;
-            userId = userData.id;
-            chatData = webAppData.chat;
-            console.log('✅ user_id из WebApp:', userId);
-            console.log('👤 Имя:', userData.first_name);
-        }
-    }
-    
-    // Сохраняем в глобальные переменные
-    window.maxData = {
-        user: userData,
-        chat: chatData,
-        auth: authData,
-        user_id: userId
-    };
-    
-    if (userData && userData.first_name) {
-        window.maxUserName = userData.first_name;
-    }
-    
-    // Пробуем получить user_id из localStorage если не нашли
-    if (!userId) {
-        userId = localStorage.getItem('fredi_user_id');
-        if (userId) console.log('💾 user_id из localStorage:', userId);
-    }
-    
-    // Сохраняем в localStorage
-    if (userId) {
-        localStorage.setItem('fredi_user_id', userId);
-        if (userData && userData.first_name) {
-            localStorage.setItem('fredi_user_name', userData.first_name);
-        }
-    }
-    
-    window.maxContext = { 
-        user_id: userId,
-        user_data: userData,
-        chat_data: chatData,
-        auth_data: authData
-    };
-    
-    console.log('🎯 Итоговый user_id:', userId);
-    console.log('📊 Полные данные:', window.maxContext);
-    
-    // Инициализация MAX WebApp
-    if (window.MAX && window.MAX.WebApp) {
-        window.MAX.WebApp.ready();
-        window.MAX.WebApp.expand();
-        console.log('✅ MAX.WebApp инициализирован');
-    }
-    
-    if (!userId) {
-        console.log('❌ Нет user_id! Показываем экран входа');
-        showLoginScreen();
-    } else {
-        console.log('✅ Загружаем дашборд для user_id:', userId);
-        initDashboard();
-    }
-})();
+            
+            if (userData && userData.first_name) {
+                window.maxUserName = userData.first_name;
+            }
+            
+            // Пробуем получить user_id из localStorage если не нашли
+            if (!userId) {
+                userId = localStorage.getItem('fredi_user_id');
+                if (userId) console.log('💾 user_id из localStorage:', userId);
+            }
+            
+            // Сохраняем в localStorage
+            if (userId) {
+                localStorage.setItem('fredi_user_id', userId);
+                if (userData && userData.first_name) {
+                    localStorage.setItem('fredi_user_name', userData.first_name);
+                }
+            }
+            
+            window.maxContext = { 
+                user_id: userId,
+                user_data: userData,
+                chat_data: chatData,
+                auth_data: authData
+            };
+            
+            console.log('🎯 Итоговый user_id:', userId);
+            console.log('📊 Полные данные:', window.maxContext);
+            
+            // Инициализация MAX WebApp
+            if (window.MAX && window.MAX.WebApp) {
+                window.MAX.WebApp.ready();
+                window.MAX.WebApp.expand();
+                console.log('✅ MAX.WebApp инициализирован');
+            }
+            
+            // ✅ ЗАПУСКАЕМ ИНИЦИАЛИЗАЦИЮ С ЗАЩИТОЙ ОТ ОТСУТСТВИЯ DASHBOARD
+            if (!userId) {
+                console.log('❌ Нет user_id! Показываем экран входа');
+                showLoginScreen();
+            } else {
+                console.log('✅ Загружаем дашборд для user_id:', userId);
+                
+                // Ждём загрузки dashboard.js (защита для мобильных WebView)
+                const waitForDashboard = setInterval(() => {
+                    if (typeof FrediDashboard !== 'undefined') {
+                        clearInterval(waitForDashboard);
+                        console.log('✅ FrediDashboard загружен, запускаем initDashboard');
+                        initDashboard();
+                    }
+                }, 100);
+                
+                // Таймаут на случай, если dashboard.js не загрузился
+                setTimeout(() => {
+                    if (typeof FrediDashboard === 'undefined') {
+                        clearInterval(waitForDashboard);
+                        console.error('❌ FrediDashboard не загрузился за 5 секунд');
+                        const container = document.getElementById('screenContainer');
+                        if (container) {
+                            container.innerHTML = '<div class="dashboard-error"><div class="error-icon">⚠️</div><div class="error-title">Ошибка загрузки</div><div class="error-text">Не удалось загрузить приложение. Проверьте соединение.</div><button class="test-required-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
+                        }
+                    }
+                }, 5000);
+            }
+        })();
+        
+        // DOMContentLoaded для дополнительных инициализаций
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            const chatsPanel = document.getElementById('chatsPanel');
+            if (menuBtn && chatsPanel) {
+                menuBtn.addEventListener('click', () => chatsPanel.classList.toggle('open'));
+                document.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 768 && chatsPanel.classList.contains('open') && 
+                        !chatsPanel.contains(e.target) && !menuBtn.contains(e.target)) {
+                        chatsPanel.classList.remove('open');
+                    }
+                });
+            }
+        });
     </script>
     
-    <!-- ===== МИКРОФОН ДЛЯ MAX - УДЕРЖАНИЕ ДЛЯ ЗАПИСИ ===== -->
+    <!-- ========== МИКРОФОН ДЛЯ MAX ========== -->
     <script>
         class MaxMicrophoneManager {
             constructor() {
@@ -1591,7 +1680,7 @@
                 this.isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
                 this.isAndroid = /Android/i.test(navigator.userAgent);
             }
-
+            
             async requestMicrophone() {
                 console.log('🎤 Запрос микрофона...');
                 this.showLoading();
@@ -1617,7 +1706,7 @@
                     return false;
                 }
             }
-
+            
             showPermissionInstructions() {
                 let instructions = '';
                 if (this.isAndroid) {
@@ -1645,7 +1734,7 @@
                 document.getElementById('microphoneRetryBtn')?.addEventListener('click', () => { modal.remove(); this.requestMicrophone(); });
                 document.getElementById('microphoneCloseBtn')?.addEventListener('click', () => modal.remove());
             }
-
+            
             showToast(message, type) {
                 const toast = document.getElementById('toastMessage');
                 if (toast) {
@@ -1654,7 +1743,7 @@
                     setTimeout(() => toast.classList.remove('show'), 3000);
                 }
             }
-
+            
             showLoading() {
                 const btn = document.getElementById('voiceRecordBtn');
                 if (btn && !btn.disabled) {
@@ -1662,7 +1751,7 @@
                     btn.disabled = true;
                 }
             }
-
+            
             hideLoading() {
                 const btn = document.getElementById('voiceRecordBtn');
                 if (btn) {
@@ -1671,7 +1760,7 @@
                 }
             }
         }
-
+        
         window.maxMicrophoneManager = new MaxMicrophoneManager();
         
         window.voiceRecorder = {
@@ -1684,7 +1773,7 @@
             pressTimer: null,
             isLongPress: false
         };
-
+        
         function getSupportedMimeType() {
             const types = ['audio/webm', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/mpeg'];
             for (const type of types) {
@@ -1692,7 +1781,7 @@
             }
             return 'audio/webm';
         }
-
+        
         async function startActualRecording() {
             if (window.voiceRecorder.isRecording) return false;
             
@@ -1754,7 +1843,7 @@
                 return false;
             }
         }
-
+        
         window.startVoiceRecording = async function() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 window.maxMicrophoneManager.showToast('❌ Ваше устройство не поддерживает голосовой ввод', 'error');
@@ -1768,7 +1857,7 @@
             
             return await startActualRecording();
         };
-
+        
         window.stopVoiceRecording = function() {
             if (window.voiceRecorder.mediaRecorder && window.voiceRecorder.isRecording) {
                 window.voiceRecorder.mediaRecorder.stop();
@@ -1785,7 +1874,7 @@
                 if (voiceStatus) voiceStatus.style.display = 'none';
             }
         };
-
+        
         window.cancelVoiceRecording = function() {
             if (window.voiceRecorder.mediaRecorder && window.voiceRecorder.isRecording) {
                 window.voiceRecorder.mediaRecorder.onstop = null;
@@ -1810,7 +1899,7 @@
                 if (voiceStatus) voiceStatus.style.display = 'none';
             }
         };
-
+        
         function startRecordingTimerUI() {
             const timerEl = document.getElementById('recordingTimer');
             if (!timerEl) return;
@@ -1831,7 +1920,7 @@
                 }
             }, 200);
         }
-
+        
         function stopRecordingTimerUI() {
             if (window.voiceRecorder.recordingTimer) {
                 clearInterval(window.voiceRecorder.recordingTimer);
@@ -1843,7 +1932,7 @@
                 timerEl.style.background = 'rgba(0,0,0,0.9)';
             }
         }
-
+        
         async function sendVoiceToServer(audioBlob) {
             window.maxMicrophoneManager.showToast('🎙️ Распознаю речь...', 'info');
             
@@ -1885,8 +1974,7 @@
                 window.maxMicrophoneManager.showToast('❌ Ошибка отправки голоса', 'error');
             }
         }
-
-        // Инициализация кнопки с удержанием
+        
         function initVoiceButton() {
             const voiceBtn = document.getElementById('voiceRecordBtn');
             if (!voiceBtn) return;
@@ -1949,7 +2037,7 @@
             
             console.log('🎤 Голосовая кнопка инициализирована (удержание для записи)');
         }
-
+        
         document.addEventListener('DOMContentLoaded', () => {
             initVoiceButton();
             
@@ -1963,7 +2051,7 @@
                 }, { once: true });
             }
         });
-
+        
         window.sendVoiceToServer = sendVoiceToServer;
         window.showToast = window.maxMicrophoneManager.showToast.bind(window.maxMicrophoneManager);
         
