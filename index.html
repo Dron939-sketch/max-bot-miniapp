@@ -1417,25 +1417,36 @@
         const hash = window.location.hash.substring(1);
         console.log('🔍 Хэш:', hash);
         
-        // Проверяем, есть ли WebAppData
-        if (!hash.startsWith('WebAppData=')) {
-            console.log('❌ Нет WebAppData в хэше');
+        if (!hash) {
+            console.log('❌ Хэш пуст');
             return null;
         }
         
-        // Извлекаем данные после WebAppData=
-        const encodedData = hash.substring('WebAppData='.length);
+        // Ищем данные в формате WebAppData=...
+        let encodedData = null;
+        
+        if (hash.startsWith('WebAppData=')) {
+            encodedData = hash.substring('WebAppData='.length);
+        } else {
+            // Ищем WebAppData в любом месте хэша
+            const match = hash.match(/WebAppData=([^&]+)/);
+            if (match) {
+                encodedData = match[1];
+            }
+        }
+        
+        if (!encodedData) {
+            console.log('❌ WebAppData не найден');
+            return null;
+        }
+        
         console.log('📦 Закодированные данные:', encodedData.substring(0, 200));
         
         try {
-            // Декодируем URL
             const decodedData = decodeURIComponent(encodedData);
             console.log('🔓 Декодированные данные:', decodedData.substring(0, 500));
-            
-            // Парсим как URL параметры
             const params = new URLSearchParams(decodedData);
             console.log('📋 Параметры:', Array.from(params.entries()));
-            
             return params;
         } catch (e) {
             console.error('❌ Ошибка декодирования:', e);
@@ -1450,12 +1461,10 @@
         const userParam = webAppParams.get('user');
         if (userParam) {
             try {
-                const decodedUser = decodeURIComponent(userParam);
-                userData = JSON.parse(decodedUser);
+                userData = JSON.parse(decodeURIComponent(userParam));
                 userId = userData.id;
                 console.log('✅ user_id из WebAppData:', userId);
                 console.log('👤 Имя:', userData.first_name);
-                console.log('📸 Фото:', userData.photo_url);
             } catch (e) {
                 console.error('❌ Ошибка парсинга user:', e);
             }
@@ -1465,8 +1474,7 @@
         const chatParam = webAppParams.get('chat');
         if (chatParam) {
             try {
-                const decodedChat = decodeURIComponent(chatParam);
-                chatData = JSON.parse(decodedChat);
+                chatData = JSON.parse(decodeURIComponent(chatParam));
                 console.log('💬 Chat ID:', chatData.id);
                 if (!userId && chatData.id) {
                     userId = chatData.id;
@@ -1499,24 +1507,16 @@
     }
     
     // Пробуем получить user_id из других источников
-    if (!userId) {
-        const urlParams = new URLSearchParams(window.location.search);
-        userId = urlParams.get('user_id');
-        if (userId) console.log('✅ user_id из query-параметров:', userId);
-    }
-    
     if (!userId && window.MAX?.WebApp?.initDataUnsafe?.user?.id) {
         userId = window.MAX.WebApp.initDataUnsafe.user.id;
         console.log('✅ user_id из MAX.WebApp:', userId);
-        window.maxData = window.maxData || {};
-        window.maxData.user = window.MAX.WebApp.initDataUnsafe.user;
+        userData = window.MAX.WebApp.initDataUnsafe.user;
     }
     
     if (!userId && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
         userId = window.Telegram.WebApp.initDataUnsafe.user.id;
         console.log('✅ user_id из Telegram.WebApp:', userId);
-        window.maxData = window.maxData || {};
-        window.maxData.user = window.Telegram.WebApp.initDataUnsafe.user;
+        userData = window.Telegram.WebApp.initDataUnsafe.user;
     }
     
     if (!userId) {
@@ -1525,7 +1525,7 @@
     }
     
     // Сохраняем в localStorage
-    if (userId && userId !== '213102077') {
+    if (userId) {
         localStorage.setItem('fredi_user_id', userId);
         if (userData && userData.first_name) {
             localStorage.setItem('fredi_user_name', userData.first_name);
@@ -1547,10 +1547,6 @@
         window.MAX.WebApp.ready();
         window.MAX.WebApp.expand();
         console.log('✅ MAX.WebApp инициализирован');
-    }
-    if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
     }
     
     if (!userId) {
