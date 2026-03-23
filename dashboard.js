@@ -1,6 +1,6 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 3.1 - ДОБАВЛЕНО ОЖИДАНИЕ window.api
+// Версия 3.2 - УНИВЕРСАЛЬНАЯ (веб + мобильный MAX)
 // ============================================
 
 class FrediDashboard {
@@ -49,51 +49,56 @@ class FrediDashboard {
             { id: 'creativity', name: '🎨 Творчество', icon: '🎨', color: '#FF6B6B', description: 'Вдохновение и идеи' }
         ];
         
-        this.init();
+        // Откладываем инициализацию до загрузки API
+        this.initPromise = this.init();
     }
     
     // ============================================
-    // ИНИЦИАЛИЗАЦИЯ (С ОЖИДАНИЕМ API)
+    // ИНИЦИАЛИЗАЦИЯ С ОЖИДАНИЕМ API
     // ============================================
     
     async init() {
         console.log('🎯 Инициализация личного кабинета...');
+        console.log('📱 Режим WebView:', this.isWebView);
         
-        // ✅ ЖДЁМ ЗАГРУЗКИ API (до 5 секунд)
+        // ✅ ЖДЁМ ЗАГРУЗКИ API (до 5 секунд, проверяем каждые 100мс)
         let attempts = 0;
-        while (!window.api && attempts < 50) {
+        const maxAttempts = 50; // 5 секунд
+        
+        while (!window.api && attempts < maxAttempts) {
             await new Promise(r => setTimeout(r, 100));
             attempts++;
-            console.log(`⏳ Ожидание window.api... попытка ${attempts}`);
+            if (attempts % 10 === 0) {
+                console.log(`⏳ Ожидание window.api... ${attempts * 100}мс`);
+            }
         }
         
         if (!window.api) {
             console.error('❌ window.api не загружен!');
-            this.showError('Не удалось загрузить API. Проверьте соединение.');
+            this.showError('Не удалось загрузить API. Проверьте соединение и перезагрузите страницу.');
             return;
         }
         
-        console.log('✅ window.api доступен:', window.api);
+        console.log('✅ window.api доступен');
         
         if (!this.userId) {
             this.showError('Не удалось идентифицировать пользователя. Пожалуйста, откройте приложение через MAX.');
             return;
         }
         
-        console.log('📱 Режим WebView:', this.isWebView);
-        
-        await this.loadUserData();
-        await this.loadProfileData();
-        await this.loadPsychologistThought();
-        this.renderDashboard();
-        this.initVoiceInput();
-        
-        if (this.isTestCompleted) {
-            await this.initAnimatedAvatar();
-            // Временно отключаем проблемные модули
-            // await this.initChallenges();
-            // await this.initPsychometricDoubles();
-            // await this.initNotifications();
+        try {
+            await this.loadUserData();
+            await this.loadProfileData();
+            await this.loadPsychologistThought();
+            this.renderDashboard();
+            this.initVoiceInput();
+            
+            if (this.isTestCompleted) {
+                await this.initAnimatedAvatar();
+            }
+        } catch (error) {
+            console.error('❌ Ошибка инициализации:', error);
+            this.showError('Ошибка загрузки данных. Попробуйте обновить страницу.');
         }
     }
     
@@ -1490,7 +1495,9 @@ class FrediDashboard {
 }
 
 // Инициализация при загрузке страницы
+// НЕ СОЗДАЁМ dashboard СРАЗУ — ждём DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM загружен, создаём FrediDashboard');
     window.dashboard = new FrediDashboard();
 });
 
