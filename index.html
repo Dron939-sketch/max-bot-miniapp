@@ -1409,19 +1409,75 @@
         }
 
         (function() {
-            let userId = null;
-            const urlParams = new URLSearchParams(window.location.search);
-            userId = urlParams.get('user_id');
-            if (!userId && window.MAX?.WebApp?.initDataUnsafe?.user?.id) userId = window.MAX.WebApp.initDataUnsafe.user.id;
-            if (!userId && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) userId = window.Telegram.WebApp.initDataUnsafe.user.id;
-            if (!userId) userId = localStorage.getItem('fredi_user_id');
-            if (userId && userId !== '213102077') localStorage.setItem('fredi_user_id', userId);
-            window.maxContext = { user_id: userId };
-            console.log('🎯 user_id:', userId);
-            if (window.MAX?.WebApp) { window.MAX.WebApp.ready(); window.MAX.WebApp.expand(); }
-            if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
-            initDashboard();
-        })();
+    let userId = null;
+    
+    // 1. ПРОВЕРКА ХЭША (где MAX передаёт данные)
+    const hash = window.location.hash.substring(1);
+    const hashParams = new URLSearchParams(hash);
+    const webAppData = hashParams.get('WebAppData');
+    
+    if (webAppData) {
+        try {
+            const userData = JSON.parse(decodeURIComponent(webAppData));
+            console.log('✅ Данные из хэша получены:', userData);
+            userId = userData.id;
+        } catch (e) {
+            console.error('❌ Ошибка парсинга WebAppData:', e);
+        }
+    }
+    
+    // 2. ПРОВЕРКА QUERY-ПАРАМЕТРОВ (для обратной совместимости)
+    if (!userId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        userId = urlParams.get('user_id');
+        if (userId) console.log('✅ user_id из query-параметров:', userId);
+    }
+    
+    // 3. ПРОВЕРКА MAX WebApp
+    if (!userId && window.MAX?.WebApp?.initDataUnsafe?.user?.id) {
+        userId = window.MAX.WebApp.initDataUnsafe.user.id;
+        console.log('✅ user_id из MAX.WebApp:', userId);
+    }
+    
+    // 4. ПРОВЕРКА Telegram WebApp
+    if (!userId && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        console.log('✅ user_id из Telegram.WebApp:', userId);
+    }
+    
+    // 5. ПРОВЕРКА localStorage
+    if (!userId) {
+        userId = localStorage.getItem('fredi_user_id');
+        if (userId) console.log('✅ user_id из localStorage:', userId);
+    }
+    
+    // Сохраняем в localStorage (если не тестовый ID)
+    if (userId && userId !== '213102077') {
+        localStorage.setItem('fredi_user_id', userId);
+    }
+    
+    window.maxContext = { user_id: userId };
+    console.log('🎯 Итоговый user_id:', userId);
+    
+    // Инициализируем WebApp
+    if (window.MAX?.WebApp) {
+        window.MAX.WebApp.ready();
+        window.MAX.WebApp.expand();
+    }
+    if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+    }
+    
+    // Загружаем дашборд или показываем экран входа
+    if (!userId) {
+        console.log('❌ Нет user_id! Показываем экран входа');
+        showLoginScreen();
+    } else {
+        console.log('✅ Загружаем дашборд для user_id:', userId);
+        initDashboard();
+    }
+})();
 
         document.addEventListener('DOMContentLoaded', function() {
             const menuBtn = document.getElementById('mobileMenuBtn');
