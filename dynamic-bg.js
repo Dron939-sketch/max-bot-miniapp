@@ -1,6 +1,6 @@
 // ============================================
 // ДИНАМИЧЕСКИЙ ФОН
-// Версия 1.0 - Анимированный градиент с частицами
+// Версия 1.1 - ИСПРАВЛЕНА РАБОТА С API
 // ============================================
 
 class DynamicBackground {
@@ -506,13 +506,24 @@ class DynamicBackground {
     }
     
     // ============================================
-    // ИНТЕГРАЦИЯ С ПРОФИЛЕМ
+    // ИНТЕГРАЦИЯ С ПРОФИЛЕМ (ИСПРАВЛЕНО)
     // ============================================
     
     async updateFromProfile(userId) {
         try {
-            const response = await fetch(`/api/get-profile?user_id=${userId}`);
-            const data = await response.json();
+            let data;
+            
+            // ✅ ИСПРАВЛЕНО: используем window.api если доступен
+            if (window.api) {
+                data = await window.api.request(`/api/get-profile?user_id=${userId}`);
+            } else {
+                // Fallback: используем window.API_BASE_URL из конфигурации
+                const baseUrl = window.API_BASE_URL || '';
+                const url = `${baseUrl}/api/get-profile?user_id=${userId}`;
+                console.log(`🎨 Загрузка профиля для фона: ${url}`);
+                const response = await fetch(url);
+                data = await response.json();
+            }
             
             if (data && data.profile_data) {
                 const scores = {
@@ -540,6 +551,8 @@ class DynamicBackground {
                 this.options.particleSpeed = 0.3 + scores.ub * 0.1;
                 this.options.waveIntensity = 0.3 + scores.chv * 0.1;
                 this.options.gradientSpeed = 0.001 + scores.sb * 0.0005;
+                
+                console.log('🎨 Фон настроен под профиль пользователя');
             }
         } catch (error) {
             console.warn('Ошибка загрузки профиля для фона:', error);
