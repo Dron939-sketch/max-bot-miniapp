@@ -225,129 +225,78 @@ class FrediDashboard {
     // ============================================
     
     async loadUserData() {
-        try {
-            // ✅ ИСПРАВЛЕНО: используем window.api вместо прямого fetch
-            const status = await window.api.request(`/api/user-status?user_id=${this.userId}`);
+    try {
+        // ✅ Запрос статуса
+        const status = await window.api.request(`/api/user-status?user_id=${this.userId}`);
+        
+        // ✅ ЕСЛИ ПРОФИЛЯ НЕТ В ПАМЯТИ — ЗАГРУЖАЕМ ИЗ БД
+        if (!status.has_profile && !status.test_completed) {
+            console.log('🔄 Профиль не найден в памяти, загружаем из БД...');
             
-            this.isTestCompleted = status.test_completed || status.has_profile;
-            this.profileCode = status.profile_code;
-            
-            try {
-                const userData = await window.api.request(`/api/user-data?user_id=${this.userId}`);
-                if (userData && userData.user_name) {
-                    this.userName = userData.user_name;
-                    console.log('👤 Имя пользователя загружено из БД:', this.userName);
-                }
-            } catch (nameError) {
-                console.warn('Не удалось загрузить имя из БД:', nameError);
-            }
-            
-            if (this.userName === 'Друг' && window.MAX?.WebApp?.initDataUnsafe?.user?.first_name) {
-                this.userName = window.MAX.WebApp.initDataUnsafe.user.first_name;
-                console.log('👤 Имя получено из MAX.WebApp:', this.userName);
-            }
-            
-            if (status.has_profile || status.has_interpretation) {
-                const profile = await window.api.request(`/api/get-profile?user_id=${this.userId}`);
-                this.userData = profile;
-            }
-            
-            try {
-                const stats = await window.api.request(`/api/user-full-status?user_id=${this.userId}`);
-                if (stats.days_active) this.daysActive = stats.days_active;
-                if (stats.sessions_count) this.sessionsCount = stats.sessions_count;
-            } catch (statsError) {
-                console.warn('Не удалось загрузить статистику:', statsError);
-            }
-            
-            console.log('📊 Данные пользователя:', { 
-                userId: this.userId, 
-                userName: this.userName,
-                testCompleted: this.isTestCompleted,
-                profileCode: this.profileCode
+            const loadResult = await window.api.request('/api/force-load-user', {
+                method: 'POST',
+                body: JSON.stringify({ user_id: this.userId })
             });
             
-        } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
-            this.isTestCompleted = false;
-        }
-    }
-    
-    async loadProfileData() {
-        try {
-            // ✅ ИСПРАВЛЕНО: используем window.api
-            const data = await window.api.request(`/api/get-profile?user_id=${this.userId}`);
-            
-            if (data.ai_generated_profile) {
-                this.profileText = data.ai_generated_profile;
-            } else if (data.profile_data) {
-                this.profileText = this.formatProfileText(data);
+            if (loadResult.success && loadResult.has_profile) {
+                console.log('✅ Профиль загружен из БД!');
+                // Повторно запрашиваем статус
+                const newStatus = await window.api.request(`/api/user-status?user_id=${this.userId}`);
+                this.isTestCompleted = newStatus.test_completed || newStatus.has_profile;
+                this.profileCode = newStatus.profile_code;
             } else {
-                this.profileText = 'Профиль пока не сформирован. Пройдите тест.';
+                this.isTestCompleted = false;
+                console.log('❌ Профиль не найден в БД');
             }
-        } catch (error) {
-            console.error('Ошибка загрузки профиля:', error);
-            this.profileText = 'Ошибка загрузки профиля. Попробуйте позже.';
+        } else {
+            this.isTestCompleted = status.test_completed || status.has_profile;
+            this.profileCode = status.profile_code;
         }
-    }
-    
-    async loadPsychologistThought() {
+        
+        // Загружаем имя пользователя
         try {
-            // ✅ ИСПРАВЛЕНО: используем window.api
-            const data = await window.api.request(`/api/thought?user_id=${this.userId}`);
-            this.psychologistThought = data.thought || 'Мысли психолога еще не сгенерированы. Пройдите тест для получения персонального анализа.';
-        } catch (error) {
-            console.error('Ошибка загрузки мыслей психолога:', error);
-            this.psychologistThought = 'Мысли психолога пока недоступны. Попробуйте позже.';
+            const userData = await window.api.request(`/api/user-data?user_id=${this.userId}`);
+            if (userData && userData.user_name) {
+                this.userName = userData.user_name;
+                console.log('👤 Имя пользователя загружено из БД:', this.userName);
+            }
+        } catch (nameError) {
+            console.warn('Не удалось загрузить имя из БД:', nameError);
         }
+        
+        // Если имя не загрузилось, пробуем из MAX.WebApp
+        if (this.userName === 'Друг' && window.MAX?.WebApp?.initDataUnsafe?.user?.first_name) {
+            this.userName = window.MAX.WebApp.initDataUnsafe.user.first_name;
+            console.log('👤 Имя получено из MAX.WebApp:', this.userName);
+        }
+        
+        // Если тест пройден, загружаем полный профиль
+        if (this.isTestCompleted) {
+            const profile = await window.api.request(`/api/get-profile?user_id=${this.userId}`);
+            this.userData = profile;
+        }
+        
+        // Загружаем статистику
+        try {
+            const stats = await window.api.request(`/api/user-full-status?user_id=${this.userId}`);
+            if (stats.days_active) this.daysActive = stats.days_active;
+            if (stats.sessions_count) this.sessionsCount = stats.sessions_count;
+        } catch (statsError) {
+            console.warn('Не удалось загрузить статистику:', statsError);
+        }
+        
+        console.log('📊 Данные пользователя:', { 
+            userId: this.userId, 
+            userName: this.userName,
+            testCompleted: this.isTestCompleted,
+            profileCode: this.profileCode
+        });
+        
+    } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+        this.isTestCompleted = false;
     }
-    
-    formatProfileText(data) {
-        const profile = data.profile_data || {};
-        const profileCode = profile.display_name || 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
-        const perceptionType = data.perception_type || 'не определен';
-        const thinkingLevel = data.thinking_level || 5;
-        
-        return `
-            <div class="profile-section">
-                <h3>🧠 ВАШ ПСИХОЛОГИЧЕСКИЙ ПОРТРЕТ</h3>
-                <p><strong>Профиль:</strong> ${profileCode}</p>
-                <p><strong>Тип восприятия:</strong> ${perceptionType}</p>
-                <p><strong>Уровень мышления:</strong> ${thinkingLevel}/9</p>
-            </div>
-            <div class="profile-section">
-                <h4>📊 ВАШИ ВЕКТОРЫ:</h4>
-                <p>• Реакция на давление (СБ): ${profile.sb_level || 4}/6</p>
-                <p>• Отношение к деньгам (ТФ): ${profile.tf_level || 4}/6</p>
-                <p>• Понимание мира (УБ): ${profile.ub_level || 4}/6</p>
-                <p>• Отношения с людьми (ЧВ): ${profile.chv_level || 4}/6</p>
-            </div>
-            <div class="profile-section">
-                <h4>🎯 ТОЧКА РОСТА:</h4>
-                <p>${this.getGrowthPoint(profile)}</p>
-            </div>
-        `;
-    }
-    
-    getGrowthPoint(profile) {
-        const scores = {
-            sb: profile.sb_level || 4,
-            tf: profile.tf_level || 4,
-            ub: profile.ub_level || 4,
-            chv: profile.chv_level || 4
-        };
-        
-        const weakest = Object.entries(scores).sort((a, b) => a[1] - b[1])[0]?.[0] || 'sb';
-        
-        const growthPoints = {
-            sb: 'Работа с реакцией на давление и страхи. Учитесь говорить "нет" и защищать свои границы.',
-            tf: 'Проработка денежных блоков и развитие финансового мышления.',
-            ub: 'Развитие системного мышления и поиск глубинных смыслов.',
-            chv: 'Исцеление привязанности и развитие навыков здорового общения.'
-        };
-        
-        return growthPoints[weakest] || 'Исследование себя и своих паттернов.';
-    }
+}
     
     // ============================================
     // ИНИЦИАЛИЗАЦИЯ АНИМИРОВАННОГО АВАТАРА
