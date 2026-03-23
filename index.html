@@ -1414,15 +1414,31 @@
     // 1. ПРОВЕРКА ХЭША (где MAX передаёт данные)
     const hash = window.location.hash.substring(1);
     const hashParams = new URLSearchParams(hash);
-    const webAppData = hashParams.get('WebAppData');
+    let webAppData = hashParams.get('WebAppData');
     
     if (webAppData) {
         try {
-            const userData = JSON.parse(decodeURIComponent(webAppData));
+            // Декодируем URL
+            let decoded = decodeURIComponent(webAppData);
+            console.log('📦 Декодированные данные:', decoded);
+            
+            // Убираем префикс "user=", если он есть
+            if (decoded.startsWith('user=')) {
+                decoded = decoded.substring(5);
+            }
+            
+            // Парсим JSON
+            const userData = JSON.parse(decoded);
             console.log('✅ Данные из хэша получены:', userData);
             userId = userData.id;
+            
+            // Сохраняем имя пользователя
+            if (userData.first_name) {
+                window.maxUserName = userData.first_name;
+            }
         } catch (e) {
             console.error('❌ Ошибка парсинга WebAppData:', e);
+            console.log('🔍 Сырые данные:', webAppData);
         }
     }
     
@@ -1478,21 +1494,6 @@
         initDashboard();
     }
 })();
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuBtn = document.getElementById('mobileMenuBtn');
-            const chatsPanel = document.getElementById('chatsPanel');
-            if (menuBtn && chatsPanel) {
-                menuBtn.addEventListener('click', () => chatsPanel.classList.toggle('open'));
-                document.addEventListener('click', (e) => {
-                    if (window.innerWidth <= 768 && chatsPanel.classList.contains('open') && !chatsPanel.contains(e.target) && !menuBtn.contains(e.target)) {
-                        chatsPanel.classList.remove('open');
-                    }
-                });
-            }
-        });
-    </script>
-
     <!-- ===== МИКРОФОН ДЛЯ MAX - УДЕРЖАНИЕ ДЛЯ ЗАПИСИ ===== -->
     <script>
         class MaxMicrophoneManager {
