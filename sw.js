@@ -5,26 +5,25 @@
 
 const CACHE_NAME = 'fredi-v2';
 
-// ✅ Кэшируем только существующие файлы (без иконок, которых нет)
+// ✅ Кэшируем только существующие файлы (без /static/, так как файлы в корне)
 const urlsToCache = [
     '/',
-    '/static/styles.css',
-    '/static/script.js',
-    '/static/app.js',
-    '/static/api.js',
-    '/static/dashboard.js',
-    '/static/psychometric.js',
-    '/static/challenges.js',
-    '/static/animated-avatar.js',
-    '/static/animations.js',
-    '/static/notifications.js',
-    '/static/dynamic-bg.js',
-    '/static/context.js',
-    '/static/onboarding.js',
-    '/static/test.js',
-    '/static/psychometric.css',
+    '/styles.css',
+    '/psychometric.css',
+    '/script.js',
+    '/api.js',
+    '/dashboard.js',
+    '/psychometric.js',
+    '/challenges.js',
+    '/animated-avatar.js',
+    '/animations.js',
+    '/notifications.js',
+    '/dynamic-bg.js',
+    '/context.js',
+    '/onboarding.js',
+    '/test.js',
     '/manifest.json',
-    '/sw.js'
+    '/service-worker.js'  // или '/sw.js' - как называется ваш файл
 ];
 
 // ============================================
