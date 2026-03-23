@@ -1339,324 +1339,50 @@
         </div>
     </template>
 
-    <!-- ========== СКРИПТЫ: ВАЖНЫЙ ПОРЯДОК ========== -->
-    <!-- 1. СНАЧАЛА API и DASHBOARD (ОСНОВНЫЕ) -->
-    <script src="/api.js?v=4"></script>
-    <script src="/dashboard.js?v=4"></script>
+    <!-- ========== СКРИПТЫ: УНИВЕРСАЛЬНЫЙ ПОРЯДОК (РАБОТАЕТ В ВЕБ И МОБИЛЬНОМ MAX) ========== -->
     
-    <!-- 2. ПОТОМ ВСЕ ОСТАЛЬНЫЕ -->
-    <script src="/context.js?v=4"></script>
-    <script src="/onboarding.js?v=4"></script>
-    <script src="/script.js?v=4"></script>
-    <script src="/test.js?v=4"></script>
-    <script src="/animations.js?v=4"></script>
-    <script src="/animated-avatar.js?v=4"></script>
-    <script src="/dynamic-bg.js?v=4"></script>
-    <script src="/challenges.js?v=4"></script>
-    <script src="/notifications.js?v=4"></script>
-    <script src="/psychometric.js?v=4"></script>
-    
-    <!-- ========== КОНФИГУРАЦИЯ API ========== -->
+    <!-- 1. КОНФИГУРАЦИЯ API (САМЫЙ ПЕРВЫЙ) -->
     <script>
-        // URL вашего бэкенда (FastAPI сервер)
         window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
         console.log('🌐 API будет обращаться к:', window.API_BASE_URL);
     </script>
     
-    <!-- ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ========== -->
+    <!-- 2. API.js (создаёт window.api) -->
+    <script src="/api.js?v=7"></script>
+    
+    <!-- 3. ВСЕ ОСТАЛЬНЫЕ СКРИПТЫ (кроме dashboard.js) -->
+    <script src="/context.js?v=7"></script>
+    <script src="/onboarding.js?v=7"></script>
+    <script src="/script.js?v=7"></script>
+    <script src="/test.js?v=7"></script>
+    <script src="/animations.js?v=7"></script>
+    <script src="/animated-avatar.js?v=7"></script>
+    <script src="/dynamic-bg.js?v=7"></script>
+    <script src="/challenges.js?v=7"></script>
+    <script src="/notifications.js?v=7"></script>
+    <script src="/psychometric.js?v=7"></script>
+    
+    <!-- 4. DASHBOARD.js (ПОСЛЕДНИМ) -->
+    <script src="/dashboard.js?v=7"></script>
+    
+    <!-- ========== ДОПОЛНИТЕЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ДЛЯ МОБИЛЬНЫХ ========== -->
     <script>
-        window.dashboard = null;
-        window.api = null;
-        window.animationManager = null;
-        window.dynamicBg = null;
-        
-        function showLoading() {
-            const container = document.getElementById('screenContainer');
-            if (container) {
-                container.innerHTML = '<div class="loading-screen"><div class="loading-spinner">🧠</div><div class="loading-text">Загрузка личного кабинета...</div></div>';
+        // Эта функция нужна для корректной работы голоса в мобильном MAX
+        window.waitForApi = async function() {
+            let attempts = 0;
+            while (!window.api && attempts < 50) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
             }
-        }
-        
-        function showLoginScreen() {
-            const container = document.getElementById('screenContainer');
-            if (container) {
-                container.innerHTML = '<div class="login-screen"><div class="login-icon">🔐</div><div class="login-title">Личный кабинет Фреди</div><div class="login-text">Для доступа к личному кабинету необходимо открыть приложение через MAX.</div><button class="login-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
-            }
-        }
-        
-        // Функция инициализации с защитой от отсутствия dashboard.js
-        async function initDashboard() {
-            console.log('🔍 [INIT] initDashboard вызван');
-            console.log('🔍 [INIT] typeof FrediDashboard:', typeof FrediDashboard);
-            console.log('🔍 [INIT] window.FrediDashboard:', window.FrediDashboard);
-            
-            const userId = window.maxContext?.user_id || localStorage.getItem('fredi_user_id');
-            console.log('🔍 [INIT] userId:', userId);
-            
-            if (!userId) {
-                showLoginScreen();
-                return;
-            }
-            
-            showLoading();
-            
-            try {
-                // ✅ Инициализируем API
-                window.api = new FrediAPI();
-                
-                // ✅ Инициализируем анимации
-                if (typeof AnimationManager !== 'undefined') {
-                    window.animationManager = new AnimationManager({ 
-                        rootMargin: '0px 0px -50px 0px', 
-                        threshold: 0.1, 
-                        animationDuration: 0.4, 
-                        staggerDelay: 0.05 
-                    });
-                }
-                
-                // ✅ Инициализируем динамический фон
-                if (typeof DynamicBackground !== 'undefined') {
-                    window.dynamicBg = new DynamicBackground('app', { 
-                        particlesCount: 50, 
-                        particleSpeed: 0.5, 
-                        gradientSpeed: 0.002, 
-                        waveIntensity: 0.6 
-                    });
-                }
-                
-                // ✅ СОЗДАЁМ ДАШБОРД
-                window.dashboard = new FrediDashboard();
-                window.dashboard.userId = userId;
-                
-                // Ждём загрузки данных
-                await window.dashboard.loadUserData();
-                window.dashboard.renderDashboard();
-                
-                // Анимированный аватар (если тест пройден)
-                setTimeout(() => {
-                    if (window.dashboard && window.dashboard.isTestCompleted && window.dashboard.initAnimatedAvatar) {
-                        window.dashboard.initAnimatedAvatar();
-                    }
-                }, 500);
-                
-                // Обновляем UI
-                const userNameEl = document.getElementById('userName');
-                if (userNameEl && window.dashboard.userName) {
-                    userNameEl.textContent = window.dashboard.userName;
-                }
-                
-                const userStatusEl = document.getElementById('userStatus');
-                if (userStatusEl) {
-                    userStatusEl.innerHTML = window.dashboard.isTestCompleted ? 
-                        `🧠 ${window.dashboard.profileCode || 'профиль готов'}` : 
-                        `📝 тест не пройден`;
-                }
-                
-                // Обновляем фон по профилю
-                if (window.dynamicBg && window.dashboard.userId) {
-                    window.dynamicBg.updateFromProfile(window.dashboard.userId);
-                }
-                
-                console.log('✅ Личный кабинет загружен');
-                
-            } catch (error) {
-                console.error('❌ Ошибка инициализации:', error);
-                const container = document.getElementById('screenContainer');
-                if (container) {
-                    container.innerHTML = '<div class="dashboard-error"><div class="error-icon">⚠️</div><div class="error-title">Ошибка загрузки</div><div class="error-text">Не удалось загрузить данные профиля.</div><button class="test-required-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
-                }
-            }
-        }
-        
-        // ========== УНИВЕРСАЛЬНЫЙ ПАРСИНГ WebAppData ==========
-        (function() {
-            let userId = null;
-            let userData = null;
-            let chatData = null;
-            let authData = {};
-            
-            function parseWebAppData() {
-                // 1. Проверяем хэш (#)
-                const hash = window.location.hash.substring(1);
-                console.log('🔍 Хэш:', hash);
-                
-                if (hash) {
-                    let encodedData = null;
-                    if (hash.startsWith('WebAppData=')) {
-                        encodedData = hash.substring('WebAppData='.length);
-                    } else {
-                        const match = hash.match(/WebAppData=([^&]+)/);
-                        if (match) encodedData = match[1];
-                    }
-                    
-                    if (encodedData) {
-                        try {
-                            const decodedData = decodeURIComponent(encodedData);
-                            const params = new URLSearchParams(decodedData);
-                            console.log('📋 WebAppData из хэша:', Array.from(params.entries()));
-                            return { type: 'url', params: params };
-                        } catch (e) {
-                            console.warn('Ошибка декодирования хэша:', e);
-                        }
-                    }
-                }
-                
-                // 2. Проверяем query-параметры (?)
-                const search = window.location.search;
-                if (search) {
-                    const urlParams = new URLSearchParams(search);
-                    if (urlParams.has('WebAppData')) {
-                        try {
-                            const encodedData = urlParams.get('WebAppData');
-                            const decodedData = decodeURIComponent(encodedData);
-                            const params = new URLSearchParams(decodedData);
-                            console.log('📋 WebAppData из query:', Array.from(params.entries()));
-                            return { type: 'url', params: params };
-                        } catch (e) {
-                            console.warn('Ошибка декодирования query:', e);
-                        }
-                    }
-                }
-                
-                // 3. Проверяем MAX.WebApp (для мобильного приложения)
-                if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.initDataUnsafe) {
-                    const user = window.MAX.WebApp.initDataUnsafe.user;
-                    if (user && user.id) {
-                        console.log('✅ user_id из MAX.WebApp.initDataUnsafe:', user.id);
-                        return { type: 'webapp', user: user, chat: window.MAX.WebApp.initDataUnsafe.chat };
-                    }
-                }
-                
-                // 4. Проверяем Telegram.WebApp (для совместимости)
-                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-                    const user = window.Telegram.WebApp.initDataUnsafe.user;
-                    if (user && user.id) {
-                        console.log('✅ user_id из Telegram.WebApp.initDataUnsafe:', user.id);
-                        return { type: 'webapp', user: user, chat: window.Telegram.WebApp.initDataUnsafe.chat };
-                    }
-                }
-                
-                console.log('❌ WebAppData не найден ни в одном источнике');
-                return null;
-            }
-            
-            const webAppData = parseWebAppData();
-            
-            if (webAppData) {
-                if (webAppData.type === 'url') {
-                    const params = webAppData.params;
-                    const userParam = params.get('user');
-                    if (userParam) {
-                        try {
-                            userData = JSON.parse(decodeURIComponent(userParam));
-                            userId = userData.id;
-                            console.log('✅ user_id из URL:', userId);
-                            console.log('👤 Имя:', userData.first_name);
-                        } catch (e) {
-                            console.error('❌ Ошибка парсинга user:', e);
-                        }
-                    }
-                    
-                    const chatParam = params.get('chat');
-                    if (chatParam) {
-                        try {
-                            chatData = JSON.parse(decodeURIComponent(chatParam));
-                            console.log('💬 Chat ID:', chatData.id);
-                            if (!userId && chatData.id) userId = chatData.id;
-                        } catch (e) {
-                            console.error('❌ Ошибка парсинга chat:', e);
-                        }
-                    }
-                    
-                    authData = {
-                        hash: params.get('hash'),
-                        auth_date: params.get('auth_date'),
-                        query_id: params.get('query_id'),
-                        ip: params.get('ip')
-                    };
-                } else if (webAppData.type === 'webapp') {
-                    userData = webAppData.user;
-                    userId = userData.id;
-                    chatData = webAppData.chat;
-                    console.log('✅ user_id из WebApp:', userId);
-                    console.log('👤 Имя:', userData.first_name);
-                }
-            }
-            
-            // Сохраняем в глобальные переменные
-            window.maxData = {
-                user: userData,
-                chat: chatData,
-                auth: authData,
-                user_id: userId
-            };
-            
-            if (userData && userData.first_name) {
-                window.maxUserName = userData.first_name;
-            }
-            
-            // Пробуем получить user_id из localStorage если не нашли
-            if (!userId) {
-                userId = localStorage.getItem('fredi_user_id');
-                if (userId) console.log('💾 user_id из localStorage:', userId);
-            }
-            
-            // Сохраняем в localStorage
-            if (userId) {
-                localStorage.setItem('fredi_user_id', userId);
-                if (userData && userData.first_name) {
-                    localStorage.setItem('fredi_user_name', userData.first_name);
-                }
-            }
-            
-            window.maxContext = { 
-                user_id: userId,
-                user_data: userData,
-                chat_data: chatData,
-                auth_data: authData
-            };
-            
-            console.log('🎯 Итоговый user_id:', userId);
-            console.log('📊 Полные данные:', window.maxContext);
-            
-            // Инициализация MAX WebApp
-            if (window.MAX && window.MAX.WebApp) {
-                window.MAX.WebApp.ready();
-                window.MAX.WebApp.expand();
-                console.log('✅ MAX.WebApp инициализирован');
-            }
-            
-            // ✅ ЗАПУСКАЕМ ИНИЦИАЛИЗАЦИЮ С ЗАЩИТОЙ ОТ ОТСУТСТВИЯ DASHBOARD
-            if (!userId) {
-                console.log('❌ Нет user_id! Показываем экран входа');
-                showLoginScreen();
+            if (!window.api) {
+                console.error('❌ API не загружен');
             } else {
-                console.log('✅ Загружаем дашборд для user_id:', userId);
-                
-                // Ждём загрузки dashboard.js (защита для мобильных WebView)
-                const waitForDashboard = setInterval(() => {
-                    if (typeof FrediDashboard !== 'undefined') {
-                        clearInterval(waitForDashboard);
-                        console.log('✅ FrediDashboard загружен, запускаем initDashboard');
-                        initDashboard();
-                    }
-                }, 100);
-                
-                // Таймаут на случай, если dashboard.js не загрузился
-                setTimeout(() => {
-                    if (typeof FrediDashboard === 'undefined') {
-                        clearInterval(waitForDashboard);
-                        console.error('❌ FrediDashboard не загрузился за 5 секунд');
-                        const container = document.getElementById('screenContainer');
-                        if (container) {
-                            container.innerHTML = '<div class="dashboard-error"><div class="error-icon">⚠️</div><div class="error-title">Ошибка загрузки</div><div class="error-text">Не удалось загрузить приложение. Проверьте соединение.</div><button class="test-required-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button></div>';
-                        }
-                    }
-                }, 5000);
+                console.log('✅ API загружен');
             }
-        })();
+            return window.api;
+        };
         
-        // DOMContentLoaded для дополнительных инициализаций
+        // Дополнительная обработка для мобильных устройств
         document.addEventListener('DOMContentLoaded', function() {
             const menuBtn = document.getElementById('mobileMenuBtn');
             const chatsPanel = document.getElementById('chatsPanel');
@@ -1668,6 +1394,17 @@
                         chatsPanel.classList.remove('open');
                     }
                 });
+            }
+            
+            // Проверяем, что dashboard создан
+            if (!window.dashboard) {
+                console.log('⏳ Dashboard ещё не создан, ждём...');
+                const checkDashboard = setInterval(() => {
+                    if (window.dashboard) {
+                        clearInterval(checkDashboard);
+                        console.log('✅ Dashboard создан');
+                    }
+                }, 100);
             }
         });
     </script>
