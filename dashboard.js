@@ -1,7 +1,6 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 2.5 - ИСПРАВЛЕНА РАБОТА МИКРОФОНА (Samsung A51 и другие Android)
-// Версия 2.6 - ДОБАВЛЕН АНИМИРОВАННЫЙ АВАТАР
+// Версия 2.8 - ИСПРАВЛЕНА РАБОТА МИКРОФОНА ДЛЯ MAX WEBVIEW
 // ============================================
 
 class FrediDashboard {
@@ -31,6 +30,11 @@ class FrediDashboard {
         this.recordingTimer = null;
         this.recordingStartTime = null;
         
+        // ✅ ДЕТЕКЦИЯ WEBVIEW
+        this.isWebView = /; wv\)/.test(navigator.userAgent) || 
+                         /WebView/.test(navigator.userAgent) ||
+                         (window.MAX && window.MAX.WebApp);
+        
         // Базовые модули консорциума (всегда доступны)
         this.allModules = [
             { id: 'strategy', name: '🎯 Стратегия', icon: '🎯', color: '#4CAF50', description: 'Построение планов и достижение целей' },
@@ -56,10 +60,7 @@ class FrediDashboard {
             return;
         }
         
-        // ✅ ЗАПРОС РАЗРЕШЕНИЯ НА МИКРОФОН
-        await this.requestMicrophonePermission();
-        
-        this.checkMicrophoneSupport();
+        console.log('📱 Режим WebView:', this.isWebView);
         
         await this.loadUserData();
         await this.loadProfileData();
@@ -113,58 +114,125 @@ class FrediDashboard {
     }
     
     // ============================================
-    // ЗАПРОС РАЗРЕШЕНИЯ НА МИКРОФОН
+    // ЗАПРОС РАЗРЕШЕНИЯ НА МИКРОФОН (ИСПРАВЛЕНО ДЛЯ WEBVIEW)
     // ============================================
     
     async requestMicrophonePermission() {
-        // 1. Пробуем через MAX WebApp
-        if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.requestMediaPermission) {
-            try {
-                console.log('🎤 Запрос разрешения через MAX...');
-                const result = await window.MAX.WebApp.requestMediaPermission('audio');
-                if (result === 'granted') {
-                    console.log('✅ Разрешение на микрофон получено через MAX');
-                    return true;
-                } else {
-                    console.warn('⚠️ Разрешение отклонено в MAX:', result);
-                }
-            } catch (e) {
-                console.warn('Ошибка запроса через MAX:', e);
-            }
-        }
+        // Для WebView не нужно отдельно запрашивать разрешение
+        // Просто пробуем получить доступ
         
-        // 2. Пробуем через MAX WebApp getUserMedia (альтернативный способ)
-        if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.getUserMedia) {
-            try {
-                console.log('🎤 Проверка микрофона через MAX getUserMedia...');
-                const stream = await window.MAX.WebApp.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
-                console.log('✅ Микрофон доступен через MAX');
-                return true;
-            } catch (e) {
-                console.warn('MAX getUserMedia не сработал:', e);
-            }
-        }
-        
-        // 3. Fallback на стандартный Web API
         try {
-            console.log('🎤 Запрос разрешения через Web API...');
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log('🎤 Проверка доступа к микрофону...');
+            
+            let stream = null;
+            
+            // Пробуем через MAX WebApp
+            if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.getUserMedia) {
+                try {
+                    stream = await window.MAX.WebApp.getUserMedia({ audio: true });
+                    console.log('✅ Микрофон доступен через MAX');
+                } catch (e) {
+                    console.warn('MAX getUserMedia не сработал:', e);
+                }
+            }
+            
+            // Fallback на стандартный Web API
+            if (!stream) {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('✅ Микрофон доступен через Web API');
+            }
+            
             stream.getTracks().forEach(track => track.stop());
-            console.log('✅ Разрешение на микрофон получено через Web API');
             return true;
+            
         } catch (error) {
             console.error('❌ Ошибка доступа к микрофону:', error);
             
-            let errorMessage = '❌ Не удалось получить доступ к микрофону.';
+            // ✅ ИСПРАВЛЕНО: показываем инструкцию для MAX, а не для браузера
             if (error.name === 'NotAllowedError') {
-                errorMessage = '❌ Разрешение на использование микрофона отклонено.\n\nВ MAX: нажмите на значок 🔒 в адресной строке и разрешите доступ к микрофону.\n\nВ браузере: проверьте настройки разрешений.';
+                this.showMicrophoneInstructions();
             } else if (error.name === 'NotFoundError') {
-                errorMessage = '❌ Микрофон не найден. Подключите микрофон и попробуйте снова.';
+                this.showFloatingMessage('❌ Микрофон не найден. Подключите гарнитуру.', 'error');
+            } else {
+                this.showFloatingMessage('❌ Не удалось получить доступ к микрофону', 'error');
             }
-            this.showFloatingMessage(errorMessage, 'error');
             return false;
         }
+    }
+    
+    // ✅ НОВЫЙ МЕТОД: показывает инструкцию для настройки микрофона в MAX
+    showMicrophoneInstructions() {
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        let instructions = '';
+        
+        if (isAndroid) {
+            instructions = `
+🔊 <b>ВКЛЮЧИТЕ МИКРОФОН В MAX</b>
+<br><br>
+1️⃣ Закройте чат с ботом
+<br>
+2️⃣ Откройте <b>Настройки</b> телефона
+<br>
+3️⃣ Перейдите в <b>Приложения</b> → <b>MAX</b>
+<br>
+4️⃣ Нажмите <b>Разрешения</b>
+<br>
+5️⃣ Включите <b>Микрофон</b> → <b>Разрешить</b>
+<br><br>
+6️⃣ Вернитесь в чат и нажмите 🎤 ещё раз
+<br><br>
+<i>После включения разрешения — всё заработает!</i>
+            `;
+        } else if (isIOS) {
+            instructions = `
+🎤 <b>ВКЛЮЧИТЕ МИКРОФОН В MAX</b>
+<br><br>
+1️⃣ Закройте чат с ботом
+<br>
+2️⃣ Откройте <b>Настройки</b> iPhone
+<br>
+3️⃣ Прокрутите вниз → найдите <b>MAX</b>
+<br>
+4️⃣ Включите переключатель <b>Микрофон</b>
+<br><br>
+5️⃣ Вернитесь в чат и нажмите 🎤 ещё раз
+<br><br>
+<i>После включения — всё заработает!</i>
+            `;
+        } else {
+            instructions = `
+🎤 <b>НУЖЕН ДОСТУП К МИКРОФОНУ</b>
+<br><br>
+В настройках приложения MAX разрешите доступ к микрофону.
+<br><br>
+Затем вернитесь и нажмите 🎤 ещё раз.
+            `;
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'microphone-modal';
+        modal.innerHTML = `
+            <div class="microphone-modal-content">
+                <div style="font-size:48px;margin-bottom:16px;">🎤</div>
+                <h3 style="margin:0 0 12px 0;">Нужен доступ к микрофону</h3>
+                <div style="color:var(--max-text-secondary,#8e9aa6);line-height:1.6;text-align:left;font-size:14px;">
+                    ${instructions}
+                </div>
+                <div style="display:flex;gap:12px;margin-top:28px;">
+                    <button id="microphoneRetryBtn" class="modal-btn primary">🔄 ПРОВЕРИТЬ</button>
+                    <button id="microphoneCloseBtn" class="modal-btn secondary">📱 ЗАКРЫТЬ</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        document.getElementById('microphoneRetryBtn')?.addEventListener('click', () => {
+            modal.remove();
+            this.requestMicrophonePermission();
+        });
+        document.getElementById('microphoneCloseBtn')?.addEventListener('click', () => modal.remove());
     }
     
     // ============================================
@@ -311,33 +379,25 @@ class FrediDashboard {
         }
         
         try {
-            // Загружаем данные профиля для аватара
             const profileResponse = await fetch(`/api/get-profile?user_id=${this.userId}`);
             const profileData = await profileResponse.json();
             
-            // Создаём экземпляр анимированного аватара
             this.animatedAvatar = new AnimatedAvatar(this.userId, this.userName, profileData);
             const avatarCanvas = await this.animatedAvatar.init();
             
-            // Настраиваем размер
             this.animatedAvatar.setSize(80, 80);
             
-            // Добавляем в контейнер
             const avatarContainer = document.getElementById('avatarContainer');
             if (avatarContainer) {
                 avatarContainer.innerHTML = '';
                 avatarContainer.appendChild(avatarCanvas);
             }
             
-            // Обработчик клика на аватар
             this.animatedAvatar.onAvatarClick = () => {
-                // Случайная смена настроения
                 const moods = ['happy', 'thoughtful', 'energetic'];
                 const randomMood = moods[Math.floor(Math.random() * moods.length)];
                 this.animatedAvatar.setMood(randomMood);
                 setTimeout(() => this.animatedAvatar.setMood('neutral'), 2000);
-                
-                // Показываем приветственное сообщение
                 this.showFloatingMessage('Привет! Как настроение?', 'info');
             };
             
@@ -920,7 +980,7 @@ class FrediDashboard {
     }
     
     // ============================================
-    // 🎤 ГОЛОСОВОЙ ВВОД - ИСПРАВЛЕНА ВЕРСИЯ ДЛЯ ВСЕХ АНДРОИДОВ
+    // 🎤 ГОЛОСОВОЙ ВВОД - ИСПРАВЛЕНА ВЕРСИЯ ДЛЯ MAX WEBVIEW
     // ============================================
     
     setupVoiceButton(button) {
@@ -935,13 +995,10 @@ class FrediDashboard {
         
         // Детекция устройств
         const isSamsung = /Samsung|SM-|GT-|SHV-|SCH-|SPH-/.test(navigator.userAgent);
-        const isAndroidWebView = /; wv\)/.test(navigator.userAgent);
-        const isAndroid = /Android/.test(navigator.userAgent);
-        const isChrome = /Chrome/.test(navigator.userAgent);
         
-        if (isSamsung || isAndroidWebView) {
+        if (isSamsung || this.isWebView) {
             console.log('📱 Обнаружен Samsung/WebView, применяем специальные настройки');
-            this.showFloatingMessage('🔊 Нажмите разрешить, когда браузер запросит доступ к микрофону', 'info');
+            this.showFloatingMessage('🔊 Нажмите разрешить, когда приложение запросит доступ к микрофону', 'info');
         }
         
         const startRecording = async () => {
@@ -967,7 +1024,7 @@ class FrediDashboard {
                     } catch (e) {
                         console.warn('MAX getUserMedia не сработал:', e);
                         if (isSamsung) {
-                            this.showFloatingMessage('🔊 На Samsung: нажмите на значок 🔒 в адресной строке и разрешите доступ к микрофону', 'info');
+                            this.showFloatingMessage('🔊 На Samsung: проверьте разрешения в настройках MAX', 'info');
                         }
                     }
                 }
@@ -986,7 +1043,6 @@ class FrediDashboard {
                             }
                         };
                         
-                        // Для Samsung добавляем fallback без параметров
                         stream = await navigator.mediaDevices.getUserMedia(constraints).catch(async () => {
                             console.log('🎤 Пробуем без параметров...');
                             return await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1001,11 +1057,11 @@ class FrediDashboard {
                 
                 // 3. Выбираем правильный MIME тип
                 const mimeTypes = [
-                    'audio/mp4',
-                    'audio/mpeg',
-                    'audio/3gpp',
                     'audio/webm',
-                    'audio/ogg'
+                    'audio/mp4',
+                    'audio/ogg',
+                    'audio/3gpp',
+                    'audio/mpeg'
                 ];
                 
                 for (const type of mimeTypes) {
@@ -1029,45 +1085,36 @@ class FrediDashboard {
                 mediaRecorder.onstop = async () => {
                     stream.getTracks().forEach(track => track.stop());
                     
-                    // Определяем тип для отправки
                     let audioBlob;
-                    const finalMimeType = mimeType || (isAndroid ? 'audio/mp4' : 'audio/webm');
+                    const finalMimeType = mimeType || 'audio/webm';
                     
                     if (audioChunks.length > 0) {
                         audioBlob = new Blob(audioChunks, { type: finalMimeType });
                     } else {
                         console.warn('⚠️ Нет аудиоданных');
                         this.showFloatingMessage('❌ Не удалось записать голос. Попробуйте еще раз.', 'error');
-                        if (voiceStatus) voiceStatus.style.display = 'none';
-                        button.classList.remove('recording');
-                        button.innerHTML = '<span class="voice-icon">🎤</span><span class="voice-text">Нажмите и говорите</span>';
+                        this._resetVoiceUI(button, voiceStatus, timerInterval);
                         return;
                     }
                     
-                    if (audioBlob.size < 1000) {
+                    if (audioBlob.size < 5000) {
                         console.warn('⚠️ Аудиофайл слишком маленький:', audioBlob.size);
                         this.showFloatingMessage('❌ Запись слишком короткая. Поговорите дольше.', 'error');
-                        if (voiceStatus) voiceStatus.style.display = 'none';
-                        button.classList.remove('recording');
-                        button.innerHTML = '<span class="voice-icon">🎤</span><span class="voice-text">Нажмите и говорите</span>';
+                        this._resetVoiceUI(button, voiceStatus, timerInterval);
                         return;
                     }
                     
                     await this.sendVoiceToServer(audioBlob);
-                    
-                    if (timerInterval) clearInterval(timerInterval);
-                    if (voiceStatus) voiceStatus.style.display = 'none';
-                    button.classList.remove('recording');
-                    button.innerHTML = '<span class="voice-icon">🎤</span><span class="voice-text">Нажмите и говорите</span>';
+                    this._resetVoiceUI(button, voiceStatus, timerInterval);
                 };
                 
-                // Устанавливаем интервал для записи кусками
+                // Устанавливаем интервал для записи
                 mediaRecorder.start(1000);
                 isRecording = true;
                 recordingStartTime = Date.now();
                 
                 button.classList.add('recording');
-                button.innerHTML = '<span class="voice-icon">⏹️</span><span class="voice-text">Отпустите для отправки</span>';
+                button.innerHTML = '<span class="voice-icon">⏹️</span><span class="voice-text">Отпустите</span>';
                 if (voiceStatus) voiceStatus.style.display = 'flex';
                 if (timerEl) timerEl.textContent = '0s';
                 
@@ -1087,20 +1134,21 @@ class FrediDashboard {
                 let errorMessage = '❌ Не удалось получить доступ к микрофону.';
                 
                 if (isSamsung) {
-                    errorMessage = '🔊 На Samsung A51:\n\n1. Нажмите на значок 🔒 в адресной строке\n2. Разрешите доступ к микрофону\n3. Обновите страницу\n\nЕсли не помогает, используйте текстовый ввод.';
+                    errorMessage = '🔊 На Samsung:\n\n1. Настройки телефона → Приложения → MAX\n2. Разрешения → Микрофон → Разрешить\n3. Вернитесь и нажмите 🎤';
                 } else if (error.name === 'NotAllowedError' || error.message?.includes('permission')) {
-                    errorMessage = '❌ Разрешение на использование микрофона отклонено.\n\nВ MAX: нажмите на значок 🔒 в адресной строке и разрешите доступ к микрофону.\n\nВ браузере: проверьте настройки разрешений.';
+                    if (this.isWebView) {
+                        errorMessage = '🔊 РАЗРЕШИТЕ ДОСТУП К МИКРОФОНУ В MAX:\n\n1. Закройте чат\n2. Настройки телефона → Приложения → MAX\n3. Разрешения → Микрофон → Разрешить\n4. Вернитесь и нажмите 🎤';
+                    } else {
+                        errorMessage = '❌ Разрешение на использование микрофона отклонено.\n\nПроверьте настройки разрешений.';
+                    }
                 } else if (error.name === 'NotFoundError') {
-                    errorMessage = '❌ Микрофон не найден. Подключите гарнитуру и попробуйте снова.';
+                    errorMessage = '❌ Микрофон не найден. Подключите гарнитуру.';
                 } else if (error.name === 'NotReadableError') {
-                    errorMessage = '❌ Микрофон занят другим приложением. Закройте другие программы, использующие микрофон.';
+                    errorMessage = '❌ Микрофон занят другим приложением.';
                 }
                 
                 this.showFloatingMessage(errorMessage, 'error');
-                
-                if (voiceStatus) voiceStatus.style.display = 'none';
-                button.classList.remove('recording');
-                button.innerHTML = '<span class="voice-icon">🎤</span><span class="voice-text">Нажмите и говорите</span>';
+                this._resetVoiceUI(button, voiceStatus, timerInterval);
             }
         };
         
@@ -1112,7 +1160,7 @@ class FrediDashboard {
             }
         };
         
-        // Удаляем старые обработчики, если есть
+        // Очищаем старые обработчики
         button.removeEventListener('mousedown', startRecording);
         button.removeEventListener('mouseup', stopRecording);
         button.removeEventListener('mouseleave', stopRecording);
@@ -1135,6 +1183,15 @@ class FrediDashboard {
         }, { passive: false });
     }
     
+    _resetVoiceUI(button, voiceStatus, timerInterval) {
+        if (button) {
+            button.classList.remove('recording');
+            button.innerHTML = '<span class="voice-icon">🎤</span><span class="voice-text">Нажмите и говорите</span>';
+        }
+        if (voiceStatus) voiceStatus.style.display = 'none';
+        if (timerInterval) clearInterval(timerInterval);
+    }
+    
     async sendVoiceToServer(audioBlob) {
         this.showFloatingMessage('🎤 Распознаю речь...', 'info');
         
@@ -1153,6 +1210,14 @@ class FrediDashboard {
             if (result.success) {
                 if (result.recognized_text) {
                     this.showFloatingMessage(`📝 Вы сказали: ${result.recognized_text}`, 'success');
+                    const questionInput = document.getElementById('questionInput');
+                    if (questionInput) {
+                        questionInput.value = result.recognized_text;
+                        const sendBtn = document.getElementById('sendQuestionBtn');
+                        if (sendBtn && result.recognized_text.length > 3) {
+                            setTimeout(() => sendBtn.click(), 500);
+                        }
+                    }
                 }
                 if (result.answer) {
                     this.showFloatingMessage(result.answer, 'info');
@@ -1181,7 +1246,6 @@ class FrediDashboard {
     // ============================================
     
     handleQuickAction(actionType) {
-        // Анимация аватара при нажатии
         if (this.animatedAvatar) {
             this.animatedAvatar.setMood('happy');
             setTimeout(() => this.animatedAvatar.setMood('neutral'), 1500);
@@ -1204,7 +1268,6 @@ class FrediDashboard {
     }
     
     handleModuleClick(moduleId) {
-        // Анимация аватара при клике на модуль
         if (this.animatedAvatar) {
             this.animatedAvatar.setMood('thoughtful');
             setTimeout(() => this.animatedAvatar.setMood('neutral'), 1500);
