@@ -39,11 +39,25 @@ const App = {
             }
         }
         
-        // Если все еще нет - используем тестовый
-        if (!this.userId) {
-            this.userId = 'test_user_123';
-            console.warn('⚠️ Используем тестовый user_id:', this.userId);
-        }
+        // Если нет user_id — показываем ошибку и не продолжаем
+if (!this.userId) {
+    console.error('❌ Нет user_id! Приложение должно открываться через MAX.');
+    const container = document.getElementById('screenContainer');
+    if (container) {
+        container.innerHTML = `
+            <div class="login-screen">
+                <div class="login-icon">🔐</div>
+                <div class="login-title">Ошибка входа</div>
+                <div class="login-text">
+                    Не удалось идентифицировать пользователя.<br>
+                    Пожалуйста, откройте приложение через MAX.
+                </div>
+                <button class="login-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button>
+            </div>
+        `;
+    }
+    return;
+}
         
         // Сохраняем в localStorage
         localStorage.setItem('fredi_user_id', this.userId);
