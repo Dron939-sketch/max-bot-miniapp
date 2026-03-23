@@ -1408,119 +1408,160 @@
         }
 
         (function() {
-            let userId = null;
-            let userData = null;
-            let chatData = null;
-            let authData = {};
+    let userId = null;
+    let userData = null;
+    let chatData = null;
+    let authData = {};
+    
+    // ========== ПРАВИЛЬНЫЙ ПАРСИНГ WebAppData ==========
+    function parseWebAppData() {
+        const hash = window.location.hash.substring(1);
+        console.log('🔍 Хэш:', hash);
+        
+        // Проверяем, есть ли WebAppData
+        if (!hash.startsWith('WebAppData=')) {
+            console.log('❌ Нет WebAppData в хэше');
+            return null;
+        }
+        
+        // Извлекаем данные после WebAppData=
+        const encodedData = hash.substring('WebAppData='.length);
+        console.log('📦 Закодированные данные:', encodedData.substring(0, 200));
+        
+        try {
+            // Декодируем URL
+            const decodedData = decodeURIComponent(encodedData);
+            console.log('🔓 Декодированные данные:', decodedData.substring(0, 500));
             
-            const hash = window.location.hash.substring(1);
-            const hashParams = new URLSearchParams(hash);
-            console.log('🔍 Все параметры из хэша:', Array.from(hashParams.entries()));
+            // Парсим как URL параметры
+            const params = new URLSearchParams(decodedData);
+            console.log('📋 Параметры:', Array.from(params.entries()));
             
-            const userParam = hashParams.get('user');
-            if (userParam) {
-                try {
-                    const decoded = decodeURIComponent(userParam);
-                    userData = JSON.parse(decoded);
-                    console.log('✅ Данные пользователя:', userData);
-                    userId = userData.id;
-                } catch (e) {
-                    console.error('❌ Ошибка парсинга user:', e);
+            return params;
+        } catch (e) {
+            console.error('❌ Ошибка декодирования:', e);
+            return null;
+        }
+    }
+    
+    const webAppParams = parseWebAppData();
+    
+    if (webAppParams) {
+        // Получаем данные пользователя
+        const userParam = webAppParams.get('user');
+        if (userParam) {
+            try {
+                const decodedUser = decodeURIComponent(userParam);
+                userData = JSON.parse(decodedUser);
+                userId = userData.id;
+                console.log('✅ user_id из WebAppData:', userId);
+                console.log('👤 Имя:', userData.first_name);
+                console.log('📸 Фото:', userData.photo_url);
+            } catch (e) {
+                console.error('❌ Ошибка парсинга user:', e);
+            }
+        }
+        
+        // Получаем данные чата
+        const chatParam = webAppParams.get('chat');
+        if (chatParam) {
+            try {
+                const decodedChat = decodeURIComponent(chatParam);
+                chatData = JSON.parse(decodedChat);
+                console.log('💬 Chat ID:', chatData.id);
+                if (!userId && chatData.id) {
+                    userId = chatData.id;
                 }
+            } catch (e) {
+                console.error('❌ Ошибка парсинга chat:', e);
             }
-            
-            const chatParam = hashParams.get('chat');
-            if (chatParam) {
-                try {
-                    const decoded = decodeURIComponent(chatParam);
-                    chatData = JSON.parse(decoded);
-                    console.log('📦 Данные чата:', chatData);
-                    if (!userId && chatData.id) {
-                        userId = chatData.id;
-                    }
-                } catch (e) {
-                    console.error('Ошибка парсинга chat:', e);
-                }
-            }
-            
-            authData = {
-                hash: hashParams.get('hash'),
-                auth_date: hashParams.get('auth_date'),
-                query_id: hashParams.get('query_id'),
-                ip: hashParams.get('ip')
-            };
-            console.log('🔐 Данные аутентификации:', authData);
-            
-            window.maxData = {
-                user: userData,
-                chat: chatData,
-                auth: authData,
-                raw_hash: hash,
-                user_id: userId
-            };
-            
-            if (userData && userData.first_name) {
-                window.maxUserName = userData.first_name;
-            }
-            
-            if (!userId) {
-                const urlParams = new URLSearchParams(window.location.search);
-                userId = urlParams.get('user_id');
-                if (userId) console.log('✅ user_id из query-параметров:', userId);
-            }
-            
-            if (!userId && window.MAX?.WebApp?.initDataUnsafe?.user?.id) {
-                userId = window.MAX.WebApp.initDataUnsafe.user.id;
-                console.log('✅ user_id из MAX.WebApp:', userId);
-                window.maxData = window.maxData || {};
-                window.maxData.user = window.MAX.WebApp.initDataUnsafe.user;
-            }
-            
-            if (!userId && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-                userId = window.Telegram.WebApp.initDataUnsafe.user.id;
-                console.log('✅ user_id из Telegram.WebApp:', userId);
-                window.maxData = window.maxData || {};
-                window.maxData.user = window.Telegram.WebApp.initDataUnsafe.user;
-            }
-            
-            if (!userId) {
-                userId = localStorage.getItem('fredi_user_id');
-                if (userId) console.log('✅ user_id из localStorage:', userId);
-            }
-            
-            if (userId && userId !== '213102077') {
-                localStorage.setItem('fredi_user_id', userId);
-                if (userData && userData.first_name) {
-                    localStorage.setItem('fredi_user_name', userData.first_name);
-                }
-            }
-            
-            window.maxContext = { 
-                user_id: userId,
-                user_data: userData,
-                chat_data: chatData,
-                auth_data: authData
-            };
-            console.log('🎯 Итоговый user_id:', userId);
-            console.log('📊 Полные данные:', window.maxContext);
-            
-            if (window.MAX?.WebApp) {
-                window.MAX.WebApp.ready();
-                window.MAX.WebApp.expand();
-            }
-            if (window.Telegram?.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand();
-            }
-            
-            if (!userId) {
-                console.log('❌ Нет user_id! Показываем экран входа');
-                showLoginScreen();
-            } else {
-                console.log('✅ Загружаем дашборд для user_id:', userId);
-                initDashboard();
-            }
-        })();
+        }
+        
+        // Получаем auth данные
+        authData = {
+            hash: webAppParams.get('hash'),
+            auth_date: webAppParams.get('auth_date'),
+            query_id: webAppParams.get('query_id'),
+            ip: webAppParams.get('ip')
+        };
+        console.log('🔐 Auth data:', authData);
+    }
+    
+    // Сохраняем в глобальные переменные
+    window.maxData = {
+        user: userData,
+        chat: chatData,
+        auth: authData,
+        user_id: userId
+    };
+    
+    if (userData && userData.first_name) {
+        window.maxUserName = userData.first_name;
+    }
+    
+    // Пробуем получить user_id из других источников
+    if (!userId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        userId = urlParams.get('user_id');
+        if (userId) console.log('✅ user_id из query-параметров:', userId);
+    }
+    
+    if (!userId && window.MAX?.WebApp?.initDataUnsafe?.user?.id) {
+        userId = window.MAX.WebApp.initDataUnsafe.user.id;
+        console.log('✅ user_id из MAX.WebApp:', userId);
+        window.maxData = window.maxData || {};
+        window.maxData.user = window.MAX.WebApp.initDataUnsafe.user;
+    }
+    
+    if (!userId && window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        console.log('✅ user_id из Telegram.WebApp:', userId);
+        window.maxData = window.maxData || {};
+        window.maxData.user = window.Telegram.WebApp.initDataUnsafe.user;
+    }
+    
+    if (!userId) {
+        userId = localStorage.getItem('fredi_user_id');
+        if (userId) console.log('✅ user_id из localStorage:', userId);
+    }
+    
+    // Сохраняем в localStorage
+    if (userId && userId !== '213102077') {
+        localStorage.setItem('fredi_user_id', userId);
+        if (userData && userData.first_name) {
+            localStorage.setItem('fredi_user_name', userData.first_name);
+        }
+    }
+    
+    window.maxContext = { 
+        user_id: userId,
+        user_data: userData,
+        chat_data: chatData,
+        auth_data: authData
+    };
+    
+    console.log('🎯 Итоговый user_id:', userId);
+    console.log('📊 Полные данные:', window.maxContext);
+    
+    // Инициализация MAX WebApp
+    if (window.MAX?.WebApp) {
+        window.MAX.WebApp.ready();
+        window.MAX.WebApp.expand();
+        console.log('✅ MAX.WebApp инициализирован');
+    }
+    if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+    }
+    
+    if (!userId) {
+        console.log('❌ Нет user_id! Показываем экран входа');
+        showLoginScreen();
+    } else {
+        console.log('✅ Загружаем дашборд для user_id:', userId);
+        initDashboard();
+    }
+})();
     </script>
     
     <!-- ===== МИКРОФОН ДЛЯ MAX - УДЕРЖАНИЕ ДЛЯ ЗАПИСИ ===== -->
