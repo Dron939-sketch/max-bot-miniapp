@@ -13,6 +13,11 @@
     <meta name="apple-mobile-web-app-title" content="Фреди">
     <link rel="apple-touch-icon" href="/icon-192.png">
     
+    <!-- Отключаем кэширование -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <!-- MAX Bridge -->
     <script src="https://st.max.ru/js/max-web-app.js"></script>
     
@@ -135,6 +140,32 @@
                 `;
             });
         }
+    </script>
+    
+    <!-- ========== КОНФИГУРАЦИЯ API (ИСПРАВЛЕНО) ========== -->
+    <script>
+        // FastAPI запущен на основном сервере
+        const MAIN_API_URL = 'https://max-bot-1-ywpz.onrender.com';
+        const MINIAPP_URL = 'https://max-bot-miniapp.onrender.com';
+        
+        const hostname = window.location.hostname;
+        
+        if (hostname === 'max-bot-miniapp.onrender.com') {
+            // Мини-приложение открыто отдельно — API на основном сервере
+            window.API_BASE_URL = MAIN_API_URL;
+            console.log('🌐 Мини-приложение на отдельном домене, API:', window.API_BASE_URL);
+        } else if (hostname === 'max-bot-1-ywpz.onrender.com') {
+            // Открыто на основном домене — API там же
+            window.API_BASE_URL = window.location.origin;
+            console.log('🌐 Основной домен, API:', window.API_BASE_URL);
+        } else {
+            // Локальная разработка
+            window.API_BASE_URL = 'http://localhost:10000';
+            console.log('🌐 Локальная разработка, API:', window.API_BASE_URL);
+        }
+        
+        // Сохраняем в localStorage для других скриптов
+        localStorage.setItem('api_base_url', window.API_BASE_URL);
     </script>
     
     <!-- ========== СТИЛИ ========== -->
@@ -1483,79 +1514,18 @@
         </div>
     </template>
 
-    <!-- ========== СКРИПТЫ ========== -->
-    <script>
-        // Конфигурация API
-        window.API_BASE_URL = (() => {
-            // В MAX мессенджере используем текущий origin
-            if (window.MAX?.WebApp || window.location.hostname.includes('onrender.com')) {
-                return window.location.origin;
-            }
-            // Для разработки локально
-            return 'https://max-bot-1-ywpz.onrender.com';
-        })();
-        console.log('🌐 API_BASE_URL:', window.API_BASE_URL);
-    </script>
-    
-    <!-- API.js -->
-    <script>
-        (function() {
-            const API_BASE_URL = window.API_BASE_URL || window.location.origin;
-            
-            window.api = {
-                baseUrl: API_BASE_URL,
-                
-                async request(endpoint, options = {}) {
-                    const url = `${API_BASE_URL}${endpoint}`;
-                    const config = {
-                        headers: { 'Content-Type': 'application/json' },
-                        ...options
-                    };
-                    
-                    if (config.body && typeof config.body === 'object') {
-                        config.body = JSON.stringify(config.body);
-                    }
-                    
-                    try {
-                        const response = await fetch(url, config);
-                        const data = await response.json();
-                        return data;
-                    } catch (error) {
-                        console.error(`API Error ${endpoint}:`, error);
-                        return { success: false, error: error.message };
-                    }
-                },
-                
-                get(endpoint, params = {}) {
-                    let url = endpoint;
-                    if (Object.keys(params).length > 0) {
-                        const searchParams = new URLSearchParams(params);
-                        url = `${endpoint}?${searchParams.toString()}`;
-                    }
-                    return this.request(url, { method: 'GET' });
-                },
-                
-                post(endpoint, data = {}) {
-                    return this.request(endpoint, { method: 'POST', body: data });
-                }
-            };
-            
-            console.log('✅ API.js загружен');
-        })();
-    </script>
-    
-    <!-- Основные скрипты -->
-    <script src="/context.js?v=7"></script>
-    <script src="/onboarding.js?v=7"></script>
-    <script src="/script.js?v=7"></script>
-    <script src="/test.js?v=7"></script>
-    <script src="/animations.js?v=7"></script>
-    <script src="/animated-avatar.js?v=7"></script>
-    <script src="/dynamic-bg.js?v=7"></script>
-    <script src="/challenges.js?v=7"></script>
-    <script src="/notifications.js?v=7"></script>
-    <script src="/psychometric.js?v=7"></script>
-    <script src="/dashboard.js?v=7"></script>
+    <!-- ========== СКРИПТЫ (с увеличенной версией для обновления кэша) ========== -->
+    <script src="/context.js?v=8"></script>
+    <script src="/onboarding.js?v=8"></script>
+    <script src="/script.js?v=8"></script>
+    <script src="/test.js?v=8"></script>
+    <script src="/animations.js?v=8"></script>
+    <script src="/animated-avatar.js?v=8"></script>
+    <script src="/dynamic-bg.js?v=8"></script>
+    <script src="/challenges.js?v=8"></script>
+    <script src="/notifications.js?v=8"></script>
+    <script src="/psychometric.js?v=8"></script>
+    <script src="/dashboard.js?v=8"></script>
     
     <!-- Микрофон для мобильных -->
     <script>
@@ -1620,6 +1590,16 @@
         }
         
         window.microphoneManager = new MicrophoneManager();
+        
+        // Инициализация dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📄 DOM загружен, создаём FrediDashboard');
+            if (typeof FrediDashboard !== 'undefined') {
+                window.dashboard = new FrediDashboard();
+            } else {
+                console.error('❌ FrediDashboard не загружен!');
+            }
+        });
     </script>
 </body>
 </html>
