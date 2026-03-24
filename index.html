@@ -66,12 +66,14 @@
             }
             
             // 5. Тестовый ID только для разработки (если не в MAX)
-            if (!window.MAX || !window.MAX.WebApp) {
-                console.warn('⚠️ Режим разработки: используется тестовый user_id');
-                const testId = 'test_' + Math.random().toString(36).substr(2, 8);
-                localStorage.setItem('fredi_user_id', testId);
-                return testId;
-            }
+        if (!window.MAX || !window.MAX.WebApp) {
+            console.warn('⚠️ Режим разработки: используется тестовый user_id');
+            // ✅ ИСПРАВЛЕНО: числовой ID вместо строки с test_
+            const testId = Math.floor(Math.random() * 1000000000).toString();
+            localStorage.setItem('fredi_user_id', testId);
+            console.log('🔧 Создан тестовый ID:', testId);
+            return testId;
+        }
             
             console.error('❌ Не удалось получить user_id!');
             return null;
