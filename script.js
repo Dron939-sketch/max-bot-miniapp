@@ -108,79 +108,50 @@ const App = {
     },
     
     // ========== API ВЫЗОВЫ (ИСПРАВЛЕНО) ==========
-    async apiCall(endpoint, params = {}, method = 'GET') {
-        // ✅ ИСПРАВЛЕНО: используем window.API_BASE_URL из конфигурации
-        const baseUrl = window.API_BASE_URL || 'https://max-bot-miniapp.onrender.com';
-        
-        // Формируем полный URL
-        let url = `${baseUrl}${endpoint}`;
-        
-        // Добавляем параметры для GET
-        if (method === 'GET' && Object.keys(params).length > 0) {
-            const urlObj = new URL(url);
-            Object.keys(params).forEach(key => {
-                if (params[key] !== undefined && params[key] !== null) {
-                    urlObj.searchParams.append(key, params[key]);
-                }
-            });
-            url = urlObj.toString();
-        }
-        
-        const options = {
-            method: method,
-            headers: { 'Content-Type': 'application/json' }
-        };
-        
-        if (method !== 'GET' && Object.keys(params).length > 0) {
-            options.body = JSON.stringify(params);
-        }
-        
-        console.log(`📡 API ${method} ${url}`);
-        
-        try {
-            const response = await fetch(url, options);
-            const data = await response.json();
-            
-            if (!response.ok) {
-                console.error(`HTTP Error ${response.status}:`, data);
-                return { success: false, error: data.error || `HTTP ${response.status}` };
+async apiCall(endpoint, params = {}, method = 'GET') {
+    // ✅ ИСПРАВЛЕНО: используем адрес бэкенда
+    const baseUrl = window.API_BASE_URL || 'https://max-bot-1-ywpz.onrender.com';
+    
+    // Формируем полный URL
+    let url = `${baseUrl}${endpoint}`;
+    
+    // Добавляем параметры для GET
+    if (method === 'GET' && Object.keys(params).length > 0) {
+        const urlObj = new URL(url);
+        Object.keys(params).forEach(key => {
+            if (params[key] !== undefined && params[key] !== null) {
+                urlObj.searchParams.append(key, params[key]);
             }
-            
-            return data;
-        } catch (error) {
-            console.error(`API Error ${endpoint}:`, error);
-            return { success: false, error: error.message };
+        });
+        url = urlObj.toString();
+    }
+    
+    const options = {
+        method: method,
+        headers: { 'Content-Type': 'application/json' }
+    };
+    
+    if (method !== 'GET' && Object.keys(params).length > 0) {
+        options.body = JSON.stringify(params);
+    }
+    
+    console.log(`📡 API ${method} ${url}`);
+    
+    try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error(`HTTP Error ${response.status}:`, data);
+            return { success: false, error: data.error || `HTTP ${response.status}` };
         }
-    },
-
-    async sendQuestionToServer(question) {
-        return this.apiCall('/api/chat/message', {
-            user_id: this.userId,
-            message: question,
-            mode: this.currentMode
-        }, 'POST');
-    },
-
-    async saveModeToServer(mode) {
-        return this.apiCall('/api/save-mode', {
-            user_id: this.userId,
-            mode: mode
-        }, 'POST');
-    },
-
-    async getPsychologistThoughtFromServer() {
-        const response = await this.apiCall('/api/thought', {
-            user_id: this.userId
-        });
-        return response.thought;
-    },
-
-    async getSmartQuestionsFromServer() {
-        const response = await this.apiCall('/api/smart-questions', {
-            user_id: this.userId
-        });
-        return response.questions || [];
-    },
+        
+        return data;
+    } catch (error) {
+        console.error(`API Error ${endpoint}:`, error);
+        return { success: false, error: error.message };
+    }
+},
     
     // ========== УПРАВЛЕНИЕ ИМЕНЕМ ==========
     loadUserName() {
