@@ -1,6 +1,6 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 3.7 - ФИКСИРОВАННЫЙ USER_ID И API_BACKEND_URL
+// Версия 3.8 - ДОБАВЛЕНА ИНИЦИАЛИЗАЦИЯ МИКРОФОНА
 // ============================================
 
 class FrediDashboard {
@@ -9,8 +9,6 @@ class FrediDashboard {
     
     constructor() {
         // ========== ФИКСИРОВАННЫЙ USER_ID ==========
-        // ВРЕМЕННОЕ РЕШЕНИЕ: используем фиксированный ID
-        // ВАЖНО: замените 213102077 на свой реальный ID
         const FIXED_USER_ID = 213102077;
         const FIXED_USER_NAME = 'Андрей';
         
@@ -119,6 +117,7 @@ class FrediDashboard {
             await this.loadPsychologistThought();
             this.renderDashboard();
             this.startAutoRefresh();
+            this.initVoiceButton(); // ✅ ИНИЦИАЛИЗАЦИЯ МИКРОФОНА
             
             if (this.isTestCompleted) {
                 await this.initChallenges();
@@ -138,7 +137,6 @@ class FrediDashboard {
         try {
             console.log('🔍 Загрузка данных для user_id:', this.userId);
             
-            // Проверяем кэш
             const cached = this.cache.get(`user_status_${this.userId}`);
             if (cached && !forceRefresh) {
                 console.log('📦 Используем кэшированные данные статуса');
@@ -147,7 +145,6 @@ class FrediDashboard {
                 return;
             }
             
-            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
             const apiBase = this.getApiBaseUrl();
             const statusResponse = await fetch(`${apiBase}/api/user-status?user_id=${this.userId}`);
             const status = await statusResponse.json();
@@ -164,14 +161,12 @@ class FrediDashboard {
             console.log('📌 isTestCompleted:', this.isTestCompleted);
             console.log('📌 profileCode:', this.profileCode);
             
-            // Сохраняем в кэш
             this.cache.set(`user_status_${this.userId}`, {
                 isTestCompleted: this.isTestCompleted,
                 profileCode: this.profileCode,
                 timestamp: Date.now()
             });
             
-            // Если тест пройден, загружаем полный профиль
             if (this.isTestCompleted) {
                 const profileResponse = await fetch(`${apiBase}/api/get-profile?user_id=${this.userId}`);
                 this.userData = await profileResponse.json();
@@ -197,7 +192,6 @@ class FrediDashboard {
                 return;
             }
             
-            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
             const apiBase = this.getApiBaseUrl();
             const response = await fetch(`${apiBase}/api/get-profile?user_id=${this.userId}`);
             const data = await response.json();
@@ -227,7 +221,6 @@ class FrediDashboard {
                 return;
             }
             
-            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
             const apiBase = this.getApiBaseUrl();
             const response = await fetch(`${apiBase}/api/thought?user_id=${this.userId}`);
             const data = await response.json();
@@ -398,7 +391,7 @@ class FrediDashboard {
                 <div class="voice-input-dashboard" id="voiceInputDashboard">
                     <button class="voice-record-btn-large" id="dashboardVoiceBtn">
                         <span class="voice-icon">🎤</span>
-                        <span class="voice-text">Нажмите для записи</span>
+                        <span class="voice-text">Нажмите и удерживайте для записи</span>
                     </button>
                     <div class="voice-status-dashboard" id="voiceStatusDashboard" style="display: none;">
                         <span class="recording-pulse"></span>
@@ -482,6 +475,122 @@ class FrediDashboard {
     }
     
     // ============================================
+    // ИНИЦИАЛИЗАЦИЯ МИКРОФОНА (НОВЫЙ МЕТОД)
+    // ============================================
+    
+    initVoiceButton() {
+        const voiceBtn = document.getElementById('dashboardVoiceBtn');
+        if (!voiceBtn) {
+            console.log('🎤 Кнопка микрофона не найдена');
+            return;
+        }
+        
+        console.log('🎤 Инициализация микрофона на дашборде');
+        
+        // Отключаем выделение текста
+        voiceBtn.style.userSelect = 'none';
+        voiceBtn.style.webkitUserSelect = 'none';
+        voiceBtn.style.touchAction = 'manipulation';
+        
+        let pressTimer = null;
+        let isPressing = false;
+        let startY = 0, startX = 0;
+        
+        const onStart = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (e.type === 'touchstart') {
+                startY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
+            }
+            
+            if (isPressing) return;
+            isPressing = true;
+            voiceBtn.style.transform = 'scale(0.95)';
+            
+            pressTimer = setTimeout(() => {
+                if (isPressing) {
+                    voiceBtn.style.transform = '';
+                    if (typeof window.startVoiceRecording === 'function') {
+                        window.startVoiceRecording();
+                    } else {
+                        console.error('❌ window.startVoiceRecording не определён');
+                        this.showFloatingMessage('Ошибка: микрофон не инициализирован', 'error');
+                    }
+                }
+            }, 120);
+        };
+        
+        const onEnd = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+            
+            if (window.voiceRecorder?.isRecording && typeof window.stopVoiceRecording === 'function') {
+                window.stopVoiceRecording();
+            }
+            
+            isPressing = false;
+            voiceBtn.style.transform = '';
+        };
+        
+        const onCancel = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+            
+            if (window.voiceRecorder?.isRecording && typeof window.cancelVoiceRecording === 'function') {
+                window.cancelVoiceRecording();
+            }
+            
+            isPressing = false;
+            voiceBtn.style.transform = '';
+        };
+        
+        const checkSwipe = (e) => {
+            if (!isPressing) return;
+            
+            let currentY, currentX;
+            if (e.type === 'touchmove') {
+                currentY = e.touches[0].clientY;
+                currentX = e.touches[0].clientX;
+            } else {
+                currentY = e.clientY;
+                currentX = e.clientX;
+            }
+            
+            const deltaY = Math.abs(currentY - startY);
+            const deltaX = Math.abs(currentX - startX);
+            
+            if (deltaY > 30 || deltaX > 30) {
+                onCancel(e);
+            }
+        };
+        
+        // Mouse events
+        voiceBtn.addEventListener('mousedown', onStart);
+        voiceBtn.addEventListener('mouseup', onEnd);
+        voiceBtn.addEventListener('mouseleave', onCancel);
+        
+        // Touch events
+        voiceBtn.addEventListener('touchstart', onStart, { passive: false });
+        voiceBtn.addEventListener('touchend', onEnd, { passive: false });
+        voiceBtn.addEventListener('touchcancel', onCancel, { passive: false });
+        voiceBtn.addEventListener('touchmove', checkSwipe, { passive: false });
+        
+        console.log('🎤 Голосовая кнопка дашборда инициализирована');
+    }
+    
+    // ============================================
     // ОБРАБОТЧИКИ СОБЫТИЙ
     // ============================================
     
@@ -500,11 +609,7 @@ class FrediDashboard {
             });
         });
         
-        const voiceBtn = document.getElementById('dashboardVoiceBtn');
-        if (voiceBtn) {
-            console.log('🎤 Кнопка микрофона найдена');
-            // Микрофон обрабатывается в index.html через window.maxMicrophoneManager
-        }
+        // Микрофон уже инициализирован в initVoiceButton()
     }
     
     handleQuickAction(actionType) {
@@ -537,7 +642,6 @@ class FrediDashboard {
     
     async sendQuestionToBot(question) {
         try {
-            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
             const apiBase = this.getApiBaseUrl();
             const response = await fetch(`${apiBase}/api/chat/message`, {
                 method: 'POST',
@@ -770,7 +874,6 @@ class FrediDashboard {
     
     async saveMode(mode) {
         try {
-            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
             const apiBase = this.getApiBaseUrl();
             await fetch(`${apiBase}/api/save-mode`, {
                 method: 'POST',
