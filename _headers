@@ -1,4 +1,4 @@
-# Настройка MIME типов для статических файлов
+# Правильные MIME типы
 /styles.css
   Content-Type: text/css
 
@@ -11,6 +11,7 @@
 /*.json
   Content-Type: application/json
 
-# Прокси API запросов на бэкенд
-/api/*
-  X-Forwarded-Host: max-bot-1-ywpz.onrender.com
+# Отключаем кэширование для разработки
+/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Content-Type-Options: nosniff
