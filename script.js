@@ -1,6 +1,7 @@
 // ========== script.js ==========
 // ПОЛНАЯ ВЕРСИЯ МИНИ-ПРИЛОЖЕНИЯ
-// С ПРОВЕРКОЙ ПРОФИЛЯ ПРИ ВХОДЕ + ГОЛОСОВЫЕ СООБЩЕНИЯ + ТЕСТ
+// С ФИКСИРОВАННЫМ USER_ID ДЛЯ ТЕСТИРОВАНИЯ
+// Версия 2.0
 
 const App = {
     userId: null,
@@ -24,46 +25,29 @@ const App = {
     async init() {
         console.log('🚀 Фреди: инициализация');
         
-        // 🔥 ПОЛУЧАЕМ USER_ID ИЗ maxContext (устанавливается в index.html)
-        if (window.maxContext && window.maxContext.user_id) {
-            this.userId = window.maxContext.user_id;
-            console.log('👤 Получен ID от MAX:', this.userId);
+        // ========== ФИКСИРОВАННЫЙ USER_ID ==========
+        // ВРЕМЕННОЕ РЕШЕНИЕ: используем фиксированный ID
+        const FIXED_USER_ID = 213102077;
+        const FIXED_USER_NAME = 'Андрей';
+        
+        // Принудительно устанавливаем ID
+        this.userId = FIXED_USER_ID;
+        this.userName = FIXED_USER_NAME;
+        
+        // Сохраняем в localStorage для API запросов
+        localStorage.setItem('fredi_user_id', FIXED_USER_ID);
+        localStorage.setItem('userName', FIXED_USER_NAME);
+        
+        // Создаем глобальный контекст, если его нет
+        if (!window.maxContext) {
+            window.maxContext = {};
         }
+        window.maxContext.user_id = FIXED_USER_ID;
+        window.maxContext.user_name = FIXED_USER_NAME;
+        window.maxContext.initialized = true;
         
-        // Если нет из maxContext, пробуем из localStorage
-        if (!this.userId) {
-            const savedUserId = localStorage.getItem('fredi_user_id');
-            if (savedUserId) {
-                this.userId = savedUserId;
-                console.log('💾 Загружен user_id из localStorage:', this.userId);
-            }
-        }
-        
-        // Если нет user_id — показываем ошибку и не продолжаем
-if (!this.userId) {
-    console.error('❌ Нет user_id! Приложение должно открываться через MAX.');
-    const container = document.getElementById('screenContainer');
-    if (container) {
-        container.innerHTML = `
-            <div class="login-screen">
-                <div class="login-icon">🔐</div>
-                <div class="login-title">Ошибка входа</div>
-                <div class="login-text">
-                    Не удалось идентифицировать пользователя.<br>
-                    Пожалуйста, откройте приложение через MAX.
-                </div>
-                <button class="login-btn" onclick="location.reload()">🔄 ПОВТОРИТЬ</button>
-            </div>
-        `;
-    }
-    return;
-}
-        
-        // Сохраняем в localStorage
-        localStorage.setItem('fredi_user_id', this.userId);
-        
-        // Загружаем сохраненное имя
-        this.loadUserName();
+        console.log('🎯 FIXED USER_ID установлен:', this.userId);
+        console.log('👤 USER_NAME:', this.userName);
         
         // Скрываем шапку чата
         const chatHeader = document.getElementById('chatHeader');
@@ -124,84 +108,79 @@ if (!this.userId) {
     },
     
     // ========== API ВЫЗОВЫ (ИСПРАВЛЕНО) ==========
-async apiCall(endpoint, params = {}, method = 'GET') {
-    // ✅ ИСПРАВЛЕНО: используем window.API_BASE_URL из конфигурации
-    const baseUrl = window.API_BASE_URL || '';
-    
-    // Формируем полный URL
-    let url;
-    if (baseUrl) {
-        url = `${baseUrl}${endpoint}`;
-    } else {
-        url = new URL(endpoint, window.location.origin).toString();
-    }
-    
-    // Добавляем параметры для GET
-    if (method === 'GET' && Object.keys(params).length > 0) {
-        const urlObj = new URL(url);
-        Object.keys(params).forEach(key => {
-            if (params[key] !== undefined && params[key] !== null) {
-                urlObj.searchParams.append(key, params[key]);
-            }
-        });
-        url = urlObj.toString();
-    }
-    
-    const options = {
-        method: method,
-        headers: { 'Content-Type': 'application/json' }
-    };
-    
-    if (method !== 'GET' && Object.keys(params).length > 0) {
-        options.body = JSON.stringify(params);
-    }
-    
-    console.log(`📡 API ${method} ${url}`);
-    
-    try {
-        const response = await fetch(url, options);
-        const data = await response.json();
+    async apiCall(endpoint, params = {}, method = 'GET') {
+        // ✅ ИСПРАВЛЕНО: используем window.API_BASE_URL из конфигурации
+        const baseUrl = window.API_BASE_URL || 'https://max-bot-miniapp.onrender.com';
         
-        if (!response.ok) {
-            console.error(`HTTP Error ${response.status}:`, data);
-            return { success: false, error: data.error || `HTTP ${response.status}` };
+        // Формируем полный URL
+        let url = `${baseUrl}${endpoint}`;
+        
+        // Добавляем параметры для GET
+        if (method === 'GET' && Object.keys(params).length > 0) {
+            const urlObj = new URL(url);
+            Object.keys(params).forEach(key => {
+                if (params[key] !== undefined && params[key] !== null) {
+                    urlObj.searchParams.append(key, params[key]);
+                }
+            });
+            url = urlObj.toString();
         }
         
-        return data;
-    } catch (error) {
-        console.error(`API Error ${endpoint}:`, error);
-        return { success: false, error: error.message };
-    }
-},
+        const options = {
+            method: method,
+            headers: { 'Content-Type': 'application/json' }
+        };
+        
+        if (method !== 'GET' && Object.keys(params).length > 0) {
+            options.body = JSON.stringify(params);
+        }
+        
+        console.log(`📡 API ${method} ${url}`);
+        
+        try {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                console.error(`HTTP Error ${response.status}:`, data);
+                return { success: false, error: data.error || `HTTP ${response.status}` };
+            }
+            
+            return data;
+        } catch (error) {
+            console.error(`API Error ${endpoint}:`, error);
+            return { success: false, error: error.message };
+        }
+    },
 
-async sendQuestionToServer(question) {
-    return this.apiCall('/api/chat/message', {
-        user_id: this.userId,
-        message: question,
-        mode: this.currentMode
-    }, 'POST');
-},
+    async sendQuestionToServer(question) {
+        return this.apiCall('/api/chat/message', {
+            user_id: this.userId,
+            message: question,
+            mode: this.currentMode
+        }, 'POST');
+    },
 
-async saveModeToServer(mode) {
-    return this.apiCall('/api/save-mode', {
-        user_id: this.userId,
-        mode: mode
-    }, 'POST');
-},
+    async saveModeToServer(mode) {
+        return this.apiCall('/api/save-mode', {
+            user_id: this.userId,
+            mode: mode
+        }, 'POST');
+    },
 
-async getPsychologistThoughtFromServer() {
-    const response = await this.apiCall('/api/thought', {
-        user_id: this.userId
-    });
-    return response.thought;
-},
+    async getPsychologistThoughtFromServer() {
+        const response = await this.apiCall('/api/thought', {
+            user_id: this.userId
+        });
+        return response.thought;
+    },
 
-async getSmartQuestionsFromServer() {
-    const response = await this.apiCall('/api/smart-questions', {
-        user_id: this.userId
-    });
-    return response.questions || [];
-},
+    async getSmartQuestionsFromServer() {
+        const response = await this.apiCall('/api/smart-questions', {
+            user_id: this.userId
+        });
+        return response.questions || [];
+    },
     
     // ========== УПРАВЛЕНИЕ ИМЕНЕМ ==========
     loadUserName() {
