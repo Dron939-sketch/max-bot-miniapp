@@ -136,7 +136,7 @@ class FrediDashboard {
             }
             
             // Используем фиксированный API URL
-            const apiBase = window.API_BASE_URL || 'https://max-bot-miniapp.onrender.com';
+            const apiBase = window.API_BASE_URL || 'https://max-bot-1-ywpz.onrender.com';
             const statusResponse = await fetch(`${apiBase}/api/user-status?user_id=${this.userId}`);
             const status = await statusResponse.json();
             
