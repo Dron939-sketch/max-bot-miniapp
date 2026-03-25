@@ -1,0 +1,16 @@
+# Настройка MIME типов для статических файлов
+/styles.css
+  Content-Type: text/css
+
+/*.css
+  Content-Type: text/css
+
+/*.js
+  Content-Type: application/javascript
+
+/*.json
+  Content-Type: application/json
+
+# Прокси API запросов на бэкенд
+/api/*
+  X-Forwarded-Host: max-bot-1-ywpz.onrender.com
