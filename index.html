@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     
     <style>
+        /* ============================================
+           ВСЕ СТИЛИ ЗДЕСЬ (полный современный дизайн)
+           ============================================ */
+        
         * {
             margin: 0;
             padding: 0;
@@ -25,9 +29,6 @@
             --gradient-psychologist: linear-gradient(135deg, #ec489a 0%, #8b5cf6 100%);
             --gradient-trainer: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
             --accent-purple: #8b5cf6;
-            --accent-pink: #ec489a;
-            --accent-blue: #3b82f6;
-            --accent-orange: #f59e0b;
             --glass-border: rgba(255, 255, 255, 0.1);
             --text-primary: #ffffff;
             --text-secondary: #a0a3b0;
@@ -43,6 +44,7 @@
             height: 100vh;
         }
 
+        /* Анимированный фон */
         .animated-bg {
             position: fixed;
             top: 0;
@@ -68,25 +70,14 @@
             50% { transform: translate(-2%, -2%) scale(1.05); opacity: 1; }
         }
 
-        .noise-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: -1;
-        }
-
         .app {
             display: flex;
             height: 100vh;
             width: 100%;
             overflow: hidden;
-            position: relative;
         }
 
+        /* Левая панель */
         .chats-panel {
             width: 320px;
             background: var(--bg-sidebar);
@@ -211,6 +202,7 @@
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.03);
             cursor: pointer;
+            transition: all 0.3s;
         }
 
         .user-mini-profile:hover {
@@ -239,6 +231,7 @@
             color: var(--text-secondary);
         }
 
+        /* Правая панель */
         .chat-panel {
             flex: 1;
             display: flex;
@@ -318,11 +311,13 @@
             padding: 28px 32px;
         }
 
+        /* ========== ДАШБОРД ========== */
         .dashboard-container {
             max-width: 1300px;
             margin: 0 auto;
         }
 
+        /* Hero секция */
         .hero-section {
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.1));
             border-radius: 32px;
@@ -396,6 +391,7 @@
             color: var(--text-secondary);
         }
 
+        /* Голосовая кнопка */
         .voice-section {
             margin-bottom: 40px;
         }
@@ -451,6 +447,7 @@
             color: var(--text-secondary);
         }
 
+        /* Селектор режимов */
         .mode-selector {
             display: flex;
             gap: 12px;
@@ -489,6 +486,7 @@
         .mode-btn.psychologist.active { background: var(--gradient-psychologist); }
         .mode-btn.trainer.active { background: var(--gradient-trainer); }
 
+        /* Модули */
         .modules-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -529,6 +527,7 @@
             color: var(--text-secondary);
         }
 
+        /* Быстрые действия */
         .quick-actions {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
@@ -575,6 +574,7 @@
             font-weight: 500;
         }
 
+        /* Всплывающие сообщения */
         .floating-message {
             position: fixed;
             bottom: 28px;
@@ -682,6 +682,7 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Адаптивность */
         @media (max-width: 768px) {
             .chats-panel {
                 position: fixed;
@@ -731,6 +732,7 @@
             }
         }
 
+        /* Скроллбар */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -748,9 +750,9 @@
 </head>
 <body>
     <div class="animated-bg"></div>
-    <div class="noise-bg"></div>
     
     <div class="app">
+        <!-- Левая панель -->
         <div class="chats-panel" id="chatsPanel">
             <div class="chats-header">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -782,6 +784,7 @@
             </div>
         </div>
 
+        <!-- Правая панель -->
         <div class="chat-panel" id="chatPanel">
             <div class="chat-header">
                 <div class="chat-header-left">
@@ -819,48 +822,18 @@
 
     <script>
         // ============================================
-        // ФИКСИРОВАННЫЕ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (ПРИНУДИТЕЛЬНО)
+        // ВСЯ ЛОГИКА ЗДЕСЬ (полноценный фронтенд)
         // ============================================
         
-        const FIXED_USER_ID = 213102077;
-        const FIXED_USER_NAME = 'Андрей';
-        const FIXED_PROFILE_CODE = 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
-        
-        // Принудительно сохраняем в localStorage
-        localStorage.setItem('fredi_user_id', FIXED_USER_ID);
-        localStorage.setItem('userName', FIXED_USER_NAME);
-        
-        // Создаём глобальный контекст
-        window.maxContext = {
-            user_id: FIXED_USER_ID,
-            user_name: FIXED_USER_NAME,
-            initialized: true,
-            fixed: true,
-            force_skip_test: true
+        // Конфигурация
+        const CONFIG = {
+            API_BASE_URL: 'https://max-bot-1-ywpz.onrender.com',
+            USER_ID: 213102077,
+            USER_NAME: 'Андрей',
+            PROFILE_CODE: 'СБ-4_ТФ-4_УБ-4_ЧВ-4'
         };
         
-        // Устанавливаем API URL
-        window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
-        
-        console.log('🎯 ФИКСИРОВАННЫЙ USER_ID:', FIXED_USER_ID);
-        console.log('👤 USER_NAME:', FIXED_USER_NAME);
-        console.log('🌐 API_BASE_URL:', window.API_BASE_URL);
-        
-        // ============================================
-        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-        // ============================================
-        
-        let currentMode = 'psychologist';
-        let isRecording = false;
-        let recordingTimer = null;
-        let recordingSeconds = 0;
-        let mediaRecorder = null;
-        let audioChunks = [];
-        
-        // ============================================
-        // КОНФИГУРАЦИЯ РЕЖИМОВ
-        // ============================================
-        
+        // Режимы
         const MODES = {
             coach: {
                 id: 'coach',
@@ -868,8 +841,7 @@
                 emoji: '🔮',
                 color: '#3b82f6',
                 greeting: 'Привет! Я твой коуч. Давай найдём ответы внутри тебя.',
-                voicePrompt: 'Задай вопрос, я помогу найти решение',
-                description: 'Помогаю найти ответы внутри себя'
+                voicePrompt: 'Задай вопрос, я помогу найти решение'
             },
             psychologist: {
                 id: 'psychologist',
@@ -877,8 +849,7 @@
                 emoji: '🧠',
                 color: '#ec489a',
                 greeting: 'Здравствуйте. Я здесь, чтобы помочь разобраться в глубинных паттернах.',
-                voicePrompt: 'Расскажите, что вас беспокоит',
-                description: 'Исследую глубинные паттерны'
+                voicePrompt: 'Расскажите, что вас беспокоит'
             },
             trainer: {
                 id: 'trainer',
@@ -886,11 +857,11 @@
                 emoji: '⚡',
                 color: '#f59e0b',
                 greeting: 'Готов к работе! Давай достигать целей вместе!',
-                voicePrompt: 'Сформулируй задачу, получишь чёткий план',
-                description: 'Даю чёткие инструменты и задачи'
+                voicePrompt: 'Сформулируй задачу, получишь чёткий план'
             }
         };
         
+        // Модули для каждого режима
         const MODULES = {
             coach: [
                 { id: 'goals', name: 'Цели', icon: '🎯', desc: 'Постановка и достижение целей' },
@@ -912,9 +883,15 @@
             ]
         };
         
-        // ============================================
-        // ФУНКЦИИ UI
-        // ============================================
+        // Состояние
+        let currentMode = 'psychologist';
+        let isRecording = false;
+        let recordingTimer = null;
+        let recordingSeconds = 0;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        
+        // ========== UI ФУНКЦИИ ==========
         
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toastMessage');
@@ -953,13 +930,6 @@
             
             updateModeUI();
             renderDashboard();
-            
-            // Сохраняем режим на сервере (асинхронно, не ждём)
-            fetch(`${window.API_BASE_URL}/api/save-mode`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: FIXED_USER_ID, mode: mode })
-            }).catch(e => console.warn('Не удалось сохранить режим', e));
         }
         
         function playAudioResponse(text) {
@@ -972,9 +942,7 @@
             }
         }
         
-        // ============================================
-        // ГОЛОСОВАЯ ЗАПИСЬ
-        // ============================================
+        // ========== ГОЛОСОВАЯ ЗАПИСЬ ==========
         
         async function startRecording() {
             if (isRecording) return;
@@ -996,11 +964,11 @@
                         showToast('🎙️ Распознаю речь...', 'info');
                         
                         const formData = new FormData();
-                        formData.append('user_id', FIXED_USER_ID);
+                        formData.append('user_id', CONFIG.USER_ID);
                         formData.append('voice', audioBlob, 'voice.webm');
                         
                         try {
-                            const response = await fetch(`${window.API_BASE_URL}/api/voice/process`, {
+                            const response = await fetch(`${CONFIG.API_BASE_URL}/api/voice/process`, {
                                 method: 'POST',
                                 body: formData
                             });
@@ -1124,7 +1092,7 @@
         function initVoiceButton() {
             const voiceBtn = document.getElementById('mainVoiceBtn');
             if (!voiceBtn) {
-                console.log('🎤 Кнопка микрофона будет инициализирована позже');
+                console.log('🎤 Кнопка микрофона не найдена');
                 return;
             }
             
@@ -1193,9 +1161,7 @@
             voiceBtn.addEventListener('touchmove', checkSwipe, { passive: false });
         }
         
-        // ============================================
-        // ОТРИСОВКА ДАШБОРДА (СРАЗУ, БЕЗ ПРОВЕРКИ ТЕСТА)
-        // ============================================
+        // ========== ОТРИСОВКА ДАШБОРДА ==========
         
         function renderDashboard() {
             const container = document.getElementById('screenContainer');
@@ -1210,10 +1176,10 @@
                         <div class="user-greeting">
                             <div class="greeting-text">
                                 <h2>${modeConfig.emoji} ${modeConfig.greeting}</h2>
-                                <p>${FIXED_USER_NAME}, я здесь, чтобы помочь</p>
+                                <p>${CONFIG.USER_NAME}, я здесь, чтобы помочь</p>
                             </div>
                             <div class="profile-badge">
-                                <div class="profile-code" id="profileCode">${FIXED_PROFILE_CODE}</div>
+                                <div class="profile-code">${CONFIG.PROFILE_CODE}</div>
                                 <div style="font-size: 10px; color: var(--text-secondary);">ваш психотип</div>
                             </div>
                         </div>
@@ -1306,8 +1272,6 @@
             `;
             
             attachEvents();
-            
-            // Инициализируем кнопку микрофона после отрисовки
             setTimeout(() => initVoiceButton(), 100);
         }
         
@@ -1327,7 +1291,7 @@
             });
             
             document.querySelectorAll('.quick-action').forEach(action => {
-                action.addEventListener('click', async () => {
+                action.addEventListener('click', () => {
                     const actionType = action.dataset.action;
                     handleQuickAction(actionType);
                 });
@@ -1363,42 +1327,23 @@
             }
         }
         
-        // ============================================
-        // ИНИЦИАЛИЗАЦИЯ
-        // ============================================
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
         
         function init() {
             console.log('🚀 Инициализация приложения...');
-            console.log('👤 USER_ID:', FIXED_USER_ID);
-            console.log('👤 USER_NAME:', FIXED_USER_NAME);
-            console.log('🌐 API_URL:', window.API_BASE_URL);
+            console.log('👤 USER_ID:', CONFIG.USER_ID);
+            console.log('🌐 API_URL:', CONFIG.API_BASE_URL);
             
-            // Сразу показываем дашборд, не дожидаясь API
             renderDashboard();
             initMobileMenu();
             
-            // Обновляем имя в сайдбаре
             const userNameEl = document.getElementById('userName');
-            if (userNameEl) userNameEl.textContent = FIXED_USER_NAME;
+            if (userNameEl) userNameEl.textContent = CONFIG.USER_NAME;
             
             const userAvatarEl = document.getElementById('userMiniAvatar');
-            if (userAvatarEl) userAvatarEl.textContent = FIXED_USER_NAME.charAt(0);
-            
-            // Фоновые запросы к API (не блокируют UI)
-            setTimeout(() => {
-                // Загружаем реальные данные в фоне
-                fetch(`${window.API_BASE_URL}/api/get-profile?user_id=${FIXED_USER_ID}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data && data.ai_generated_profile) {
-                            console.log('✅ Профиль загружен с сервера');
-                        }
-                    })
-                    .catch(e => console.log('ℹ️ Режим офлайн, использую локальные данные'));
-            }, 1000);
+            if (userAvatarEl) userAvatarEl.textContent = CONFIG.USER_NAME.charAt(0);
         }
         
-        // Запуск после загрузки DOM
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
