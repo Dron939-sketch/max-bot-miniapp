@@ -2,15 +2,16 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Фреди">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#248bf2">
     <title>Фреди · виртуальный психолог</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#248bf2">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Фреди">
     <link rel="apple-touch-icon" href="/icon-192.png">
     
     <!-- MAX Bridge -->
@@ -18,7 +19,6 @@
     
     <!-- ========== КРИТИЧЕСКИ ВАЖНО: УСТАНОВКА API_BASE_URL ========== -->
     <script>
-        // ЖЁСТКАЯ УСТАНОВКА — ДОЛЖНО БЫТЬ САМЫМ ПЕРВЫМ СКРИПТОМ
         window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
         console.log('🌐 API_BASE_URL установлен:', window.API_BASE_URL);
         console.log('📍 Мини-приложение:', window.location.origin);
@@ -29,299 +29,28 @@
     <link rel="stylesheet" href="/styles.css">
     
     <style>
-        /* Дополнительные стили для мобильных устройств */
+        /* Глобальные стили для отключения выделения на всех кнопках */
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
         
-        body {
-            background-color: #0e1621;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .app {
-            display: flex;
-            height: 100vh;
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .chats-panel {
-            width: 280px;
-            background: var(--max-panel-bg, #17212b);
-            border-right: 1px solid var(--max-border, #0f1b26);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-            z-index: 20;
-        }
-        
-        @media (max-width: 768px) {
-            .chats-panel {
-                position: fixed;
-                left: 0;
-                top: 0;
-                height: 100%;
-                transform: translateX(-100%);
-                width: 280px;
-                box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-            }
-            .chats-panel.open {
-                transform: translateX(0);
-            }
-        }
-        
-        .chats-header {
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--max-border, #0f1b26);
-        }
-        
-        .chats-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        .new-chat-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
+        button, 
+        .btn,
+        [role="button"],
+        .voice-record-btn,
+        .voice-record-btn-large,
+        .module-card,
+        .quick-action,
+        .goal-item,
+        .mode-card {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-user-drag: none;
+            touch-action: manipulation;
             cursor: pointer;
-            color: var(--max-blue, #248bf2);
-            padding: 8px;
-        }
-        
-        .chats-search {
-            padding: 12px;
-        }
-        
-        .chats-search input {
-            width: 100%;
-            padding: 10px 14px;
-            background: var(--max-input-bg, #1f2c38);
-            border: none;
-            border-radius: 20px;
-            color: var(--max-text, white);
-            font-size: 14px;
-        }
-        
-        .chats-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-        
-        .chat-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .chat-item:hover {
-            background: var(--max-hover, #2b3b4a);
-        }
-        
-        .chat-item.active {
-            background: var(--max-hover, #2b3b4a);
-        }
-        
-        .chat-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin-right: 12px;
-        }
-        
-        .chat-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .chat-info {
-            flex: 1;
-        }
-        
-        .chat-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .chat-preview {
-            font-size: 12px;
-            color: var(--max-text-secondary, #8e9aa6);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .chat-time {
-            font-size: 11px;
-            color: var(--max-text-secondary, #8e9aa6);
-        }
-        
-        .chats-footer {
-            padding: 16px;
-            border-top: 1px solid var(--max-border, #0f1b26);
-        }
-        
-        .user-mini-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .user-mini-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-        }
-        
-        .user-mini-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .user-mini-name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .user-mini-status {
-            font-size: 11px;
-            color: var(--max-text-secondary, #8e9aa6);
-        }
-        
-        .chat-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--max-bg, #0e1621);
-            overflow: hidden;
-        }
-        
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: var(--max-header-bg, #1f2c38);
-            border-bottom: 1px solid var(--max-border, #0f1b26);
-        }
-        
-        .chat-header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--max-text, white);
-            padding: 8px;
-        }
-        
-        @media (max-width: 768px) {
-            .mobile-menu-btn {
-                display: block;
-            }
-        }
-        
-        .chat-header-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-        }
-        
-        .chat-header-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .chat-header-name {
-            font-weight: 600;
-            font-size: 16px;
-        }
-        
-        .chat-header-status {
-            font-size: 12px;
-            color: var(--max-text-secondary, #8e9aa6);
-        }
-        
-        .header-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--max-text, white);
-            padding: 8px;
-        }
-        
-        .screen-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .loading-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 300px;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .loading-spinner {
-            font-size: 48px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            margin-top: 20px;
-            font-size: 16px;
-            color: var(--max-text-secondary, #8e9aa6);
-        }
-        
-        .voice-input-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--glass-border, rgba(255,255,255,0.1));
-            justify-content: center;
         }
         
         .voice-record-btn {
@@ -340,7 +69,12 @@
             transition: transform 0.1s ease, background 0.2s ease;
             touch-action: manipulation;
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
         }
         
         .voice-record-btn:active {
@@ -350,11 +84,6 @@
         .voice-record-btn.recording {
             background: #ff4444;
             animation: pulse-red 1s infinite;
-            transform: scale(1.05);
-        }
-        
-        .voice-record-btn.recording:active {
-            transform: scale(1.05);
         }
         
         @keyframes pulse-red {
@@ -377,6 +106,7 @@
             backdrop-filter: blur(10px);
             pointer-events: none;
             font-family: monospace;
+            user-select: none;
         }
         
         .voice-status {
@@ -400,27 +130,6 @@
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
-        }
-        
-        .voice-hint-text {
-            font-size: 13px;
-            color: var(--max-text-secondary, #8e9aa6);
-            text-align: center;
-            margin-top: 8px;
-        }
-        
-        .voice-hold-hint {
-            display: inline-block;
-            background: rgba(36, 139, 242, 0.2);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            margin-left: 8px;
-            font-weight: normal;
-        }
-        
-        #hiddenAudioPlayer {
-            display: none;
         }
         
         .toast-message {
@@ -502,14 +211,7 @@
             color: var(--max-text, white);
         }
         
-        .modal-btn.primary:active {
-            transform: scale(0.98);
-        }
-        
         @media (max-width: 480px) {
-            .screen-container {
-                padding: 16px;
-            }
             .voice-record-btn {
                 width: 56px;
                 height: 56px;
@@ -517,362 +219,17 @@
             }
             .recording-timer {
                 bottom: 100px;
-                padding: 8px 20px;
                 font-size: 18px;
             }
             .toast-message {
                 bottom: 120px;
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-            .voice-hint-text {
-                font-size: 12px;
             }
         }
         
-        @supports (padding: max(0px)) {
-            .screen-container {
-                padding-left: max(20px, env(safe-area-inset-left));
-                padding-right: max(20px, env(safe-area-inset-right));
-                padding-bottom: max(20px, env(safe-area-inset-bottom));
+        @media (hover: none) and (pointer: coarse) {
+            .voice-record-btn:active {
+                transform: scale(0.95);
             }
-            .chat-header {
-                padding-top: max(12px, env(safe-area-inset-top));
-            }
-            .recording-timer {
-                bottom: max(120px, env(safe-area-inset-bottom) + 80px);
-            }
-            .toast-message {
-                bottom: max(140px, env(safe-area-inset-bottom) + 100px);
-            }
-        }
-        
-        /* Стили для экранов */
-        .onboarding-container, .context-container, .benefits-container, .final-profile-container, 
-        .ask-question-container, .choose-goal-container, .choose-mode-container, .thought-result-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .onboarding-content, .context-content, .benefits-content, .final-profile-content, 
-        .ask-question-content, .choose-goal-content, .choose-mode-content, .thought-result-content {
-            background: var(--max-panel-bg, #17212b);
-            border-radius: 24px;
-            padding: 24px;
-        }
-        
-        .onboarding-title {
-            font-size: 28px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-        
-        .onboarding-subtitle {
-            text-align: center;
-            color: var(--max-text-secondary, #8e9aa6);
-            margin-bottom: 24px;
-        }
-        
-        .onboarding-text {
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-        
-        .onboarding-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .onboarding-btn {
-            padding: 14px;
-            border-radius: 40px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        
-        .onboarding-btn.primary {
-            background: var(--max-blue, #248bf2);
-            border: none;
-            color: white;
-        }
-        
-        .onboarding-btn.secondary {
-            background: transparent;
-            border: 1px solid var(--max-border, #2b3b4a);
-            color: var(--max-text, white);
-        }
-        
-        .context-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .context-question {
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-        
-        .context-hint {
-            font-size: 14px;
-            color: var(--max-text-secondary, #8e9aa6);
-            margin-bottom: 16px;
-        }
-        
-        .context-input-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .context-input {
-            flex: 1;
-            padding: 14px;
-            background: var(--max-input-bg, #1f2c38);
-            border: none;
-            border-radius: 40px;
-            color: var(--max-text, white);
-            font-size: 16px;
-        }
-        
-        .context-submit {
-            background: var(--max-blue, #248bf2);
-            border: none;
-            border-radius: 40px;
-            padding: 14px 20px;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        
-        .context-skip {
-            background: transparent;
-            border: none;
-            color: var(--max-text-secondary, #8e9aa6);
-            padding: 12px;
-            cursor: pointer;
-            width: 100%;
-        }
-        
-        .gender-buttons {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .gender-btn {
-            flex: 1;
-            padding: 16px;
-            background: var(--max-input-bg, #1f2c38);
-            border: none;
-            border-radius: 40px;
-            color: var(--max-text, white);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .gender-emoji {
-            font-size: 32px;
-        }
-        
-        .profile-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .profile-emoji {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-        
-        .profile-title {
-            font-size: 24px;
-        }
-        
-        .profile-text {
-            line-height: 1.6;
-            margin-bottom: 24px;
-            white-space: pre-wrap;
-        }
-        
-        .profile-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .button-row {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .button-row .onboarding-btn {
-            flex: 1;
-        }
-        
-        .ask-question-title, .choose-goal-title, .choose-mode-title {
-            font-size: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        
-        .voice-hint {
-            background: var(--max-input-bg, #1f2c38);
-            padding: 12px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .question-input-area {
-            margin-bottom: 20px;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .question-input {
-            flex: 1;
-            padding: 14px;
-            background: var(--max-input-bg, #1f2c38);
-            border: none;
-            border-radius: 40px;
-            color: var(--max-text, white);
-            font-size: 16px;
-        }
-        
-        .question-submit {
-            background: var(--max-blue, #248bf2);
-            border: none;
-            border-radius: 40px;
-            padding: 14px 20px;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        
-        .mode-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .mode-card {
-            background: var(--max-input-bg, #1f2c38);
-            border-radius: 20px;
-            padding: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-        
-        .mode-card.selected {
-            border-color: var(--max-blue, #248bf2);
-            background: var(--max-hover, #2b3b4a);
-        }
-        
-        .mode-emoji {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-        
-        .mode-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .mode-desc, .mode-what, .mode-get {
-            font-size: 13px;
-            color: var(--max-text-secondary, #8e9aa6);
-            margin-top: 4px;
-        }
-        
-        .goals-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .goal-card {
-            background: var(--max-input-bg, #1f2c38);
-            border-radius: 16px;
-            padding: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .goal-card:hover {
-            background: var(--max-hover, #2b3b4a);
-        }
-        
-        .goal-name {
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-        
-        .goal-time, .goal-difficulty {
-            font-size: 12px;
-            color: var(--max-text-secondary, #8e9aa6);
-        }
-        
-        .thought-text {
-            line-height: 1.8;
-            margin-bottom: 24px;
-            white-space: pre-wrap;
-        }
-        
-        .question-back, .goal-back, .mode-back, .thought-buttons {
-            margin-top: 20px;
-        }
-        
-        .custom-goal {
-            margin-bottom: 16px;
-        }
-        
-        .dashboard-error {
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        
-        .error-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-        
-        .error-text {
-            color: var(--max-text-secondary, #8e9aa6);
-            margin-bottom: 24px;
-        }
-        
-        .test-required-btn {
-            background: var(--max-blue, #248bf2);
-            border: none;
-            border-radius: 40px;
-            padding: 12px 24px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -941,165 +298,6 @@
     <div id="toastMessage" class="toast-message"></div>
 
     <!-- ШАБЛОНЫ ЭКРАНОВ -->
-    <template id="onboardingScreen1">
-        <div class="onboarding-container">
-            <div class="onboarding-content">
-                <div class="onboarding-avatar">🧠</div>
-                <div class="onboarding-title">Фреди</div>
-                <div class="onboarding-subtitle">виртуальный психолог</div>
-                <div class="onboarding-text" id="onboardingText1">
-                    Привет, <span id="userNamePlaceholder">друг</span>!<br><br>
-                    Я — Фреди, виртуальный психолог.<br><br>
-                    🧐 Чтобы я понимал, с кем имею дело — давай пройдём тест.<br><br>
-                    📊 Всего 5 этапов:<br><br>
-                    1️⃣ Конфигурация восприятия<br>
-                    2️⃣ Конфигурация мышления<br>
-                    3️⃣ Конфигурация поведения<br>
-                    4️⃣ Точка роста<br>
-                    5️⃣ Глубинные паттерны<br><br>
-                    ⏱ 15 минут — и я буду знать о тебе больше.
-                </div>
-                <div class="onboarding-buttons">
-                    <button class="onboarding-btn primary" id="startTestBtn">🚀 Давай, погнали!</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="onboardingScreen2">
-        <div class="onboarding-container">
-            <div class="onboarding-content">
-                <div class="onboarding-text">
-                    🎭 Ну, вопрос хороший. Давайте по существу.<br><br>
-                    Я — экспериментальная модель. Андрей Мейстер создал меня, чтобы я работал, пока он отдыхает.<br><br>
-                    🧐 Что я умею:<br><br>
-                    • Вижу паттерны там, где вы видите просто день сурка<br>
-                    • Нахожу систему в ваших "случайных" решениях<br>
-                    • Понимаю, почему вы выбираете одних и тех же "не тех" людей<br>
-                    • Я реально беспристрастен — у меня нет плохого настроения<br><br>
-                    🎯 Конкретно по тесту:<br><br>
-                    1️⃣ Восприятие — поймём, какую линзу вы носите<br>
-                    2️⃣ Мышление — узнаем, как вы пережёвываете реальность<br>
-                    3️⃣ Поведение — посмотрим, что вы делаете "на автомате"<br>
-                    4️⃣ Точка роста — я скажу, куда вам двигаться<br>
-                    5️⃣ Глубинные паттерны — заглянем в детство и подсознание<br><br>
-                    ⏱ 15 минут — и я составлю ваш профиль.
-                </div>
-                <div class="onboarding-buttons">
-                    <button class="onboarding-btn primary" id="letsGoBtn">👌 Погнали!</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="contextCityScreen">
-        <div class="context-container">
-            <div class="context-content">
-                <div class="context-title">📝 Давайте познакомимся</div>
-                <div class="context-question">Из какого вы города?</div>
-                <div class="context-hint">(Напишите название)</div>
-                <div class="context-input-group">
-                    <input type="text" class="context-input" id="cityInput" placeholder="Например: Москва">
-                    <button class="context-submit" id="submitCityBtn">➡️</button>
-                </div>
-                <button class="context-skip" id="skipContextBtn">⏭ Позже</button>
-            </div>
-        </div>
-    </template>
-
-    <template id="contextGenderScreen">
-        <div class="context-container">
-            <div class="context-content">
-                <div class="context-title">📝 Давайте познакомимся</div>
-                <div class="context-question">Укажите ваш пол:</div>
-                <div class="gender-buttons">
-                    <button class="gender-btn" id="genderMaleBtn"><span class="gender-emoji">👨</span><span class="gender-text">Мужской</span></button>
-                    <button class="gender-btn" id="genderFemaleBtn"><span class="gender-emoji">👩</span><span class="gender-text">Женский</span></button>
-                </div>
-                <button class="context-skip" id="skipGenderBtn">⏭ Позже</button>
-            </div>
-        </div>
-    </template>
-
-    <template id="contextAgeScreen">
-        <div class="context-container">
-            <div class="context-content">
-                <div class="context-title">📝 Давайте познакомимся</div>
-                <div class="context-question">Сколько вам лет?</div>
-                <div class="context-hint">(Напишите число)</div>
-                <div class="context-input-group">
-                    <input type="number" class="context-input" id="ageInput" placeholder="Например: 35" min="1" max="120">
-                    <button class="context-submit" id="submitAgeBtn">➡️</button>
-                </div>
-                <button class="context-skip" id="skipAgeBtn">⏭ Позже</button>
-            </div>
-        </div>
-    </template>
-
-    <template id="contextCompleteScreen">
-        <div class="context-complete-container">
-            <div class="context-complete-content">
-                <div class="context-complete-title">✅ Отлично! Теперь я знаю о вас:</div>
-                <div class="context-info" id="contextInfo"></div>
-                <div class="context-next-text">
-                    🎯 Теперь я буду учитывать это в наших разговорах!<br><br>
-                    🧠 <b>ЧТО ДАЛЬШЕ?</b><br><br>
-                    Чтобы я мог помочь по-настоящему, нужно пройти тест (15 минут).
-                </div>
-                <div class="context-complete-buttons">
-                    <button class="onboarding-btn primary" id="startRealTestBtn">🚀 НАЧАТЬ ТЕСТ</button>
-                    <button class="onboarding-btn secondary" id="whatTestGivesBtn">📖 ЧТО ДАЕТ ТЕСТ</button>
-                    <button class="onboarding-btn secondary" id="askQuestionPreBtn">❓ ЗАДАТЬ ВОПРОС</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="benefitsScreen">
-        <div class="benefits-container">
-            <div class="benefits-content">
-                <div class="benefits-title">🔍 ЧТО ВЫ УЗНАЕТЕ О СЕБЕ:</div>
-                <div class="benefits-list">
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 1: КОНФИГУРАЦИЯ ВОСПРИЯТИЯ</div><div class="benefit-desc">Линза, через которую вы смотрите на мир.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 2: КОНФИГУРАЦИЯ МЫШЛЕНИЯ</div><div class="benefit-desc">Как вы обрабатываете информацию.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 3: КОНФИГУРАЦИЯ ПОВЕДЕНИЯ</div><div class="benefit-desc">Ваши автоматические реакции.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 4: ТОЧКА РОСТА</div><div class="benefit-desc">Где находится рычаг изменений.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 5: ГЛУБИННЫЕ ПАТТЕРНЫ</div><div class="benefit-desc">Тип привязанности, защитные механизмы, базовые убеждения.</div></div>
-                </div>
-                <div class="benefits-after">
-                    ⚡ <b>ПОСЛЕ ТЕСТА ВЫ ПОЛУЧИТЕ:</b><br><br>
-                    ✅ Полный психологический портрет<br>
-                    ✅ Глубинный анализ подсознательных паттернов<br>
-                    ✅ Выбор стиля общения: 🔮 КОУЧ | 🧠 ПСИХОЛОГ | ⚡ ТРЕНЕР<br>
-                    ✅ Индивидуальный навигатор по целям<br>
-                    ✅ Напоминания и поддержка на пути<br><br>
-                    ⏱ <b>Всего 15 минут</b>
-                </div>
-                <div class="benefits-buttons">
-                    <button class="onboarding-btn primary" id="startTestFromBenefitsBtn">🚀 НАЧАТЬ ТЕСТ</button>
-                    <button class="onboarding-btn secondary" id="backToContextBtn">◀️ НАЗАД</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="finalProfileScreen">
-        <div class="final-profile-container">
-            <div class="final-profile-content">
-                <div class="profile-header"><div class="profile-emoji">🧠</div><h2 class="profile-title">ВАШ ПСИХОЛОГИЧЕСКИЙ ПОРТРЕТ</h2></div>
-                <div class="profile-text" id="profileText"></div>
-                <div class="profile-buttons">
-                    <button class="onboarding-btn primary" id="psychologistThoughtBtn">🧠 МЫСЛИ ПСИХОЛОГА</button>
-                    <div class="button-row">
-                        <button class="onboarding-btn secondary" id="askQuestionBtn">🎤 ЗАДАТЬ ВОПРОС</button>
-                        <button class="onboarding-btn secondary" id="chooseGoalBtn">🎯 ВЫБРАТЬ ЦЕЛЬ</button>
-                    </div>
-                    <button class="onboarding-btn secondary" id="chooseModeBtn">⚙️ ВЫБРАТЬ РЕЖИМ</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
     <template id="askQuestionScreen">
         <div class="ask-question-container">
             <div class="ask-question-content">
@@ -1111,7 +309,13 @@
                         <button id="sendQuestionBtn" class="question-submit">➡️</button>
                     </div>
                     <div class="voice-input-area">
-                        <button id="voiceRecordBtn" class="voice-record-btn">🎤</button>
+                        <button id="voiceRecordBtn" class="voice-record-btn"
+                            onselectstart="return false"
+                            ondragstart="return false"
+                            oncontextmenu="return false"
+                            aria-label="Запись голоса"
+                            role="button"
+                            tabindex="0">🎤</button>
                     </div>
                     <div class="voice-status" id="voiceStatus" style="display: none;">
                         <span class="voice-status-dot"></span>
@@ -1127,59 +331,7 @@
         </div>
     </template>
 
-    <template id="chooseGoalScreen">
-        <div class="choose-goal-container">
-            <div class="choose-goal-content">
-                <h2 class="choose-goal-title">🎯 ВЫБЕРИТЕ ЦЕЛЬ</h2>
-                <div class="goal-description"><span id="goalUserName">друг</span>, я проанализировал твой профиль и подобрал цели, которые сейчас наиболее актуальны.</div>
-                <div class="profile-badge"><span class="badge-label">Твой профиль:</span><span class="badge-code" id="profileCode">СБ-4_ТФ-4_УБ-4_ЧВ-4</span></div>
-                <div class="mode-badge"><span class="badge-label">Режим:</span><span class="badge-code" id="modeCode">🔮 КОУЧ</span></div>
-                <div class="goals-list" id="goalsList"></div>
-                <div class="custom-goal"><button class="onboarding-btn secondary" id="customGoalBtn">✏️ Сформулирую сам</button></div>
-                <div class="goal-back"><button class="onboarding-btn secondary" id="backToProfileFromGoalBtn">◀️ НАЗАД</button></div>
-            </div>
-        </div>
-    </template>
-
-    <template id="chooseModeScreen">
-        <div class="choose-mode-container">
-            <div class="choose-mode-content">
-                <h2 class="choose-mode-title">⚙️ ВЫБЕРИТЕ РЕЖИМ</h2>
-                <div class="mode-description">Слушай, я могу быть разным. Хочешь конкретики — давай определимся, в каком качестве я сегодня буду полезен.</div>
-                <div class="profile-badge"><span class="badge-label">Твой профиль:</span><span class="badge-code" id="modeProfileCode">СБ-4_ТФ-4_УБ-4_ЧВ-4</span></div>
-                <div class="mode-cards" id="modeCards">
-                    <div class="mode-card" data-mode="coach"><div class="mode-emoji">🔮</div><div class="mode-name">КОУЧ</div><div class="mode-desc">Если хочешь, чтобы я помог тебе самому найти решения.</div><div class="mode-what">Задавать открытые вопросы, отражать твои мысли, направлять.</div><div class="mode-get">• Жить станет легче<br>• Появится больше радости от простых вещей<br>• Начнёшь замечать возможности вместо проблем</div></div>
-                    <div class="mode-card" data-mode="psychologist"><div class="mode-emoji">🧠</div><div class="mode-name">ПСИХОЛОГ</div><div class="mode-desc">Если хочешь копнуть вглубь, разобраться с причинами, а не следствиями.</div><div class="mode-what">Исследовать твои глубинные паттерны, защитные механизмы, прошлый опыт.</div><div class="mode-get">• Перестанешь реагировать на триггеры<br>• Исчезнут старые сценарии<br>• Поймёшь, откуда растут ноги у твоих страхов</div></div>
-                    <div class="mode-card" data-mode="trainer"><div class="mode-emoji">⚡</div><div class="mode-name">ТРЕНЕР</div><div class="mode-desc">Если нужны чёткие инструменты, навыки и результат.</div><div class="mode-what">Формировать твои поведенческие и мыслительные навыки.</div><div class="mode-get">• Научишься чётко формулировать мысли<br>• Освоишь алгоритмы ведения переговоров<br>• Сформируешь полезные привычки</div></div>
-                </div>
-                <div class="mode-back"><button class="onboarding-btn secondary" id="backToProfileFromModeBtn">◀️ НАЗАД</button></div>
-            </div>
-        </div>
-    </template>
-
-    <template id="psychologistThoughtLoadingScreen">
-        <div class="thought-loading-container">
-            <div class="thought-loading-content">
-                <div class="loading-spinner">🧠</div>
-                <div class="loading-text">Анализирую...</div>
-            </div>
-        </div>
-    </template>
-
-    <template id="psychologistThoughtResultScreen">
-        <div class="thought-result-container">
-            <div class="thought-result-content">
-                <div class="thought-header"><div class="thought-emoji">🧠</div><h2 class="thought-title">МЫСЛИ ПСИХОЛОГА</h2></div>
-                <div class="thought-text" id="thoughtText"></div>
-                <div class="thought-buttons">
-                    <button class="onboarding-btn secondary" id="backToProfileFromThoughtBtn">◀️ НАЗАД</button>
-                    <button class="onboarding-btn secondary" id="askQuestionFromThoughtBtn">🎤 ЗАДАТЬ ВОПРОС</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <!-- ========== СКРИПТЫ (ПРАВИЛЬНЫЕ ПУТИ БЕЗ /static/) ========== -->
+    <!-- ========== СКРИПТЫ ========== -->
     <script src="/api.js?v=20"></script>
     <script src="/context.js?v=20"></script>
     <script src="/onboarding.js?v=20"></script>
@@ -1193,28 +345,59 @@
     <script src="/psychometric.js?v=20"></script>
     <script src="/dashboard.js?v=20"></script>
 
-    <!-- ===== МИКРОФОН ДЛЯ MAX - УДЕРЖАНИЕ ДЛЯ ЗАПИСИ ===== -->
+    <!-- ===== МИКРОФОН ДЛЯ MAX - ПОЛНОЕ РЕШЕНИЕ ДЛЯ ВСЕХ БРАУЗЕРОВ ===== -->
     <script>
         class MaxMicrophoneManager {
             constructor() {
                 this.hasPermission = false;
                 this.isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
                 this.isAndroid = /Android/i.test(navigator.userAgent);
+                this.isYandex = /YaBrowser/i.test(navigator.userAgent);
+                this.audioContext = null;
             }
-
-            async requestMicrophone() {
-                console.log('🎤 Запрос микрофона...');
-                this.showLoading();
+            
+            async initAudioContext() {
+                if (!this.isIOS && !this.isYandex) return true;
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                    this.hasPermission = true;
-                    this.hideLoading();
-                    this.showToast('✅ Микрофон готов!', 'success');
-                    stream.getTracks().forEach(track => track.stop());
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.audioContext = new AudioContext();
+                    if (this.audioContext.state === 'suspended') {
+                        await this.audioContext.resume();
+                    }
                     return true;
+                } catch (e) {
+                    console.warn('AudioContext error:', e);
+                    return false;
+                }
+            }
+            
+            async requestMicrophone() {
+                console.log('🎤 Запрос доступа к микрофону...');
+                
+                if (this.isIOS || this.isYandex) {
+                    await this.initAudioContext();
+                }
+                
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            sampleRate: 48000,
+                            channelCount: 1
+                        } 
+                    });
+                    
+                    this.hasPermission = true;
+                    stream.getTracks().forEach(track => track.stop());
+                    this.showToast('✅ Микрофон готов!', 'success');
+                    return true;
+                    
                 } catch (error) {
-                    this.hideLoading();
                     console.error('❌ Ошибка:', error);
+                    this.hasPermission = false;
+                    
                     if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
                         this.showPermissionInstructions();
                     } else if (error.name === 'NotFoundError') {
@@ -1227,7 +410,7 @@
                     return false;
                 }
             }
-
+            
             showPermissionInstructions() {
                 let instructions = '';
                 if (this.isAndroid) {
@@ -1255,7 +438,7 @@
                 document.getElementById('microphoneRetryBtn')?.addEventListener('click', () => { modal.remove(); this.requestMicrophone(); });
                 document.getElementById('microphoneCloseBtn')?.addEventListener('click', () => modal.remove());
             }
-
+            
             showToast(message, type) {
                 const toast = document.getElementById('toastMessage');
                 if (toast) {
@@ -1264,24 +447,22 @@
                     setTimeout(() => toast.classList.remove('show'), 3000);
                 }
             }
-
-            showLoading() {
-                const btn = document.getElementById('voiceRecordBtn');
+            
+            showLoading(btn) {
                 if (btn && !btn.disabled) {
                     btn.textContent = '⏳';
                     btn.disabled = true;
                 }
             }
-
-            hideLoading() {
-                const btn = document.getElementById('voiceRecordBtn');
+            
+            hideLoading(btn) {
                 if (btn) {
                     btn.textContent = '🎤';
                     btn.disabled = false;
                 }
             }
         }
-
+        
         window.maxMicrophoneManager = new MaxMicrophoneManager();
         
         window.voiceRecorder = {
@@ -1292,7 +473,7 @@
             recordingTimer: null,
             stream: null
         };
-
+        
         function getSupportedMimeType() {
             const types = ['audio/webm', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/mpeg'];
             for (const type of types) {
@@ -1300,7 +481,7 @@
             }
             return 'audio/webm';
         }
-
+        
         async function startActualRecording() {
             if (window.voiceRecorder.isRecording) return false;
             
@@ -1362,7 +543,7 @@
                 return false;
             }
         }
-
+        
         window.startVoiceRecording = async function() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 window.maxMicrophoneManager.showToast('❌ Ваше устройство не поддерживает голосовой ввод', 'error');
@@ -1376,7 +557,7 @@
             
             return await startActualRecording();
         };
-
+        
         window.stopVoiceRecording = function() {
             if (window.voiceRecorder.mediaRecorder && window.voiceRecorder.isRecording) {
                 window.voiceRecorder.mediaRecorder.stop();
@@ -1393,7 +574,29 @@
                 if (voiceStatus) voiceStatus.style.display = 'none';
             }
         };
-
+        
+        window.cancelVoiceRecording = function() {
+            if (window.voiceRecorder.mediaRecorder && window.voiceRecorder.isRecording) {
+                window.voiceRecorder.mediaRecorder.onstop = null;
+                window.voiceRecorder.mediaRecorder.stop();
+                if (window.voiceRecorder.stream) {
+                    window.voiceRecorder.stream.getTracks().forEach(track => track.stop());
+                    window.voiceRecorder.stream = null;
+                }
+                window.voiceRecorder.isRecording = false;
+                window.voiceRecorder.audioChunks = [];
+                stopRecordingTimerUI();
+                
+                const voiceBtn = document.getElementById('voiceRecordBtn');
+                if (voiceBtn) {
+                    voiceBtn.textContent = '🎤';
+                    voiceBtn.classList.remove('recording');
+                }
+                const voiceStatus = document.getElementById('voiceStatus');
+                if (voiceStatus) voiceStatus.style.display = 'none';
+            }
+        };
+        
         function startRecordingTimerUI() {
             const timerEl = document.getElementById('recordingTimer');
             if (!timerEl) return;
@@ -1404,17 +607,12 @@
                     const elapsed = Math.floor((Date.now() - window.voiceRecorder.recordingStartTime) / 1000);
                     timerEl.textContent = `${elapsed}s`;
                     timerEl.style.display = 'block';
-                    
-                    if (elapsed >= 55) {
-                        timerEl.style.background = 'rgba(255,68,68,0.9)';
-                    }
-                    if (elapsed >= 60) {
-                        stopVoiceRecording();
-                    }
+                    if (elapsed >= 55) timerEl.style.background = 'rgba(255,68,68,0.9)';
+                    if (elapsed >= 60) stopVoiceRecording();
                 }
             }, 200);
         }
-
+        
         function stopRecordingTimerUI() {
             if (window.voiceRecorder.recordingTimer) {
                 clearInterval(window.voiceRecorder.recordingTimer);
@@ -1426,10 +624,9 @@
                 timerEl.style.background = 'rgba(0,0,0,0.9)';
             }
         }
-
+        
         async function sendVoiceToServer(audioBlob) {
             window.maxMicrophoneManager.showToast('🎙️ Распознаю речь...', 'info');
-            
             const formData = new FormData();
             formData.append('user_id', window.maxContext?.user_id || localStorage.getItem('fredi_user_id'));
             formData.append('voice', audioBlob, 'voice.webm');
@@ -1469,74 +666,85 @@
                 window.maxMicrophoneManager.showToast('❌ Ошибка отправки голоса', 'error');
             }
         }
-
-        // Инициализация кнопки с удержанием
+        
         function initVoiceButton() {
             const voiceBtn = document.getElementById('voiceRecordBtn');
             if (!voiceBtn) return;
             
             let pressTimer = null;
             let isPressing = false;
+            let startY = 0, startX = 0;
             
-            function onPointerDown(e) {
+            voiceBtn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                startY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
+            }, { passive: false });
+            
+            function onStart(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.type === 'touchstart') {
+                    startY = e.touches[0].clientY;
+                    startX = e.touches[0].clientX;
+                }
                 if (isPressing) return;
                 isPressing = true;
-                
                 voiceBtn.style.transform = 'scale(0.95)';
-                
-                pressTimer = setTimeout(async () => {
+                pressTimer = setTimeout(() => {
                     if (isPressing) {
-                        const started = await window.startVoiceRecording();
-                        if (!started) {
-                            isPressing = false;
-                            voiceBtn.style.transform = '';
-                        }
+                        voiceBtn.style.transform = '';
+                        window.startVoiceRecording();
                     }
                 }, 120);
             }
             
-            function onPointerUp(e) {
+            function onEnd(e) {
                 e.preventDefault();
-                
-                if (pressTimer) {
-                    clearTimeout(pressTimer);
-                    pressTimer = null;
-                }
-                
-                if (window.voiceRecorder.isRecording) {
-                    window.stopVoiceRecording();
-                }
-                
+                e.stopPropagation();
+                if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+                if (window.voiceRecorder?.isRecording) window.stopVoiceRecording();
                 isPressing = false;
                 voiceBtn.style.transform = '';
             }
             
-            function onPointerCancel(e) {
+            function onCancel(e) {
                 e.preventDefault();
-                if (pressTimer) {
-                    clearTimeout(pressTimer);
-                    pressTimer = null;
-                }
-                if (window.voiceRecorder.isRecording) {
-                    window.voiceRecorder.mediaRecorder?.stop();
-                    window.voiceRecorder.isRecording = false;
-                    window.maxMicrophoneManager.showToast('Запись отменена', 'info');
-                }
+                e.stopPropagation();
+                if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+                if (window.voiceRecorder?.isRecording) window.cancelVoiceRecording();
                 isPressing = false;
                 voiceBtn.style.transform = '';
             }
             
-            voiceBtn.addEventListener('pointerdown', onPointerDown);
-            voiceBtn.addEventListener('pointerup', onPointerUp);
-            voiceBtn.addEventListener('pointercancel', onPointerCancel);
+            function checkSwipe(e) {
+                if (!isPressing) return;
+                let currentY, currentX;
+                if (e.type === 'touchmove') {
+                    currentY = e.touches[0].clientY;
+                    currentX = e.touches[0].clientX;
+                } else {
+                    currentY = e.clientY;
+                    currentX = e.clientX;
+                }
+                const deltaY = Math.abs(currentY - startY);
+                const deltaX = Math.abs(currentX - startX);
+                if (deltaY > 30 || deltaX > 30) onCancel(e);
+            }
             
-            console.log('🎤 Голосовая кнопка инициализирована (удержание для записи)');
+            voiceBtn.addEventListener('mousedown', onStart);
+            voiceBtn.addEventListener('mouseup', onEnd);
+            voiceBtn.addEventListener('mouseleave', onCancel);
+            voiceBtn.addEventListener('touchstart', onStart, { passive: false });
+            voiceBtn.addEventListener('touchend', onEnd, { passive: false });
+            voiceBtn.addEventListener('touchcancel', onCancel, { passive: false });
+            voiceBtn.addEventListener('touchmove', checkSwipe, { passive: false });
+            
+            console.log('🎤 Голосовая кнопка инициализирована');
         }
-
+        
         document.addEventListener('DOMContentLoaded', () => {
             initVoiceButton();
-            
             if (window.maxMicrophoneManager.isIOS) {
                 document.body.addEventListener('touchstart', () => {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1547,17 +755,16 @@
                 }, { once: true });
             }
         });
-
+        
         window.sendVoiceToServer = sendVoiceToServer;
         window.showToast = window.maxMicrophoneManager.showToast.bind(window.maxMicrophoneManager);
         
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(error => console.error('Service Worker error:', error));
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
             });
         }
         
-        // Инициализация dashboard
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof FrediDashboard !== 'undefined') {
                 window.dashboard = new FrediDashboard();
