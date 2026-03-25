@@ -1,6 +1,6 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 3.8 - ДОБАВЛЕНА ИНИЦИАЛИЗАЦИЯ МИКРОФОНА
+// Версия 3.9 - ИСПРАВЛЕНА ИНИЦИАЛИЗАЦИЯ МИКРОФОНА И ДУБЛИРОВАНИЕ
 // ============================================
 
 class FrediDashboard {
@@ -8,6 +8,14 @@ class FrediDashboard {
     static API_BACKEND_URL = 'https://max-bot-1-ywpz.onrender.com';
     
     constructor() {
+        // ========== ПРЕДОТВРАЩАЕМ МНОЖЕСТВЕННУЮ ИНИЦИАЛИЗАЦИЮ ==========
+        if (window.dashboardInstance) {
+            console.log('⚠️ Dashboard уже существует, возвращаем существующий экземпляр');
+            return window.dashboardInstance;
+        }
+        
+        window.dashboardInstance = this;
+        
         // ========== ФИКСИРОВАННЫЙ USER_ID ==========
         const FIXED_USER_ID = 213102077;
         const FIXED_USER_NAME = 'Андрей';
@@ -28,7 +36,7 @@ class FrediDashboard {
             fixed: true
         };
         
-        console.log('🎯 FrediDashboard инициализирован');
+        console.log('🎯 FrediDashboard инициализирован (единственный экземпляр)');
         console.log('👤 user_id (фиксированный):', this.userId);
         console.log('👤 user_name:', this.userName);
         console.log('🌐 API_BACKEND_URL:', FrediDashboard.API_BACKEND_URL);
@@ -43,6 +51,7 @@ class FrediDashboard {
         this.profileText = null;
         this.psychologistThought = null;
         this.refreshInterval = null;
+        this.voiceObserver = null;
         
         // Кэш-менеджер
         this.cache = new Map();
@@ -117,7 +126,11 @@ class FrediDashboard {
             await this.loadPsychologistThought();
             this.renderDashboard();
             this.startAutoRefresh();
-            this.initVoiceButton(); // ✅ ИНИЦИАЛИЗАЦИЯ МИКРОФОНА
+            
+            // Отложенная инициализация микрофона
+            setTimeout(() => {
+                this.initVoiceButton();
+            }, 500);
             
             if (this.isTestCompleted) {
                 await this.initChallenges();
@@ -442,6 +455,11 @@ class FrediDashboard {
         `;
         
         this.attachDashboardEvents();
+        
+        // Инициализируем микрофон ПОСЛЕ отрисовки
+        setTimeout(() => {
+            this.initVoiceButton();
+        }, 200);
     }
     
     // ============================================
@@ -475,16 +493,65 @@ class FrediDashboard {
     }
     
     // ============================================
-    // ИНИЦИАЛИЗАЦИЯ МИКРОФОНА (НОВЫЙ МЕТОД)
+    // ИНИЦИАЛИЗАЦИЯ МИКРОФОНА (ИСПРАВЛЕННАЯ)
     // ============================================
     
     initVoiceButton() {
-        const voiceBtn = document.getElementById('dashboardVoiceBtn');
-        if (!voiceBtn) {
-            console.log('🎤 Кнопка микрофона не найдена');
+        // Закрываем предыдущий observer если есть
+        if (this.voiceObserver) {
+            this.voiceObserver.disconnect();
+        }
+        
+        const waitForVoiceButton = () => {
+            const voiceBtn = document.getElementById('dashboardVoiceBtn');
+            if (voiceBtn) {
+                this.setupVoiceButton(voiceBtn);
+                return true;
+            }
+            return false;
+        };
+        
+        // Пробуем найти сразу
+        if (waitForVoiceButton()) {
             return;
         }
         
+        // Если не нашли, ждём появления
+        this.voiceObserver = new MutationObserver((mutations, obs) => {
+            if (waitForVoiceButton()) {
+                obs.disconnect();
+                this.voiceObserver = null;
+            }
+        });
+        
+        this.voiceObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+        // Таймаут на случай, если кнопка так и не появится
+        setTimeout(() => {
+            if (this.voiceObserver) {
+                this.voiceObserver.disconnect();
+                this.voiceObserver = null;
+                
+                const voiceBtn = document.getElementById('dashboardVoiceBtn');
+                if (!voiceBtn) {
+                    console.warn('⚠️ Кнопка микрофона не найдена после ожидания');
+                    this.createVoiceButtonIfNeeded();
+                }
+            }
+        }, 5000);
+    }
+    
+    setupVoiceButton(voiceBtn) {
+        // Предотвращаем повторную инициализацию
+        if (voiceBtn.dataset.initialized === 'true') {
+            console.log('🎤 Кнопка уже инициализирована');
+            return;
+        }
+        
+        voiceBtn.dataset.initialized = 'true';
         console.log('🎤 Инициализация микрофона на дашборде');
         
         // Отключаем выделение текста
@@ -587,7 +654,31 @@ class FrediDashboard {
         voiceBtn.addEventListener('touchcancel', onCancel, { passive: false });
         voiceBtn.addEventListener('touchmove', checkSwipe, { passive: false });
         
-        console.log('🎤 Голосовая кнопка дашборда инициализирована');
+        console.log('🎤 Голосовая кнопка дашборда успешно инициализирована');
+    }
+    
+    createVoiceButtonIfNeeded() {
+        // Если кнопка всё ещё не найдена, создаём её динамически
+        const voiceContainer = document.getElementById('voiceInputDashboard');
+        if (!voiceContainer) return;
+        
+        const existingBtn = document.getElementById('dashboardVoiceBtn');
+        if (existingBtn) return;
+        
+        console.log('🔧 Создаём кнопку микрофона динамически');
+        
+        const voiceBtn = document.createElement('button');
+        voiceBtn.id = 'dashboardVoiceBtn';
+        voiceBtn.className = 'voice-record-btn-large';
+        voiceBtn.innerHTML = `
+            <span class="voice-icon">🎤</span>
+            <span class="voice-text">Нажмите и удерживайте для записи</span>
+        `;
+        
+        voiceContainer.insertBefore(voiceBtn, voiceContainer.firstChild);
+        
+        // Инициализируем созданную кнопку
+        this.setupVoiceButton(voiceBtn);
     }
     
     // ============================================
@@ -608,8 +699,6 @@ class FrediDashboard {
                 this.handleQuickAction(actionType);
             });
         });
-        
-        // Микрофон уже инициализирован в initVoiceButton()
     }
     
     handleQuickAction(actionType) {
@@ -946,6 +1035,25 @@ class FrediDashboard {
     }
     
     // ============================================
+    // ОЧИСТКА РЕСУРСОВ
+    // ============================================
+    
+    destroy() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+            this.refreshInterval = null;
+        }
+        
+        if (this.voiceObserver) {
+            this.voiceObserver.disconnect();
+            this.voiceObserver = null;
+        }
+        
+        this.cache.clear();
+        console.log('🗑️ Dashboard уничтожен');
+    }
+    
+    // ============================================
     // ЧЕЛЛЕНДЖИ И ДВОЙНИКИ (заглушки)
     // ============================================
     
@@ -958,10 +1066,20 @@ class FrediDashboard {
     }
 }
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 DOM загружен, создаём FrediDashboard');
-    window.dashboard = new FrediDashboard();
-});
+// ============================================
+// ЕДИНАЯ ИНИЦИАЛИЗАЦИЯ
+// ============================================
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!window.dashboardInstance) {
+            window.dashboard = new FrediDashboard();
+        }
+    });
+} else {
+    if (!window.dashboardInstance) {
+        window.dashboard = new FrediDashboard();
+    }
+}
 
 window.FrediDashboard = FrediDashboard;
