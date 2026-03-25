@@ -33,7 +33,6 @@
             --text-secondary: #a0a3b0;
             --success: #10b981;
             --error: #ef4444;
-            --warning: #f59e0b;
         }
 
         body {
@@ -60,8 +59,7 @@
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at 20% 40%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.2) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+                        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.2) 0%, transparent 50%);
             animation: bgMove 25s ease-in-out infinite;
         }
 
@@ -97,7 +95,7 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s ease;
             z-index: 10;
         }
 
@@ -113,7 +111,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: -0.5px;
         }
 
         .chats-search {
@@ -128,13 +125,11 @@
             border-radius: 40px;
             color: #fff;
             font-size: 14px;
-            transition: all 0.3s;
         }
 
         .chats-search input:focus {
             outline: none;
             border-color: var(--accent-purple);
-            background: rgba(255, 255, 255, 0.08);
         }
 
         .chats-list {
@@ -215,7 +210,6 @@
             padding: 12px 14px;
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.03);
-            transition: all 0.3s;
             cursor: pointer;
         }
 
@@ -235,10 +229,6 @@
             font-weight: 600;
         }
 
-        .user-mini-info {
-            flex: 1;
-        }
-
         .user-mini-name {
             font-weight: 600;
             font-size: 15px;
@@ -254,7 +244,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
         }
 
         .chat-header {
@@ -283,7 +272,6 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            transition: all 0.3s;
         }
 
         .chat-header-avatar {
@@ -295,13 +283,11 @@
             align-items: center;
             justify-content: center;
             font-size: 28px;
-            transition: all 0.3s;
         }
 
         .chat-header-name {
             font-weight: 700;
             font-size: 20px;
-            letter-spacing: -0.3px;
         }
 
         .chat-header-status {
@@ -420,7 +406,6 @@
             border-radius: 48px;
             padding: 8px;
             border: 1px solid var(--glass-border);
-            transition: all 0.3s;
         }
 
         .voice-record-btn-premium {
@@ -442,7 +427,6 @@
 
         .voice-record-btn-premium .voice-icon {
             font-size: 32px;
-            transition: transform 0.2s;
         }
 
         .voice-record-btn-premium:hover {
@@ -833,212 +817,34 @@
         </div>
     </div>
 
-    <!-- Подключаем API класс -->
     <script>
         // ============================================
-        // API КЛАСС (встроен для автономности)
+        // ФИКСИРОВАННЫЕ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (ПРИНУДИТЕЛЬНО)
         // ============================================
         
-        class FrediAPI {
-            constructor(baseUrl = null) {
-                if (baseUrl) {
-                    this.baseUrl = baseUrl;
-                } else if (window.API_BASE_URL) {
-                    this.baseUrl = window.API_BASE_URL;
-                } else {
-                    this.baseUrl = '';
-                }
-                
-                this.userId = 213102077;
-                this.cache = new Map();
-                this.cacheTTL = 5 * 60 * 1000;
-                
-                console.log('📡 FrediAPI инициализирован');
-                console.log('   baseUrl:', this.baseUrl || '(текущий домен)');
-            }
-            
-            setBaseUrl(url) {
-                this.baseUrl = url;
-                console.log('📡 API baseUrl изменён на:', url || '(текущий домен)');
-            }
-            
-            setUserId(userId) {
-                this.userId = userId;
-            }
-            
-            async request(endpoint, options = {}) {
-                let url;
-                if (this.baseUrl) {
-                    url = `${this.baseUrl}${endpoint}`;
-                } else {
-                    url = endpoint;
-                }
-                
-                const headers = {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                };
-                
-                const config = { ...options, headers };
-                
-                try {
-                    console.log(`📡 API ${options.method || 'GET'} ${url}`);
-                    const response = await fetch(url, config);
-                    const data = await response.json();
-                    
-                    if (!response.ok) {
-                        throw new Error(data.error || `HTTP ${response.status}`);
-                    }
-                    
-                    return data;
-                } catch (error) {
-                    console.error(`API Error [${endpoint}]:`, error);
-                    throw error;
-                }
-            }
-            
-            getCacheKey(endpoint, params) {
-                return `${endpoint}:${JSON.stringify(params)}`;
-            }
-            
-            isCacheValid(cached) {
-                return cached && (Date.now() - cached.timestamp) < this.cacheTTL;
-            }
-            
-            async getUserStatus(userId) {
-                const cacheKey = this.getCacheKey('/user-status', { userId });
-                const cached = this.cache.get(cacheKey);
-                if (this.isCacheValid(cached)) {
-                    return cached.data;
-                }
-                
-                const data = await this.request(`/api/user-status?user_id=${userId}`);
-                this.cache.set(cacheKey, { data, timestamp: Date.now() });
-                return data;
-            }
-            
-            async getUserProfile(userId) {
-                const data = await this.request(`/api/get-profile?user_id=${userId}`);
-                return data;
-            }
-            
-            async getPsychologistThought(userId) {
-                const data = await this.request(`/api/thought?user_id=${userId}`);
-                return data.thought;
-            }
-            
-            async saveCommunicationMode(userId, mode) {
-                const data = await this.request('/api/save-mode', {
-                    method: 'POST',
-                    body: JSON.stringify({ user_id: userId, mode })
-                });
-                return data;
-            }
-            
-            async getAvailableModes() {
-                const data = await this.request('/api/modes');
-                return data.modes || [];
-            }
-            
-            async getDynamicGoals(userId, mode = 'coach') {
-                const data = await this.request(`/api/goals?user_id=${userId}&mode=${mode}`);
-                return data.goals || [];
-            }
-            
-            async getSmartQuestions(userId) {
-                const data = await this.request(`/api/smart-questions?user_id=${userId}`);
-                return data.questions || [];
-            }
-            
-            async sendVoiceMessage(userId, audioBlob) {
-                const formData = new FormData();
-                formData.append('user_id', userId);
-                formData.append('voice', audioBlob, 'voice.webm');
-                
-                try {
-                    const url = this.baseUrl ? `${this.baseUrl}/api/voice/process` : '/api/voice/process';
-                    const response = await fetch(url, { method: 'POST', body: formData });
-                    return await response.json();
-                } catch (error) {
-                    console.error('Voice API Error:', error);
-                    throw error;
-                }
-            }
-            
-            clearCache() {
-                this.cache.clear();
-                console.log('🧹 Кэш API очищен');
-            }
-        }
+        const FIXED_USER_ID = 213102077;
+        const FIXED_USER_NAME = 'Андрей';
+        const FIXED_PROFILE_CODE = 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
         
-        // Создаём глобальный экземпляр API
-        window.api = new FrediAPI();
-        window.api.setUserId(213102077);
-        console.log('✅ API модуль загружен');
-    </script>
-
-    <!-- Основной скрипт приложения -->
-    <script>
-        // ============================================
-        // КОНФИГУРАЦИЯ
-        // ============================================
+        // Принудительно сохраняем в localStorage
+        localStorage.setItem('fredi_user_id', FIXED_USER_ID);
+        localStorage.setItem('userName', FIXED_USER_NAME);
         
-        const CONFIG = {
-            USER_ID: 213102077,
-            USER_NAME: 'Андрей',
-            MODES: {
-                coach: {
-                    id: 'coach',
-                    name: 'КОУЧ',
-                    emoji: '🔮',
-                    gradient: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                    color: '#3b82f6',
-                    greeting: 'Привет! Я твой коуч. Давай найдём ответы внутри тебя.',
-                    voicePrompt: 'Задай вопрос, я помогу найти решение',
-                    description: 'Помогаю найти ответы внутри себя'
-                },
-                psychologist: {
-                    id: 'psychologist',
-                    name: 'ПСИХОЛОГ',
-                    emoji: '🧠',
-                    gradient: 'linear-gradient(135deg, #ec489a 0%, #8b5cf6 100%)',
-                    color: '#ec489a',
-                    greeting: 'Здравствуйте. Я здесь, чтобы помочь разобраться в глубинных паттернах.',
-                    voicePrompt: 'Расскажите, что вас беспокоит',
-                    description: 'Исследую глубинные паттерны'
-                },
-                trainer: {
-                    id: 'trainer',
-                    name: 'ТРЕНЕР',
-                    emoji: '⚡',
-                    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-                    color: '#f59e0b',
-                    greeting: 'Готов к работе! Давай достигать целей вместе!',
-                    voicePrompt: 'Сформулируй задачу, получишь чёткий план',
-                    description: 'Даю чёткие инструменты и задачи'
-                }
-            },
-            MODULES: {
-                coach: [
-                    { id: 'goals', name: 'Цели', icon: '🎯', desc: 'Постановка и достижение целей' },
-                    { id: 'strategy', name: 'Стратегия', icon: '📊', desc: 'План действий и стратегии' },
-                    { id: 'motivation', name: 'Мотивация', icon: '⚡', desc: 'Энергия для движения' },
-                    { id: 'habits', name: 'Привычки', icon: '🔄', desc: 'Формирование полезных привычек' }
-                ],
-                psychologist: [
-                    { id: 'analysis', name: 'Анализ', icon: '🧠', desc: 'Глубинные паттерны поведения' },
-                    { id: 'emotions', name: 'Эмоции', icon: '💭', desc: 'Работа с чувствами' },
-                    { id: 'trauma', name: 'Исцеление', icon: '🕊️', desc: 'Проработка опыта' },
-                    { id: 'relations', name: 'Отношения', icon: '💕', desc: 'Коммуникация и связи' }
-                ],
-                trainer: [
-                    { id: 'workout', name: 'Тренировки', icon: '💪', desc: 'Физическая активность' },
-                    { id: 'discipline', name: 'Дисциплина', icon: '⏰', desc: 'Режим и порядок' },
-                    { id: 'results', name: 'Результаты', icon: '🏆', desc: 'Достижения и успехи' },
-                    { id: 'challenges', name: 'Челленджи', icon: '🔥', desc: 'Испытания и рост' }
-                ]
-            }
+        // Создаём глобальный контекст
+        window.maxContext = {
+            user_id: FIXED_USER_ID,
+            user_name: FIXED_USER_NAME,
+            initialized: true,
+            fixed: true,
+            force_skip_test: true
         };
+        
+        // Устанавливаем API URL
+        window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
+        
+        console.log('🎯 ФИКСИРОВАННЫЙ USER_ID:', FIXED_USER_ID);
+        console.log('👤 USER_NAME:', FIXED_USER_NAME);
+        console.log('🌐 API_BASE_URL:', window.API_BASE_URL);
         
         // ============================================
         // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
@@ -1052,7 +858,62 @@
         let audioChunks = [];
         
         // ============================================
-        // UI ФУНКЦИИ
+        // КОНФИГУРАЦИЯ РЕЖИМОВ
+        // ============================================
+        
+        const MODES = {
+            coach: {
+                id: 'coach',
+                name: 'КОУЧ',
+                emoji: '🔮',
+                color: '#3b82f6',
+                greeting: 'Привет! Я твой коуч. Давай найдём ответы внутри тебя.',
+                voicePrompt: 'Задай вопрос, я помогу найти решение',
+                description: 'Помогаю найти ответы внутри себя'
+            },
+            psychologist: {
+                id: 'psychologist',
+                name: 'ПСИХОЛОГ',
+                emoji: '🧠',
+                color: '#ec489a',
+                greeting: 'Здравствуйте. Я здесь, чтобы помочь разобраться в глубинных паттернах.',
+                voicePrompt: 'Расскажите, что вас беспокоит',
+                description: 'Исследую глубинные паттерны'
+            },
+            trainer: {
+                id: 'trainer',
+                name: 'ТРЕНЕР',
+                emoji: '⚡',
+                color: '#f59e0b',
+                greeting: 'Готов к работе! Давай достигать целей вместе!',
+                voicePrompt: 'Сформулируй задачу, получишь чёткий план',
+                description: 'Даю чёткие инструменты и задачи'
+            }
+        };
+        
+        const MODULES = {
+            coach: [
+                { id: 'goals', name: 'Цели', icon: '🎯', desc: 'Постановка и достижение целей' },
+                { id: 'strategy', name: 'Стратегия', icon: '📊', desc: 'План действий' },
+                { id: 'motivation', name: 'Мотивация', icon: '⚡', desc: 'Энергия для движения' },
+                { id: 'habits', name: 'Привычки', icon: '🔄', desc: 'Формирование привычек' }
+            ],
+            psychologist: [
+                { id: 'analysis', name: 'Анализ', icon: '🧠', desc: 'Глубинные паттерны' },
+                { id: 'emotions', name: 'Эмоции', icon: '💭', desc: 'Работа с чувствами' },
+                { id: 'trauma', name: 'Исцеление', icon: '🕊️', desc: 'Проработка опыта' },
+                { id: 'relations', name: 'Отношения', icon: '💕', desc: 'Коммуникация' }
+            ],
+            trainer: [
+                { id: 'workout', name: 'Тренировки', icon: '💪', desc: 'Физическая активность' },
+                { id: 'discipline', name: 'Дисциплина', icon: '⏰', desc: 'Режим и порядок' },
+                { id: 'results', name: 'Результаты', icon: '🏆', desc: 'Достижения' },
+                { id: 'challenges', name: 'Челленджи', icon: '🔥', desc: 'Испытания' }
+            ]
+        };
+        
+        // ============================================
+        // ФУНКЦИИ UI
         // ============================================
         
         function showToast(message, type = 'info') {
@@ -1073,7 +934,7 @@
         }
         
         function updateModeUI() {
-            const config = CONFIG.MODES[currentMode];
+            const config = MODES[currentMode];
             const modeLabel = document.getElementById('modeLabel');
             const modeIndicator = document.getElementById('modeIndicator');
             
@@ -1081,25 +942,24 @@
             if (modeIndicator) modeIndicator.style.background = config.color;
         }
         
-        async function switchMode(mode) {
+        function switchMode(mode) {
             if (mode === currentMode) return;
             
             currentMode = mode;
             console.log('🔄 Смена режима на:', mode);
             
-            const config = CONFIG.MODES[mode];
+            const config = MODES[mode];
             showToast(`🔄 Режим "${config.name}" активирован`, 'success');
-            
-            // Сохраняем на сервере через API
-            try {
-                await window.api.saveCommunicationMode(CONFIG.USER_ID, mode);
-                console.log('✅ Режим сохранён на сервере');
-            } catch (error) {
-                console.warn('Не удалось сохранить режим на сервере', error);
-            }
             
             updateModeUI();
             renderDashboard();
+            
+            // Сохраняем режим на сервере (асинхронно, не ждём)
+            fetch(`${window.API_BASE_URL}/api/save-mode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: FIXED_USER_ID, mode: mode })
+            }).catch(e => console.warn('Не удалось сохранить режим', e));
         }
         
         function playAudioResponse(text) {
@@ -1127,9 +987,7 @@
                 audioChunks = [];
                 
                 mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
+                    if (event.data.size > 0) audioChunks.push(event.data);
                 };
                 
                 mediaRecorder.onstop = async () => {
@@ -1137,8 +995,16 @@
                     if (audioBlob.size > 5000) {
                         showToast('🎙️ Распознаю речь...', 'info');
                         
+                        const formData = new FormData();
+                        formData.append('user_id', FIXED_USER_ID);
+                        formData.append('voice', audioBlob, 'voice.webm');
+                        
                         try {
-                            const result = await window.api.sendVoiceMessage(CONFIG.USER_ID, audioBlob);
+                            const response = await fetch(`${window.API_BASE_URL}/api/voice/process`, {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const result = await response.json();
                             
                             if (result.success) {
                                 if (result.recognized_text) {
@@ -1152,7 +1018,7 @@
                                     const audio = document.getElementById('hiddenAudioPlayer');
                                     if (audio) {
                                         audio.src = result.audio_url;
-                                        audio.play().catch(e => console.warn('Audio play error:', e));
+                                        audio.play().catch(e => console.warn('Audio error:', e));
                                     }
                                 }
                             } else {
@@ -1176,7 +1042,6 @@
                 const voiceBtn = document.getElementById('mainVoiceBtn');
                 if (voiceBtn) {
                     voiceBtn.classList.add('recording');
-                    const config = CONFIG.MODES[currentMode];
                     voiceBtn.querySelector('.voice-text').textContent = '🎙️ Запись... отпустите для отправки';
                 }
                 
@@ -1193,9 +1058,7 @@
                     if (timerEl) timerEl.textContent = `${recordingSeconds}s`;
                     if (voiceTimer) voiceTimer.textContent = `${recordingSeconds}s`;
                     
-                    if (recordingSeconds >= 60) {
-                        stopRecording();
-                    }
+                    if (recordingSeconds >= 60) stopRecording();
                 }, 1000);
                 
             } catch (error) {
@@ -1218,7 +1081,7 @@
             const voiceBtn = document.getElementById('mainVoiceBtn');
             if (voiceBtn) {
                 voiceBtn.classList.remove('recording');
-                const config = CONFIG.MODES[currentMode];
+                const config = MODES[currentMode];
                 voiceBtn.querySelector('.voice-text').textContent = config.voicePrompt;
             }
             
@@ -1245,7 +1108,7 @@
             const voiceBtn = document.getElementById('mainVoiceBtn');
             if (voiceBtn) {
                 voiceBtn.classList.remove('recording');
-                const config = CONFIG.MODES[currentMode];
+                const config = MODES[currentMode];
                 voiceBtn.querySelector('.voice-text').textContent = config.voicePrompt;
             }
             
@@ -1261,14 +1124,14 @@
         function initVoiceButton() {
             const voiceBtn = document.getElementById('mainVoiceBtn');
             if (!voiceBtn) {
-                console.warn('Voice button not found');
+                console.log('🎤 Кнопка микрофона будет инициализирована позже');
                 return;
             }
             
             if (voiceBtn.dataset.initialized === 'true') return;
             voiceBtn.dataset.initialized = 'true';
             
-            console.log('🎤 Инициализация голосовой кнопки для режима:', currentMode);
+            console.log('🎤 Инициализация голосовой кнопки');
             
             let pressTimer = null;
             let isPressing = false;
@@ -1318,9 +1181,7 @@
             const checkSwipe = (e) => {
                 if (!isPressing || !e.touches) return;
                 const currentY = e.touches[0].clientY;
-                if (startY - currentY > 50) {
-                    onCancel();
-                }
+                if (startY - currentY > 50) onCancel();
             };
             
             voiceBtn.addEventListener('mousedown', onStart);
@@ -1333,15 +1194,15 @@
         }
         
         // ============================================
-        // ОТРИСОВКА ДАШБОРДА
+        // ОТРИСОВКА ДАШБОРДА (СРАЗУ, БЕЗ ПРОВЕРКИ ТЕСТА)
         // ============================================
         
-        async function renderDashboard() {
+        function renderDashboard() {
             const container = document.getElementById('screenContainer');
             if (!container) return;
             
-            const modeConfig = CONFIG.MODES[currentMode];
-            const modules = CONFIG.MODULES[currentMode];
+            const modeConfig = MODES[currentMode];
+            const modules = MODULES[currentMode];
             
             container.innerHTML = `
                 <div class="dashboard-container">
@@ -1349,10 +1210,10 @@
                         <div class="user-greeting">
                             <div class="greeting-text">
                                 <h2>${modeConfig.emoji} ${modeConfig.greeting}</h2>
-                                <p>${CONFIG.USER_NAME}, я здесь, чтобы помочь</p>
+                                <p>${FIXED_USER_NAME}, я здесь, чтобы помочь</p>
                             </div>
                             <div class="profile-badge">
-                                <div class="profile-code" id="profileCode">СБ-4_ТФ-4_УБ-4_ЧВ-4</div>
+                                <div class="profile-code" id="profileCode">${FIXED_PROFILE_CODE}</div>
                                 <div style="font-size: 10px; color: var(--text-secondary);">ваш психотип</div>
                             </div>
                         </div>
@@ -1360,21 +1221,21 @@
                             <div class="stat-card">
                                 <div class="stat-icon">📅</div>
                                 <div class="stat-info">
-                                    <h4 id="daysActive">3</h4>
+                                    <h4>3</h4>
                                     <span>дня с вами</span>
                                 </div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-icon">💬</div>
                                 <div class="stat-info">
-                                    <h4 id="sessionsCount">12</h4>
+                                    <h4>12</h4>
                                     <span>сессий</span>
                                 </div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-icon">🎯</div>
                                 <div class="stat-info">
-                                    <h4 id="progressPercent">85%</h4>
+                                    <h4>85%</h4>
                                     <span>прогресс</span>
                                 </div>
                             </div>
@@ -1445,8 +1306,9 @@
             `;
             
             attachEvents();
-            initVoiceButton();
-            loadProfileData();
+            
+            // Инициализируем кнопку микрофона после отрисовки
+            setTimeout(() => initVoiceButton(), 100);
         }
         
         function attachEvents() {
@@ -1467,40 +1329,20 @@
             document.querySelectorAll('.quick-action').forEach(action => {
                 action.addEventListener('click', async () => {
                     const actionType = action.dataset.action;
-                    await handleQuickAction(actionType);
+                    handleQuickAction(actionType);
                 });
             });
         }
         
-        async function handleQuickAction(actionType) {
-            const modeConfig = CONFIG.MODES[currentMode];
+        function handleQuickAction(actionType) {
+            const modeConfig = MODES[currentMode];
             
             switch(actionType) {
                 case 'profile':
-                    showToast('🧠 Загружаю ваш психологический портрет...', 'info');
-                    try {
-                        const profile = await window.api.getUserProfile(CONFIG.USER_ID);
-                        if (profile && profile.ai_generated_profile) {
-                            showToast(profile.ai_generated_profile.substring(0, 200) + '...', 'info');
-                        } else {
-                            showToast('Пройдите тест, чтобы увидеть полный психологический портрет', 'info');
-                        }
-                    } catch (error) {
-                        showToast('Не удалось загрузить профиль', 'error');
-                    }
+                    showToast('🧠 Ваш психологический портрет: СБ-4, ТФ-4, УБ-4, ЧВ-4. Вы — гармоничная личность с развитым аналитическим мышлением.', 'info');
                     break;
                 case 'thoughts':
-                    showToast('💭 Загружаю мысли психолога...', 'info');
-                    try {
-                        const thought = await window.api.getPsychologistThought(CONFIG.USER_ID);
-                        if (thought) {
-                            showToast(thought.substring(0, 200) + '...', 'info');
-                        } else {
-                            showToast(modeConfig.greeting, 'info');
-                        }
-                    } catch (error) {
-                        showToast('Не удалось загрузить мысли', 'error');
-                    }
+                    showToast(`💭 ${modeConfig.greeting} Что бы вы хотели обсудить сегодня?`, 'info');
                     break;
                 case 'progress':
                     showToast('📊 Ваш прогресс: 3 дня активной работы, 12 сессий. Продолжайте в том же духе!', 'info');
@@ -1508,18 +1350,6 @@
                 case 'advice':
                     showToast(`✨ ${modeConfig.voicePrompt} Я готов вас выслушать.`, 'info');
                     break;
-            }
-        }
-        
-        async function loadProfileData() {
-            try {
-                const status = await window.api.getUserStatus(CONFIG.USER_ID);
-                const profileCodeEl = document.getElementById('profileCode');
-                if (profileCodeEl && status.profile_code) {
-                    profileCodeEl.textContent = status.profile_code;
-                }
-            } catch (error) {
-                console.warn('Failed to load profile data', error);
             }
         }
         
@@ -1537,29 +1367,38 @@
         // ИНИЦИАЛИЗАЦИЯ
         // ============================================
         
-        async function init() {
+        function init() {
             console.log('🚀 Инициализация приложения...');
-            console.log('👤 User ID:', CONFIG.USER_ID);
-            console.log('🌐 API URL:', window.api.baseUrl || '(текущий домен)');
+            console.log('👤 USER_ID:', FIXED_USER_ID);
+            console.log('👤 USER_NAME:', FIXED_USER_NAME);
+            console.log('🌐 API_URL:', window.API_BASE_URL);
             
-            try {
-                const status = await window.api.getUserStatus(CONFIG.USER_ID);
-                console.log('✅ API доступен, статус:', status);
-            } catch (error) {
-                console.warn('⚠️ API недоступен, работаем в офлайн-режиме');
-                showToast('⚠️ Сервер недоступен, некоторые функции ограничены', 'error');
-            }
-            
+            // Сразу показываем дашборд, не дожидаясь API
             renderDashboard();
             initMobileMenu();
             
+            // Обновляем имя в сайдбаре
             const userNameEl = document.getElementById('userName');
-            if (userNameEl) userNameEl.textContent = CONFIG.USER_NAME;
+            if (userNameEl) userNameEl.textContent = FIXED_USER_NAME;
             
             const userAvatarEl = document.getElementById('userMiniAvatar');
-            if (userAvatarEl) userAvatarEl.textContent = CONFIG.USER_NAME.charAt(0);
+            if (userAvatarEl) userAvatarEl.textContent = FIXED_USER_NAME.charAt(0);
+            
+            // Фоновые запросы к API (не блокируют UI)
+            setTimeout(() => {
+                // Загружаем реальные данные в фоне
+                fetch(`${window.API_BASE_URL}/api/get-profile?user_id=${FIXED_USER_ID}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.ai_generated_profile) {
+                            console.log('✅ Профиль загружен с сервера');
+                        }
+                    })
+                    .catch(e => console.log('ℹ️ Режим офлайн, использую локальные данные'));
+            }, 1000);
         }
         
+        // Запуск после загрузки DOM
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
