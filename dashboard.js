@@ -1,9 +1,12 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 3.7 - ФИКСИРОВАННЫЙ USER_ID
+// Версия 3.7 - ФИКСИРОВАННЫЙ USER_ID И API_BACKEND_URL
 // ============================================
 
 class FrediDashboard {
+    // ========== КОНСТАНТЫ ==========
+    static API_BACKEND_URL = 'https://max-bot-1-ywpz.onrender.com';
+    
     constructor() {
         // ========== ФИКСИРОВАННЫЙ USER_ID ==========
         // ВРЕМЕННОЕ РЕШЕНИЕ: используем фиксированный ID
@@ -30,6 +33,7 @@ class FrediDashboard {
         console.log('🎯 FrediDashboard инициализирован');
         console.log('👤 user_id (фиксированный):', this.userId);
         console.log('👤 user_name:', this.userName);
+        console.log('🌐 API_BACKEND_URL:', FrediDashboard.API_BACKEND_URL);
         
         this.userData = null;
         this.isTestCompleted = false;
@@ -76,6 +80,14 @@ class FrediDashboard {
         // Слушаем события сети
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
+    }
+    
+    // ============================================
+    // ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ПОЛУЧЕНИЯ API_BASE_URL
+    // ============================================
+    
+    getApiBaseUrl() {
+        return window.API_BASE_URL || FrediDashboard.API_BACKEND_URL;
     }
     
     // ============================================
@@ -135,8 +147,8 @@ class FrediDashboard {
                 return;
             }
             
-            // Используем фиксированный API URL
-            const apiBase = window.API_BASE_URL || 'https://max-bot-1-ywpz.onrender.com';
+            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
+            const apiBase = this.getApiBaseUrl();
             const statusResponse = await fetch(`${apiBase}/api/user-status?user_id=${this.userId}`);
             const status = await statusResponse.json();
             
@@ -185,7 +197,8 @@ class FrediDashboard {
                 return;
             }
             
-            const apiBase = window.API_BASE_URL || 'https://max-bot-miniapp.onrender.com';
+            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
+            const apiBase = this.getApiBaseUrl();
             const response = await fetch(`${apiBase}/api/get-profile?user_id=${this.userId}`);
             const data = await response.json();
             
@@ -214,7 +227,8 @@ class FrediDashboard {
                 return;
             }
             
-            const apiBase = window.API_BASE_URL || 'https://max-bot-miniapp.onrender.com';
+            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
+            const apiBase = this.getApiBaseUrl();
             const response = await fetch(`${apiBase}/api/thought?user_id=${this.userId}`);
             const data = await response.json();
             
@@ -523,7 +537,8 @@ class FrediDashboard {
     
     async sendQuestionToBot(question) {
         try {
-            const apiBase = window.API_BASE_URL || 'https://max-bot-miniapp.onrender.com';
+            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
+            const apiBase = this.getApiBaseUrl();
             const response = await fetch(`${apiBase}/api/chat/message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -755,7 +770,8 @@ class FrediDashboard {
     
     async saveMode(mode) {
         try {
-            const apiBase = window.API_BASE_URL || 'https://max-bot-miniapp.onrender.com';
+            // ✅ ИСПРАВЛЕНО: используем правильный URL бэкенда
+            const apiBase = this.getApiBaseUrl();
             await fetch(`${apiBase}/api/save-mode`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
