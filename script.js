@@ -1,7 +1,25 @@
 // ========== script.js ==========
 // ПОЛНАЯ ВЕРСИЯ МИНИ-ПРИЛОЖЕНИЯ
 // С ФИКСИРОВАННЫМ USER_ID ДЛЯ ТЕСТИРОВАНИЯ
-// Версия 2.0
+// Версия 2.1 - ИСПРАВЛЕНА РАБОТА С API
+
+// ========== ФОРСИРОВАННАЯ УСТАНОВКА API_BASE_URL ==========
+// Это должно быть самым первым, до любой инициализации
+(function() {
+    // Принудительно устанавливаем URL бэкенда
+    if (!window.API_BASE_URL || window.API_BASE_URL === '') {
+        window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
+        console.log('🔧 API_BASE_URL принудительно установлен:', window.API_BASE_URL);
+    }
+    
+    // Дублируем для совместимости
+    window.API_BACKEND_URL = window.API_BASE_URL;
+    
+    // Сохраняем в localStorage
+    localStorage.setItem('api_base_url', window.API_BASE_URL);
+    
+    console.log('🌐 ФИНАЛЬНЫЙ API_BASE_URL:', window.API_BASE_URL);
+})();
 
 const App = {
     userId: null,
@@ -26,7 +44,6 @@ const App = {
         console.log('🚀 Фреди: инициализация');
         
         // ========== ФИКСИРОВАННЫЙ USER_ID ==========
-        // ВРЕМЕННОЕ РЕШЕНИЕ: используем фиксированный ID
         const FIXED_USER_ID = 213102077;
         const FIXED_USER_NAME = 'Андрей';
         
@@ -38,7 +55,7 @@ const App = {
         localStorage.setItem('fredi_user_id', FIXED_USER_ID);
         localStorage.setItem('userName', FIXED_USER_NAME);
         
-        // Создаем глобальный контекст, если его нет
+        // Создаем глобальный контекст
         if (!window.maxContext) {
             window.maxContext = {};
         }
@@ -48,6 +65,7 @@ const App = {
         
         console.log('🎯 FIXED USER_ID установлен:', this.userId);
         console.log('👤 USER_NAME:', this.userName);
+        console.log('📡 API_BASE_URL будет использован:', window.API_BASE_URL);
         
         // Скрываем шапку чата
         const chatHeader = document.getElementById('chatHeader');
@@ -71,7 +89,7 @@ const App = {
         // Инициализируем Web Speech API
         this.initSpeechRecognition();
         
-        // 🔥 ОПОВЕЩАЕМ MAX, ЧТО ПРИЛОЖЕНИЕ ЗАГРУЖЕНО
+        // Оповещаем MAX, что приложение загружено
         if (window.MAX && window.MAX.WebApp) {
             window.MAX.WebApp.ready();
             window.MAX.WebApp.expand();
@@ -89,6 +107,8 @@ const App = {
                 user_id: this.userId
             });
             
+            console.log('📡 Статус пользователя:', status);
+            
             if (status.success) {
                 if (status.profile_data) {
                     this.profileData = status.profile_data;
@@ -101,57 +121,62 @@ const App = {
                     this.userName = status.user_name;
                     this.saveUserName(status.user_name);
                 }
+            } else {
+                console.warn('⚠️ Статус пользователя не success:', status);
             }
         } catch (error) {
-            console.warn('Ошибка загрузки данных с сервера:', error);
+            console.warn('⚠️ Ошибка загрузки данных с сервера:', error);
         }
     },
     
     // ========== API ВЫЗОВЫ (ИСПРАВЛЕНО) ==========
-async apiCall(endpoint, params = {}, method = 'GET') {
-    // ✅ ИСПРАВЛЕНО: используем адрес бэкенда
-    const baseUrl = window.API_BASE_URL || 'https://max-bot-1-ywpz.onrender.com';
-    
-    // Формируем полный URL
-    let url = `${baseUrl}${endpoint}`;
-    
-    // Добавляем параметры для GET
-    if (method === 'GET' && Object.keys(params).length > 0) {
-        const urlObj = new URL(url);
-        Object.keys(params).forEach(key => {
-            if (params[key] !== undefined && params[key] !== null) {
-                urlObj.searchParams.append(key, params[key]);
-            }
-        });
-        url = urlObj.toString();
-    }
-    
-    const options = {
-        method: method,
-        headers: { 'Content-Type': 'application/json' }
-    };
-    
-    if (method !== 'GET' && Object.keys(params).length > 0) {
-        options.body = JSON.stringify(params);
-    }
-    
-    console.log(`📡 API ${method} ${url}`);
-    
-    try {
-        const response = await fetch(url, options);
-        const data = await response.json();
+    async apiCall(endpoint, params = {}, method = 'GET') {
+        // ✅ ИСПРАВЛЕНО: всегда используем адрес бэкенда
+        const baseUrl = window.API_BASE_URL || 'https://max-bot-1-ywpz.onrender.com';
         
-        if (!response.ok) {
-            console.error(`HTTP Error ${response.status}:`, data);
-            return { success: false, error: data.error || `HTTP ${response.status}` };
+        // Формируем полный URL
+        let url = `${baseUrl}${endpoint}`;
+        
+        // Добавляем параметры для GET
+        if (method === 'GET' && Object.keys(params).length > 0) {
+            const searchParams = new URLSearchParams();
+            Object.keys(params).forEach(key => {
+                if (params[key] !== undefined && params[key] !== null) {
+                    searchParams.append(key, params[key]);
+                }
+            });
+            const queryString = searchParams.toString();
+            if (queryString) {
+                url += (url.includes('?') ? '&' : '?') + queryString;
+            }
         }
         
-        return data;
-    } catch (error) {
-        console.error(`API Error ${endpoint}:`, error);
-        return { success: false, error: error.message };
-    }
-},
+        const options = {
+            method: method,
+            headers: { 'Content-Type': 'application/json' }
+        };
+        
+        if (method !== 'GET' && Object.keys(params).length > 0) {
+            options.body = JSON.stringify(params);
+        }
+        
+        console.log(`📡 API ${method} ${url}`);
+        
+        try {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                console.error(`❌ HTTP Error ${response.status}:`, data);
+                return { success: false, error: data.error || `HTTP ${response.status}` };
+            }
+            
+            return data;
+        } catch (error) {
+            console.error(`❌ API Error ${endpoint}:`, error);
+            return { success: false, error: error.message };
+        }
+    },
     
     // ========== УПРАВЛЕНИЕ ИМЕНЕМ ==========
     loadUserName() {
@@ -242,25 +267,25 @@ async apiCall(endpoint, params = {}, method = 'GET') {
                     padding: 24px;
                     border-radius: 30px;
                     text-align: center;
-                    background: var(--max-panel-bg);
-                    border: 1px solid var(--glass-border);
+                    background: var(--max-panel-bg, #1a2a3a);
+                    border: 1px solid var(--glass-border, #2a3a4a);
                 }
                 .modal-title {
                     font-size: 24px;
                     margin-bottom: 8px;
-                    color: var(--max-text);
+                    color: var(--max-text, #fff);
                 }
                 .modal-subtitle {
-                    color: var(--max-text-secondary);
+                    color: var(--max-text-secondary, #8e9aa6);
                     margin-bottom: 20px;
                 }
                 .modal-input {
                     flex: 1;
                     padding: 12px 16px;
-                    background: var(--glass-bg);
-                    border: 1px solid var(--glass-border);
+                    background: var(--glass-bg, #1f2c38);
+                    border: 1px solid var(--glass-border, #2a3a4a);
                     border-radius: 30px;
-                    color: var(--max-text);
+                    color: var(--max-text, #fff);
                 }
                 .modal-btn {
                     width: 100%;
@@ -269,8 +294,8 @@ async apiCall(endpoint, params = {}, method = 'GET') {
                     cursor: pointer;
                     margin-bottom: 8px;
                 }
-                .modal-btn.primary { background: var(--max-blue); color: white; }
-                .modal-btn.secondary { background: transparent; color: var(--max-text); border: 1px solid var(--glass-border); }
+                .modal-btn.primary { background: #248bf2; color: white; border: none; }
+                .modal-btn.secondary { background: transparent; color: var(--max-text, #fff); border: 1px solid var(--glass-border, #2a3a4a); }
             `;
             document.head.appendChild(style);
         }
@@ -332,19 +357,6 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         
         setTimeout(() => {
             document.getElementById('startTestBtn')?.addEventListener('click', () => this.showContextScreen('city'));
-            document.getElementById('whoAreYouBtn')?.addEventListener('click', () => this.showOnboardingScreen2());
-        }, 100);
-    },
-    
-    showOnboardingScreen2() {
-        const template = document.getElementById('onboardingScreen2');
-        if (!template) return;
-        const clone = document.importNode(template.content, true);
-        const container = document.getElementById('screenContainer');
-        container.innerHTML = '';
-        container.appendChild(clone);
-        setTimeout(() => {
-            document.getElementById('letsGoBtn')?.addEventListener('click', () => this.showContextScreen('city'));
         }, 100);
     },
     
@@ -412,20 +424,6 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         if (!template) return;
         const clone = document.importNode(template.content, true);
         
-        const citySpan = clone.querySelector('#infoCity');
-        if (citySpan) citySpan.textContent = this.userContext.city || 'не указан';
-        const genderSpan = clone.querySelector('#infoGender');
-        if (genderSpan) {
-            let genderText = 'не указан';
-            if (this.userContext.gender === 'male') genderText = 'Мужчина';
-            if (this.userContext.gender === 'female') genderText = 'Женщина';
-            genderSpan.textContent = genderText;
-        }
-        const ageSpan = clone.querySelector('#infoAge');
-        if (ageSpan) ageSpan.textContent = this.userContext.age || 'не указан';
-        const weatherSpan = clone.querySelector('#infoWeather');
-        if (weatherSpan) weatherSpan.style.display = 'none';
-        
         const container = document.getElementById('screenContainer');
         container.innerHTML = '';
         container.appendChild(clone);
@@ -437,26 +435,7 @@ async apiCall(endpoint, params = {}, method = 'GET') {
                     Test.start();
                 } else alert('Тест будет запущен!');
             });
-            document.getElementById('whatTestGivesBtn')?.addEventListener('click', () => this.showBenefitsScreen());
             document.getElementById('askQuestionPreBtn')?.addEventListener('click', () => this.showMainChat());
-        }, 100);
-    },
-    
-    showBenefitsScreen() {
-        const template = document.getElementById('benefitsScreen');
-        if (!template) return;
-        const clone = document.importNode(template.content, true);
-        const container = document.getElementById('screenContainer');
-        container.innerHTML = '';
-        container.appendChild(clone);
-        setTimeout(() => {
-            document.getElementById('startTestFromBenefitsBtn')?.addEventListener('click', () => {
-                if (typeof Test !== 'undefined') {
-                    Test.init(this.userId);
-                    Test.start();
-                } else alert('Тест будет запущен!');
-            });
-            document.getElementById('backToContextBtn')?.addEventListener('click', () => this.showCompleteScreen());
         }, 100);
     },
     
@@ -598,8 +577,6 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         if (this.profileData) {
             clone.querySelector('#profileCode').textContent = this.profileData.display_name || 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
         }
-        const modeNames = { coach: '🔮 КОУЧ', psychologist: '🧠 ПСИХОЛОГ', trainer: '⚡ ТРЕНЕР' };
-        clone.querySelector('#modeCode').textContent = modeNames[this.currentMode] || '🔮 КОУЧ';
         
         const goals = this.getGoalsForProfile();
         const goalsList = clone.querySelector('#goalsList');
@@ -626,7 +603,6 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         container.appendChild(clone);
         
         setTimeout(() => {
-            document.getElementById('customGoalBtn')?.addEventListener('click', () => this.showCustomGoalInput());
             document.getElementById('backToProfileFromGoalBtn')?.addEventListener('click', () => this.showFinalProfile());
         }, 100);
     },
@@ -665,19 +641,11 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         alert(`Цель выбрана: ${goal.name}\n\nВремя: ${goal.time}\n\nСкоро появится подробный план достижения!`);
     },
     
-    showCustomGoalInput() {
-        const goal = prompt('Сформулируйте свою цель своими словами:');
-        if (goal?.trim()) alert(`Цель принята: "${goal}"\n\nСкоро появится план достижения!`);
-    },
-    
     // ========== ЭКРАН "ВЫБРАТЬ РЕЖИМ" ==========
     showChooseModeScreen() {
         const template = document.getElementById('chooseModeScreen');
         if (!template) return;
         const clone = document.importNode(template.content, true);
-        if (this.profileData) {
-            clone.querySelector('#modeProfileCode').textContent = this.profileData.display_name || 'СБ-4_ТФ-4_УБ-4_ЧВ-4';
-        }
         const container = document.getElementById('screenContainer');
         container.innerHTML = '';
         container.appendChild(clone);
@@ -706,6 +674,17 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         this.showFinalProfile();
     },
     
+    async saveModeToServer(mode) {
+        try {
+            await this.apiCall('/api/save-mode', {
+                user_id: this.userId,
+                mode: mode
+            }, 'POST');
+        } catch (error) {
+            console.warn('Ошибка сохранения режима:', error);
+        }
+    },
+    
     // ========== ЭКРАН "МЫСЛИ ПСИХОЛОГА" ==========
     async showPsychologistThought() {
         const loadingTemplate = document.getElementById('psychologistThoughtLoadingScreen');
@@ -725,6 +704,13 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         } catch (error) {
             this.showPsychologistThoughtResult('Не удалось сгенерировать мысли психолога. Попробуйте позже.');
         }
+    },
+    
+    async getPsychologistThoughtFromServer() {
+        const result = await this.apiCall('/api/thought', {
+            user_id: this.userId
+        });
+        return result.thought;
     },
     
     generateMockThought() {
@@ -754,7 +740,6 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         
         setTimeout(() => {
             document.getElementById('backToProfileFromThoughtBtn')?.addEventListener('click', () => this.showFinalProfile());
-            document.getElementById('askQuestionFromThoughtBtn')?.addEventListener('click', () => this.showAskQuestionScreen());
         }, 100);
     },
     
@@ -797,7 +782,7 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         if (!statusDiv) {
             statusDiv = document.createElement('div');
             statusDiv.id = 'voiceStatus';
-            statusDiv.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--max-blue,#248bf2);color:white;padding:10px20px;border-radius:30px;z-index:1000;white-space:nowrap;`;
+            statusDiv.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#248bf2;color:white;padding:10px 20px;border-radius:30px;z-index:1000;white-space:nowrap;`;
             document.body.appendChild(statusDiv);
         }
         statusDiv.textContent = message;
@@ -867,6 +852,13 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         document.getElementById('backFromSmartQuestionsBtn')?.addEventListener('click', () => this.showFinalProfile());
     },
     
+    async getSmartQuestionsFromServer() {
+        const result = await this.apiCall('/api/smart-questions', {
+            user_id: this.userId
+        });
+        return result.questions;
+    },
+    
     generateLocalSmartQuestions() {
         const scores = this.profileData?.scores || { СБ: 3, ТФ: 3, УБ: 3, ЧВ: 3 };
         const questions = [];
@@ -888,12 +880,16 @@ async apiCall(endpoint, params = {}, method = 'GET') {
             .smart-questions-container { padding: 20px; overflow-y: auto; height: 100%; }
             .smart-questions-header { text-align: center; margin-bottom: 24px; }
             .smart-questions-emoji { font-size: 48px; }
-            .smart-questions-title { font-size: 22px; margin-bottom: 8px; color: var(--max-text); }
+            .smart-questions-title { font-size: 22px; margin-bottom: 8px; color: var(--max-text, #fff); }
+            .smart-questions-desc { color: var(--max-text-secondary, #8e9aa6); }
             .smart-questions-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-            .smart-question-item { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 14px 18px; cursor: pointer; display: flex; gap: 12px; }
-            .smart-question-item:hover { border-color: var(--max-blue); transform: translateX(4px); }
-            .smart-question-input { flex: 1; padding: 14px 18px; background: var(--glass-bg); border-radius: 30px; color: var(--max-text); }
-            .smart-question-submit { width: 48px; height: 48px; border-radius: 50%; background: var(--max-blue); color: white; }
+            .smart-question-item { background: var(--glass-bg, #1f2c38); border: 1px solid var(--glass-border, #2a3a4a); border-radius: 20px; padding: 14px 18px; cursor: pointer; display: flex; gap: 12px; transition: all 0.2s; }
+            .smart-question-item:hover { border-color: #248bf2; transform: translateX(4px); }
+            .smart-question-emoji { font-size: 20px; }
+            .smart-question-text { flex: 1; color: var(--max-text, #fff); }
+            .smart-questions-input { margin-top: 16px; }
+            .smart-question-input { flex: 1; padding: 14px 18px; background: var(--glass-bg, #1f2c38); border: 1px solid var(--glass-border, #2a3a4a); border-radius: 30px; color: var(--max-text, #fff); }
+            .smart-question-submit { width: 48px; height: 48px; border-radius: 50%; background: #248bf2; color: white; border: none; cursor: pointer; font-size: 20px; }
             .smart-questions-back { text-align: center; margin-top: 16px; }
         `;
         document.head.appendChild(style);
@@ -925,7 +921,8 @@ async apiCall(endpoint, params = {}, method = 'GET') {
                 botMessage.innerHTML = `<div class="message-bubble"><div class="message-text">${this.escapeHtml(result.response || 'Я вас слушаю. Расскажите подробнее.')}</div><div class="message-time">только что</div></div>`;
                 messagesList.appendChild(botMessage);
                 
-                document.querySelector('.messages-container')?.scrollTo({ top: document.querySelector('.messages-container').scrollHeight });
+                const messagesContainer = document.querySelector('.messages-container');
+                if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
             } else {
                 alert(result.response);
             }
@@ -934,6 +931,15 @@ async apiCall(endpoint, params = {}, method = 'GET') {
             container.innerHTML = originalContent;
             alert('Извините, произошла ошибка. Попробуйте позже.');
         }
+    },
+    
+    async sendQuestionToServer(question) {
+        const result = await this.apiCall('/api/chat/message', {
+            user_id: this.userId,
+            message: question,
+            mode: this.currentMode
+        }, 'POST');
+        return result;
     },
     
     // ========== ОСНОВНОЙ ЧАТ ==========
@@ -974,15 +980,15 @@ async apiCall(endpoint, params = {}, method = 'GET') {
                 .message.user-message { justify-content: flex-end; }
                 .message.bot-message { justify-content: flex-start; }
                 .message-bubble { max-width: 80%; padding: 12px 16px; border-radius: 18px; }
-                .user-message .message-bubble { background: var(--max-message-user, #2b5278); border-bottom-right-radius: 4px; }
-                .bot-message .message-bubble { background: var(--max-message-bot, #1f2c38); border-bottom-left-radius: 4px; }
-                .message-text { font-size: 15px; line-height: 1.4; }
-                .message-time { font-size: 10px; color: var(--max-text-secondary); margin-top: 4px; text-align: right; }
-                .input-panel { padding: 12px 16px; background: var(--max-panel-bg); border-top: 1px solid var(--max-border); display: flex; gap: 8px; align-items: center; }
-                .attach-btn, .voice-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--glass-bg); border: none; color: var(--max-text); font-size: 20px; cursor: pointer; }
-                .message-input-wrapper { flex: 1; display: flex; gap: 8px; background: var(--glass-bg); border-radius: 24px; padding: 4px 4px 4px 16px; }
-                .message-input { flex: 1; background: transparent; border: none; color: var(--max-text); font-size: 16px; outline: none; padding: 8px 0; }
-                .send-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--max-blue); border: none; color: white; font-size: 18px; cursor: pointer; }
+                .user-message .message-bubble { background: #2b5278; border-bottom-right-radius: 4px; }
+                .bot-message .message-bubble { background: #1f2c38; border-bottom-left-radius: 4px; }
+                .message-text { font-size: 15px; line-height: 1.4; color: #fff; }
+                .message-time { font-size: 10px; color: #8e9aa6; margin-top: 4px; text-align: right; }
+                .input-panel { padding: 12px 16px; background: #0f1a24; border-top: 1px solid #2a3a4a; display: flex; gap: 8px; align-items: center; }
+                .attach-btn, .voice-btn { width: 40px; height: 40px; border-radius: 50%; background: #1f2c38; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+                .message-input-wrapper { flex: 1; display: flex; gap: 8px; background: #1f2c38; border-radius: 24px; padding: 4px 4px 4px 16px; }
+                .message-input { flex: 1; background: transparent; border: none; color: #fff; font-size: 16px; outline: none; padding: 8px 0; }
+                .send-btn { width: 36px; height: 36px; border-radius: 50%; background: #248bf2; border: none; color: white; font-size: 18px; cursor: pointer; }
             `;
             document.head.appendChild(style);
         }
@@ -1001,7 +1007,8 @@ async apiCall(endpoint, params = {}, method = 'GET') {
                     userMessage.innerHTML = `<div class="message-bubble"><div class="message-text">${this.escapeHtml(text)}</div><div class="message-time">только что</div></div>`;
                     messagesList.appendChild(userMessage);
                     if (messageInput) messageInput.value = '';
-                    document.querySelector('.messages-container')?.scrollTo({ top: document.querySelector('.messages-container').scrollHeight });
+                    const messagesContainer = document.querySelector('.messages-container');
+                    if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     await this.sendQuestion(text);
                 }
             };
@@ -1021,8 +1028,6 @@ async apiCall(endpoint, params = {}, method = 'GET') {
         document.getElementById('newChatBtn')?.addEventListener('click', () => alert('Новая переписка будет доступна позже'));
     },
     
-    showContextMenu() { console.log('Контекстное меню'); },
-    
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -1030,5 +1035,6 @@ async apiCall(endpoint, params = {}, method = 'GET') {
     }
 };
 
+// Запуск приложения
 document.addEventListener('DOMContentLoaded', () => App.init());
 window.App = App;
