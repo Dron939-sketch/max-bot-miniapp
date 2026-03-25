@@ -18,119 +18,155 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- MAX Bridge -->
+    <!-- MAX Bridge (опционально) -->
     <script src="https://st.max.ru/js/max-web-app.js"></script>
     
-    <!-- ========== КРИТИЧЕСКИ ВАЖНО: УСТАНОВКА maxContext ДО ВСЕХ СКРИПТОВ ========== -->
+    <!-- ========== УНИВЕРСАЛЬНОЕ ПОЛУЧЕНИЕ USER_ID ========== -->
     <script>
-        // Функция получения user_id из MAX
-        function getUserIdFromMax() {
-            console.log('🔍 Получение user_id из MAX...');
-            
-            // 1. MAX мессенджер (основной способ)
-            if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.initDataUnsafe) {
-                const initData = window.MAX.WebApp.initDataUnsafe;
-                if (initData.user && initData.user.id) {
-                    console.log('✅ user_id из MAX.WebApp:', initData.user.id);
-                    return initData.user.id;
-                }
-                if (initData.user_id) {
-                    console.log('✅ user_id из MAX.WebApp.user_id:', initData.user_id);
-                    return initData.user_id;
-                }
-            }
-            
-            // 2. Telegram (если портировано)
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-                const initData = window.Telegram.WebApp.initDataUnsafe;
-                if (initData.user && initData.user.id) {
-                    console.log('✅ user_id из Telegram.WebApp:', initData.user.id);
-                    return initData.user.id;
-                }
-            }
-            
-            // 3. Из URL параметров (для отладки и тестирования)
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlUserId = urlParams.get('user_id') || urlParams.get('userId') || urlParams.get('uid');
-            if (urlUserId) {
-                console.log('✅ user_id из URL:', urlUserId);
-                localStorage.setItem('fredi_user_id', urlUserId);
-                return urlUserId;
-            }
-            
-            // 4. Из localStorage (сохранённый ранее)
-            const savedUserId = localStorage.getItem('fredi_user_id');
-            if (savedUserId) {
-                console.log('✅ user_id из localStorage:', savedUserId);
-                return savedUserId;
-            }
-            
-            // 5. Тестовый ID только для разработки (если не в MAX)
-        if (!window.MAX || !window.MAX.WebApp) {
-            console.warn('⚠️ Режим разработки: используется тестовый user_id');
-            // ✅ ИСПРАВЛЕНО: числовой ID вместо строки с test_
-            const testId = Math.floor(Math.random() * 1000000000).toString();
-            localStorage.setItem('fredi_user_id', testId);
-            console.log('🔧 Создан тестовый ID:', testId);
-            return testId;
-        }
-            
-            console.error('❌ Не удалось получить user_id!');
-            return null;
-        }
+        // ============================================
+        // ДИАГНОСТИКА
+        // ============================================
+        console.log('=== ДИАГНОСТИКА ===');
+        console.log('navigator.userAgent:', navigator.userAgent);
+        console.log('location.href:', location.href);
+        console.log('location.hash:', location.hash);
         
-        // Функция получения имени пользователя
-        function getUserNameFromMax() {
-            // MAX
-            if (window.MAX && window.MAX.WebApp && window.MAX.WebApp.initDataUnsafe) {
-                const initData = window.MAX.WebApp.initDataUnsafe;
-                if (initData.user && initData.user.first_name) {
-                    return initData.user.first_name;
-                }
-                if (initData.first_name) {
-                    return initData.first_name;
+        // ============================================
+        // 1. УНИВЕРСАЛЬНОЕ ПОЛУЧЕНИЕ USER_ID
+        // ============================================
+        function extractUserIdFromUrl() {
+            const url = window.location.href;
+            const decodedUrl = decodeURIComponent(url);
+            console.log('🔍 Декодированный URL:', decodedUrl.substring(0, 500));
+            
+            // Ищем chat_id (основной ID)
+            const chatPatterns = [
+                /chat%22%3A%7B%22id%22%3A(\d+)/i,
+                /chat":\{"id":(\d+)/i,
+                /chat%3D%257B%2522id%2522%253A(\d+)/i,
+                /chat":{"id":(\d+)/i,
+                /"chat":\{"id":(\d+)/i
+            ];
+            
+            for (const pattern of chatPatterns) {
+                const match = decodedUrl.match(pattern);
+                if (match && match[1]) {
+                    const id = parseInt(match[1]);
+                    if (id > 100000) {
+                        console.log(`✅ Найден CHAT_ID: ${id}`);
+                        return id;
+                    }
                 }
             }
             
-            // Telegram
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-                const initData = window.Telegram.WebApp.initDataUnsafe;
-                if (initData.user && initData.user.first_name) {
-                    return initData.user.first_name;
-                }
-            }
+            // Ищем user_id
+            const userPatterns = [
+                /user%22%3A%7B%22id%22%3A(\d+)/i,
+                /user":\{"id":(\d+)/i,
+                /user%3D%257B%2522id%2522%253A(\d+)/i,
+                /user":{"id":(\d+)/i
+            ];
             
-            // Из localStorage
-            const savedName = localStorage.getItem('userName');
-            if (savedName && savedName !== 'Гость') {
-                return savedName;
+            for (const pattern of userPatterns) {
+                const match = decodedUrl.match(pattern);
+                if (match && match[1]) {
+                    const id = parseInt(match[1]);
+                    if (id > 100000) {
+                        console.log(`⚠️ Найден USER_ID: ${id}`);
+                        return id;
+                    }
+                }
             }
             
             return null;
         }
         
-        // УСТАНАВЛИВАЕМ ГЛОБАЛЬНЫЙ maxContext
-        window.maxContext = window.maxContext || {};
-        window.maxContext.user_id = getUserIdFromMax();
-        window.maxContext.user_name = getUserNameFromMax() || 'Друг';
-        window.maxContext.isMax = !!(window.MAX && window.MAX.WebApp);
+        // ============================================
+        // 2. ПОЛУЧЕНИЕ ИМЕНИ ПОЛЬЗОВАТЕЛЯ
+        // ============================================
+        function extractUserNameFromUrl() {
+            const url = window.location.href;
+            const decodedUrl = decodeURIComponent(url);
+            
+            const patterns = [
+                /first_name%22%3A%22([^%]+?)%22/i,
+                /first_name":"([^"]+?)"/i,
+                /first_name%22%3A%22([^"]+?)%22/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = decodedUrl.match(pattern);
+                if (match && match[1]) {
+                    let name = match[1];
+                    name = name.replace(/["']/g, '').trim();
+                    try {
+                        name = decodeURIComponent(name);
+                    } catch(e) {}
+                    if (name && name.length > 0 && name.length < 50) {
+                        console.log(`✅ Найдено имя: ${name}`);
+                        return name;
+                    }
+                }
+            }
+            return null;
+        }
         
-        console.log('🎯 maxContext установлен:', {
-            user_id: window.maxContext.user_id,
-            user_name: window.maxContext.user_name,
-            isMax: window.maxContext.isMax
-        });
-        
-        // Если нет user_id — показываем ошибку и блокируем загрузку
-        if (!window.maxContext.user_id) {
-            console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: Нет user_id!');
-            document.addEventListener('DOMContentLoaded', function() {
+        // ============================================
+        // 3. ИНИЦИАЛИЗАЦИЯ
+        // ============================================
+        (function init() {
+            console.log('🚀 Инициализация приложения...');
+            
+            let userId = extractUserIdFromUrl();
+            
+            if (!userId) {
+                const savedId = localStorage.getItem('fredi_user_id');
+                if (savedId && !isNaN(parseInt(savedId)) && parseInt(savedId) > 100000) {
+                    userId = parseInt(savedId);
+                    console.log('✅ user_id из localStorage:', userId);
+                }
+            }
+            
+            if (userId) {
+                localStorage.setItem('fredi_user_id', userId);
+                console.log('🎯 Установлен user_id:', userId);
+            } else {
+                console.error('❌ Не удалось получить user_id!');
+                const isDebug = new URLSearchParams(window.location.search).get('debug') === '1';
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                if (isDebug || isLocalhost) {
+                    userId = 213102077;
+                    localStorage.setItem('fredi_user_id', userId);
+                    console.warn('⚠️ Режим отладки, тестовый ID:', userId);
+                }
+            }
+            
+            let userName = extractUserNameFromUrl();
+            if (!userName) {
+                userName = localStorage.getItem('userName') || 'друг';
+            }
+            if (userName && userName !== 'друг') {
+                localStorage.setItem('userName', userName);
+            }
+            
+            window.maxContext = {
+                user_id: userId,
+                user_name: userName,
+                initialized: true
+            };
+            
+            console.log('📦 maxContext:', {
+                user_id: window.maxContext.user_id,
+                user_name: window.maxContext.user_name
+            });
+            
+            if (!userId && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
                 document.body.innerHTML = `
                     <div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;background:#0e1621;color:white;">
                         <div>
                             <div style="font-size:64px;margin-bottom:20px;">🔐</div>
                             <h2 style="margin-bottom:12px;">Ошибка входа</h2>
-                            <p style="color:#8e9aa6;margin-bottom:24px;">
+                            <p style="color:#8e9aa6;margin-bottom:24px;line-height:1.6;">
                                 Не удалось идентифицировать пользователя.<br>
                                 Пожалуйста, откройте приложение через MAX.
                             </p>
@@ -140,34 +176,24 @@
                         </div>
                     </div>
                 `;
-            });
-        }
+            }
+        })();
     </script>
     
-    <!-- ========== КОНФИГУРАЦИЯ API (ИСПРАВЛЕНО) ========== -->
+    <!-- ========== КОНФИГУРАЦИЯ API ========== -->
     <script>
-        // FastAPI запущен на основном сервере
         const MAIN_API_URL = 'https://max-bot-1-ywpz.onrender.com';
-        const MINIAPP_URL = 'https://max-bot-miniapp.onrender.com';
-        
         const hostname = window.location.hostname;
         
-        if (hostname === 'max-bot-miniapp.onrender.com') {
-            // Мини-приложение открыто отдельно — API на основном сервере
-            window.API_BASE_URL = MAIN_API_URL;
-            console.log('🌐 Мини-приложение на отдельном домене, API:', window.API_BASE_URL);
-        } else if (hostname === 'max-bot-1-ywpz.onrender.com') {
-            // Открыто на основном домене — API там же
+        if (hostname === 'max-bot-1-ywpz.onrender.com') {
             window.API_BASE_URL = window.location.origin;
-            console.log('🌐 Основной домен, API:', window.API_BASE_URL);
-        } else {
-            // Локальная разработка
+        } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
             window.API_BASE_URL = 'http://localhost:10000';
-            console.log('🌐 Локальная разработка, API:', window.API_BASE_URL);
+        } else {
+            window.API_BASE_URL = MAIN_API_URL;
         }
         
-        // Сохраняем в localStorage для других скриптов
-        localStorage.setItem('api_base_url', window.API_BASE_URL);
+        console.log('🌐 API_BASE_URL:', window.API_BASE_URL);
     </script>
     
     <!-- ========== СТИЛИ ========== -->
@@ -201,8 +227,8 @@
         
         .chats-panel {
             width: 280px;
-            background: var(--max-panel-bg, #17212b);
-            border-right: 1px solid var(--max-border, #0f1b26);
+            background: #17212b;
+            border-right: 1px solid #0f1b26;
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
@@ -229,7 +255,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--max-border, #0f1b26);
+            border-bottom: 1px solid #0f1b26;
         }
         
         .chats-title {
@@ -242,7 +268,7 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
-            color: var(--max-blue, #248bf2);
+            color: #248bf2;
             padding: 8px;
         }
         
@@ -253,10 +279,10 @@
         .chats-search input {
             width: 100%;
             padding: 10px 14px;
-            background: var(--max-input-bg, #1f2c38);
+            background: #1f2c38;
             border: none;
             border-radius: 20px;
-            color: var(--max-text, white);
+            color: white;
             font-size: 14px;
         }
         
@@ -274,11 +300,11 @@
         }
         
         .chat-item:hover {
-            background: var(--max-hover, #2b3b4a);
+            background: #2b3b4a;
         }
         
         .chat-item.active {
-            background: var(--max-hover, #2b3b4a);
+            background: #2b3b4a;
         }
         
         .chat-avatar {
@@ -306,7 +332,7 @@
         
         .chat-preview {
             font-size: 12px;
-            color: var(--max-text-secondary, #8e9aa6);
+            color: #8e9aa6;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -314,12 +340,12 @@
         
         .chat-time {
             font-size: 11px;
-            color: var(--max-text-secondary, #8e9aa6);
+            color: #8e9aa6;
         }
         
         .chats-footer {
             padding: 16px;
-            border-top: 1px solid var(--max-border, #0f1b26);
+            border-top: 1px solid #0f1b26;
         }
         
         .user-mini-profile {
@@ -349,14 +375,14 @@
         
         .user-mini-status {
             font-size: 11px;
-            color: var(--max-text-secondary, #8e9aa6);
+            color: #8e9aa6;
         }
         
         .chat-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: var(--max-bg, #0e1621);
+            background: #0e1621;
             overflow: hidden;
         }
         
@@ -365,8 +391,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
-            background: var(--max-header-bg, #1f2c38);
-            border-bottom: 1px solid var(--max-border, #0f1b26);
+            background: #1f2c38;
+            border-bottom: 1px solid #0f1b26;
         }
         
         .chat-header-left {
@@ -381,7 +407,7 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
-            color: var(--max-text, white);
+            color: white;
             padding: 8px;
         }
         
@@ -411,7 +437,7 @@
         
         .chat-header-status {
             font-size: 12px;
-            color: var(--max-text-secondary, #8e9aa6);
+            color: #8e9aa6;
         }
         
         .header-btn {
@@ -419,7 +445,7 @@
             border: none;
             font-size: 20px;
             cursor: pointer;
-            color: var(--max-text, white);
+            color: white;
             padding: 8px;
         }
         
@@ -454,14 +480,14 @@
         .loading-text {
             margin-top: 20px;
             font-size: 16px;
-            color: var(--max-text-secondary, #8e9aa6);
+            color: #8e9aa6;
         }
         
         .voice-record-btn {
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: var(--max-blue, #248bf2);
+            background: #248bf2;
             border: none;
             color: white;
             font-size: 32px;
@@ -473,7 +499,6 @@
             transition: transform 0.1s ease, background 0.2s ease;
             touch-action: manipulation;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
         
         .voice-record-btn:active {
@@ -483,7 +508,6 @@
         .voice-record-btn.recording {
             background: #ff4444;
             animation: pulse-red 1s infinite;
-            transform: scale(1.05);
         }
         
         @keyframes pulse-red {
@@ -513,7 +537,7 @@
             align-items: center;
             gap: 8px;
             font-size: 14px;
-            color: var(--max-text-secondary, #8e9aa6);
+            color: #8e9aa6;
             margin-top: 12px;
             justify-content: center;
         }
@@ -575,13 +599,12 @@
         }
         
         .microphone-modal-content {
-            background: var(--max-panel-bg, #17212b);
+            background: #17212b;
             border-radius: 28px;
             max-width: 340px;
             width: 90%;
             padding: 28px 24px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
         
         .modal-btn {
@@ -592,18 +615,21 @@
             font-weight: bold;
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
         }
         
         .modal-btn.primary {
-            background: var(--max-blue, #248bf2);
+            background: #248bf2;
             color: white;
         }
         
         .modal-btn.secondary {
             background: transparent;
-            border: 1px solid var(--max-border, #2b3b4a);
-            color: var(--max-text, white);
+            border: 1px solid #2b3b4a;
+            color: white;
+        }
+        
+        #hiddenAudioPlayer {
+            display: none;
         }
         
         .onboarding-container, .context-container, .benefits-container, .final-profile-container, 
@@ -614,7 +640,7 @@
         
         .onboarding-content, .context-content, .benefits-content, .final-profile-content, 
         .ask-question-content, .choose-goal-content, .choose-mode-content, .thought-result-content {
-            background: var(--max-panel-bg, #17212b);
+            background: #17212b;
             border-radius: 24px;
             padding: 24px;
         }
@@ -623,24 +649,6 @@
             font-size: 28px;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 8px;
-        }
-        
-        .onboarding-subtitle {
-            text-align: center;
-            color: var(--max-text-secondary, #8e9aa6);
-            margin-bottom: 24px;
-        }
-        
-        .onboarding-text {
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-        
-        .onboarding-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
         }
         
         .onboarding-btn {
@@ -650,172 +658,285 @@
             font-weight: 600;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s;
             border: none;
         }
         
         .onboarding-btn.primary {
-            background: var(--max-blue, #248bf2);
+            background: #248bf2;
             color: white;
         }
         
         .onboarding-btn.secondary {
             background: transparent;
-            border: 1px solid var(--max-border, #2b3b4a);
-            color: var(--max-text, white);
+            border: 1px solid #2b3b4a;
+            color: white;
         }
         
-        .context-title {
-            font-size: 24px;
+        .dashboard-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #17212b;
+            border-radius: 24px;
+        }
+        
+        .user-welcome {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #248bf2, #6c5ce7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
             font-weight: bold;
-            margin-bottom: 20px;
+        }
+        
+        .user-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .user-profile {
+            font-size: 12px;
+            color: #8e9aa6;
+        }
+        
+        .user-stats {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .stat-item {
             text-align: center;
         }
         
-        .context-question {
-            font-size: 18px;
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #8e9aa6;
+        }
+        
+        .voice-input-dashboard {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+        
+        .voice-record-btn-large {
+            width: 80px;
+            height: 80px;
+            font-size: 40px;
+        }
+        
+        .voice-status-dashboard {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            padding: 12px 24px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+        }
+        
+        .recording-pulse {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .module-card {
+            background: #17212b;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            border-left: 4px solid;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-4px);
+            background: #2b3b4a;
+        }
+        
+        .module-icon {
+            font-size: 32px;
             margin-bottom: 8px;
         }
         
-        .context-hint {
+        .module-name {
+            font-weight: 600;
             font-size: 14px;
-            color: var(--max-text-secondary, #8e9aa6);
-            margin-bottom: 16px;
         }
         
-        .context-input-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .context-input {
-            flex: 1;
-            padding: 14px;
-            background: var(--max-input-bg, #1f2c38);
-            border: none;
-            border-radius: 40px;
-            color: var(--max-text, white);
-            font-size: 16px;
-        }
-        
-        .context-submit {
-            background: var(--max-blue, #248bf2);
-            border: none;
-            border-radius: 40px;
-            padding: 14px 20px;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        
-        .context-skip {
-            background: transparent;
-            border: none;
-            color: var(--max-text-secondary, #8e9aa6);
-            padding: 12px;
-            cursor: pointer;
-            width: 100%;
-        }
-        
-        .gender-buttons {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .gender-btn {
-            flex: 1;
+        .quick-actions {
+            background: #17212b;
+            border-radius: 24px;
             padding: 16px;
-            background: var(--max-input-bg, #1f2c38);
-            border: none;
-            border-radius: 40px;
-            color: var(--max-text, white);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
         }
         
-        .gender-emoji {
-            font-size: 32px;
-        }
-        
-        .benefits-list {
-            margin: 20px 0;
-        }
-        
-        .benefit-item {
+        .quick-actions-title {
+            font-size: 16px;
+            font-weight: 600;
             margin-bottom: 16px;
-            padding: 12px;
-            background: var(--max-input-bg, #1f2c38);
-            border-radius: 16px;
         }
         
-        .benefit-stage {
-            font-weight: bold;
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        .quick-action {
+            text-align: center;
+            padding: 12px;
+            background: #1f2c38;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .quick-action:hover {
+            background: #2b3b4a;
+        }
+        
+        .action-icon {
+            font-size: 24px;
+            display: block;
             margin-bottom: 4px;
         }
         
-        .benefit-desc {
-            font-size: 14px;
-            color: var(--max-text-secondary, #8e9aa6);
+        .action-name {
+            font-size: 11px;
         }
         
-        .profile-header {
-            text-align: center;
-            margin-bottom: 24px;
+        .floating-message {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            border-radius: 16px;
+            padding: 12px 16px;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
         }
         
-        .profile-emoji {
-            font-size: 48px;
-            margin-bottom: 12px;
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
-        .profile-title {
-            font-size: 24px;
+        .floating-message.success {
+            background: #28a745;
         }
         
-        .profile-text {
-            line-height: 1.6;
-            margin-bottom: 24px;
-            white-space: pre-wrap;
+        .floating-message.error {
+            background: #dc3545;
         }
         
-        .profile-buttons {
+        .floating-message.info {
+            background: #248bf2;
+        }
+        
+        .floating-message-content {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .button-row {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .button-row .onboarding-btn {
-            flex: 1;
-        }
-        
-        .ask-question-title, .choose-goal-title, .choose-mode-title {
-            font-size: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        
-        .voice-input-area {
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--glass-border, rgba(255,255,255,0.1));
-            justify-content: center;
+        }
+        
+        .floating-message-close {
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 8px;
+        }
+        
+        .dashboard-test-required {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .test-required-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .test-required-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        
+        .test-required-text {
+            color: #8e9aa6;
+            line-height: 1.6;
+            margin-bottom: 32px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .test-required-btn {
+            background: #248bf2;
+            border: none;
+            border-radius: 40px;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+        }
+        
+        @supports (padding: max(0px)) {
+            .screen-container {
+                padding-left: max(20px, env(safe-area-inset-left));
+                padding-right: max(20px, env(safe-area-inset-right));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+            .recording-timer {
+                bottom: max(120px, env(safe-area-inset-bottom) + 80px);
+            }
         }
         
         .question-input-area {
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
         
         .input-group {
@@ -826,108 +947,134 @@
         
         .question-input {
             flex: 1;
-            padding: 14px;
-            background: var(--max-input-bg, #1f2c38);
-            border: none;
-            border-radius: 40px;
-            color: var(--max-text, white);
+            padding: 14px 18px;
+            background: #1f2c38;
+            border: 1px solid #2b3b4a;
+            border-radius: 30px;
+            color: white;
             font-size: 16px;
+            outline: none;
+        }
+        
+        .question-input:focus {
+            border-color: #248bf2;
         }
         
         .question-submit {
-            background: var(--max-blue, #248bf2);
+            background: #248bf2;
             border: none;
-            border-radius: 40px;
-            padding: 14px 20px;
+            border-radius: 30px;
+            padding: 0 24px;
+            font-size: 20px;
             color: white;
-            font-size: 18px;
             cursor: pointer;
+        }
+        
+        .voice-input-area {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0;
         }
         
         .voice-hint-text {
-            font-size: 13px;
-            color: var(--max-text-secondary, #8e9aa6);
             text-align: center;
-            margin-top: 8px;
+            font-size: 12px;
+            color: #8e9aa6;
+            margin-top: 12px;
         }
         
-        .voice-hold-hint {
-            display: inline-block;
-            background: rgba(36, 139, 242, 0.2);
-            padding: 3px 10px;
+        .voice-hint {
+            text-align: center;
+            font-size: 14px;
+            color: #8e9aa6;
+            margin-bottom: 16px;
+        }
+        
+        .gender-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .gender-btn {
+            flex: 1;
+            padding: 16px;
+            background: #1f2c38;
+            border: 1px solid #2b3b4a;
             border-radius: 20px;
-            font-size: 10px;
-            margin-left: 8px;
-            font-weight: normal;
-        }
-        
-        #hiddenAudioPlayer {
-            display: none;
-        }
-        
-        .login-screen {
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 400px;
-            text-align: center;
-            padding: 40px 20px;
+            gap: 8px;
         }
         
-        .login-icon {
-            font-size: 64px;
-            margin-bottom: 24px;
+        .gender-btn.active {
+            border-color: #248bf2;
+            background: #248bf220;
         }
         
-        .login-title {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            background: linear-gradient(135deg, var(--max-blue, #248bf2), #6c5ce7);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .gender-emoji {
+            font-size: 32px;
         }
         
-        .login-text {
+        .context-input-group {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .context-input {
+            flex: 1;
+            padding: 14px 18px;
+            background: #1f2c38;
+            border: 1px solid #2b3b4a;
+            border-radius: 30px;
+            color: white;
             font-size: 16px;
-            color: var(--max-text-secondary, #8e9aa6);
-            line-height: 1.6;
-            margin-bottom: 32px;
-            max-width: 400px;
         }
         
-        .login-btn {
-            background: var(--max-blue, #248bf2);
+        .context-submit {
+            background: #248bf2;
             border: none;
-            border-radius: 40px;
-            padding: 14px 32px;
-            font-size: 18px;
-            font-weight: 600;
+            border-radius: 30px;
+            padding: 0 24px;
+            font-size: 20px;
             color: white;
             cursor: pointer;
+        }
+        
+        .context-skip {
+            background: transparent;
+            border: none;
+            color: #8e9aa6;
+            padding: 12px;
+            cursor: pointer;
+            width: 100%;
         }
         
         .mode-cards {
             display: flex;
             flex-direction: column;
             gap: 16px;
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
         
         .mode-card {
-            background: var(--max-input-bg, #1f2c38);
+            background: #1f2c38;
             border-radius: 20px;
-            padding: 16px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.2s;
             border: 2px solid transparent;
         }
         
         .mode-card.selected {
-            border-color: var(--max-blue, #248bf2);
-            background: var(--max-hover, #2b3b4a);
+            border-color: #248bf2;
+            background: #248bf220;
         }
         
         .mode-emoji {
@@ -938,18 +1085,25 @@
         .mode-name {
             font-size: 18px;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .mode-desc {
+            font-size: 12px;
+            color: #8e9aa6;
         }
         
         .goals-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 20px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
         }
         
         .goal-item {
-            background: var(--max-input-bg, #1f2c38);
+            background: #1f2c38;
             border-radius: 16px;
             padding: 16px;
             cursor: pointer;
@@ -957,245 +1111,94 @@
         }
         
         .goal-item:hover {
-            background: var(--max-hover, #2b3b4a);
+            background: #2b3b4a;
+            transform: translateX(4px);
         }
         
         .goal-name {
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 4px;
         }
         
-        .goal-time, .goal-difficulty {
-            font-size: 12px;
-            color: var(--max-text-secondary, #8e9aa6);
+        .goal-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: #8e9aa6;
         }
         
-        .thought-text {
-            line-height: 1.8;
-            margin-bottom: 24px;
-            white-space: pre-wrap;
-        }
-        
-        .profile-badge, .mode-badge {
-            background: var(--max-input-bg, #1f2c38);
-            padding: 12px;
-            border-radius: 16px;
+        .profile-badge {
+            background: #1f2c38;
+            border-radius: 30px;
+            padding: 8px 16px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         
         .badge-label {
-            font-size: 12px;
-            color: var(--max-text-secondary, #8e9aa6);
+            color: #8e9aa6;
             margin-right: 8px;
         }
         
         .badge-code {
             font-weight: bold;
+            color: #248bf2;
             font-family: monospace;
         }
         
-        /* Стили для чата */
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            height: calc(100vh - 120px);
-        }
-        
-        .messages-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .message {
-            display: flex;
-            width: 100%;
-        }
-        
-        .message.user-message {
-            justify-content: flex-end;
-        }
-        
-        .message.bot-message {
-            justify-content: flex-start;
-        }
-        
-        .message-bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 18px;
-        }
-        
-        .user-message .message-bubble {
-            background: var(--max-message-user, #2b5278);
-            border-bottom-right-radius: 4px;
-        }
-        
-        .bot-message .message-bubble {
-            background: var(--max-message-bot, #1f2c38);
-            border-bottom-left-radius: 4px;
-        }
-        
-        .message-text {
-            font-size: 15px;
-            line-height: 1.4;
-        }
-        
-        .message-time {
-            font-size: 10px;
-            color: var(--max-text-secondary);
-            margin-top: 4px;
-            text-align: right;
-        }
-        
-        .input-panel {
-            padding: 12px 16px;
-            background: var(--max-panel-bg);
-            border-top: 1px solid var(--max-border);
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .attach-btn, .voice-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            border: none;
-            color: var(--max-text);
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .message-input-wrapper {
-            flex: 1;
-            display: flex;
-            gap: 8px;
-            background: var(--glass-bg);
-            border-radius: 24px;
-            padding: 4px 4px 4px 16px;
-        }
-        
-        .message-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--max-text);
-            font-size: 16px;
-            outline: none;
-            padding: 8px 0;
-        }
-        
-        .send-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--max-blue);
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        
-        .smart-questions-container {
-            padding: 20px;
-            overflow-y: auto;
-            height: 100%;
-        }
-        
-        .smart-questions-header {
+        .profile-header {
             text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .smart-questions-emoji {
-            font-size: 48px;
-        }
-        
-        .smart-questions-title {
-            font-size: 22px;
-            margin-bottom: 8px;
-            color: var(--max-text);
-        }
-        
-        .smart-questions-desc {
-            color: var(--max-text-secondary);
-        }
-        
-        .smart-questions-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
             margin-bottom: 20px;
         }
         
-        .smart-question-item {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 14px 18px;
-            cursor: pointer;
+        .profile-emoji {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+        
+        .profile-title {
+            font-size: 20px;
+        }
+        
+        .profile-text {
+            line-height: 1.6;
+            margin-bottom: 24px;
+            white-space: pre-wrap;
+        }
+        
+        .button-row {
             display: flex;
             gap: 12px;
-            transition: all 0.2s;
+            margin: 12px 0;
         }
         
-        .smart-question-item:hover {
-            border-color: var(--max-blue);
-            transform: translateX(4px);
-        }
-        
-        .smart-question-input {
-            flex: 1;
-            padding: 14px 18px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            color: var(--max-text);
-        }
-        
-        .smart-question-submit {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--max-blue);
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
-        
-        .thought-loading-container {
+        .profile-buttons {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 300px;
+            flex-direction: column;
+            gap: 12px;
         }
         
-        .thought-loading-content {
+        .thought-header {
             text-align: center;
+            margin-bottom: 20px;
         }
         
-        .loading-time {
-            margin-top: 12px;
-            font-size: 12px;
-            color: var(--max-text-secondary);
+        .thought-emoji {
+            font-size: 48px;
+            margin-bottom: 8px;
         }
         
-        @supports (padding: max(0px)) {
-            .screen-container {
-                padding-left: max(20px, env(safe-area-inset-left));
-                padding-right: max(20px, env(safe-area-inset-right));
-                padding-bottom: max(20px, env(safe-area-inset-bottom));
-            }
-            .chat-header {
-                padding-top: max(12px, env(safe-area-inset-top));
-            }
-            .recording-timer {
-                bottom: max(120px, env(safe-area-inset-bottom) + 80px);
-            }
+        .thought-title {
+            font-size: 20px;
+        }
+        
+        .thought-text {
+            line-height: 1.6;
+            margin-bottom: 24px;
+            white-space: pre-wrap;
+            background: #1f2c38;
+            border-radius: 16px;
+            padding: 20px;
         }
     </style>
 </head>
@@ -1263,7 +1266,7 @@
     <div id="recordingTimer" class="recording-timer" style="display: none;">0s</div>
     <div id="toastMessage" class="toast-message"></div>
 
-    <!-- ШАБЛОНЫ ЭКРАНОВ -->
+    <!-- ========== ШАБЛОНЫ ЭКРАНОВ ========== -->
     <template id="onboardingScreen1">
         <div class="onboarding-container">
             <div class="onboarding-content">
@@ -1272,10 +1275,7 @@
                 <div class="onboarding-subtitle">виртуальный психолог</div>
                 <div class="onboarding-text" id="onboardingText1">
                     Привет, <span id="userNamePlaceholder">друг</span>!<br><br>
-                    Я — Фреди, виртуальный психолог.<br>
-                    Оцифрованная версия Андрея Мейстера — его цифровой слепок.<br><br>
-                    🎭 Короче, я — это он, только батарейка дольше держит и пожрать не прошу.<br><br>
-                    🕒 Нам нужно познакомиться, потому что я пока не экстрасенс.<br><br>
+                    Я — Фреди, виртуальный психолог.<br><br>
                     🧐 Чтобы я понимал, с кем имею дело — давай пройдём тест.<br><br>
                     📊 Всего 5 этапов:<br><br>
                     1️⃣ Конфигурация восприятия<br>
@@ -1283,39 +1283,10 @@
                     3️⃣ Конфигурация поведения<br>
                     4️⃣ Точка роста<br>
                     5️⃣ Глубинные паттерны<br><br>
-                    ⏱ 15 минут — и я буду знать о тебе больше, чем ты думаешь.
+                    ⏱ 15 минут — и я буду знать о тебе больше.
                 </div>
                 <div class="onboarding-buttons">
                     <button class="onboarding-btn primary" id="startTestBtn">🚀 Давай, погнали!</button>
-                    <button class="onboarding-btn secondary" id="whoAreYouBtn">🤨 А ты кто вообще такой?</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="onboardingScreen2">
-        <div class="onboarding-container">
-            <div class="onboarding-content">
-                <div class="onboarding-text">
-                    🎭 Ну, вопрос хороший. Давайте по существу.<br><br>
-                    Видите ли, дорогой человек, я — экспериментальная модель.<br>
-                    Андрей Мейстер однажды подумал: "А что, если я создам свою цифровую копию? Пусть работает, пока я сплю, ем или просто ленюсь".<br><br>
-                    Так я и появился. 🧠<br><br>
-                    🧐 Что я умею:<br><br>
-                    • Вижу паттерны там, где вы видите просто день сурка<br>
-                    • Нахожу систему в ваших "случайных" решениях<br>
-                    • Понимаю, почему вы выбираете одних и тех же "не тех" людей<br>
-                    • Я реально беспристрастен — у меня нет плохого настроения<br><br>
-                    🎯 Конкретно по тесту:<br><br>
-                    1️⃣ Восприятие — поймём, какую линзу вы носите<br>
-                    2️⃣ Мышление — узнаем, как вы пережёвываете реальность<br>
-                    3️⃣ Поведение — посмотрим, что вы делаете "на автомате"<br>
-                    4️⃣ Точка роста — я скажу, куда вам двигаться<br>
-                    5️⃣ Глубинные паттерны — заглянем в детство и подсознание<br><br>
-                    ⏱ 15 минут — и я составлю ваш профиль.
-                </div>
-                <div class="onboarding-buttons">
-                    <button class="onboarding-btn primary" id="letsGoBtn">👌 Погнали!</button>
                 </div>
             </div>
         </div>
@@ -1357,7 +1328,7 @@
                 <div class="context-question">Сколько вам лет?</div>
                 <div class="context-hint">(Напишите число)</div>
                 <div class="context-input-group">
-                    <input type="number" class="context-input" id="ageInput" placeholder="Например: 35" min="1" max="120">
+                    <input type="number" class="context-input" id="ageInput" placeholder="Например: 35">
                     <button class="context-submit" id="submitAgeBtn">➡️</button>
                 </div>
                 <button class="context-skip" id="skipAgeBtn">⏭ Позже</button>
@@ -1369,50 +1340,15 @@
         <div class="context-complete-container">
             <div class="context-complete-content">
                 <div class="context-complete-title">✅ Отлично! Теперь я знаю о вас:</div>
-                <div class="context-info" id="contextInfo">
-                    📍 Город: <span id="infoCity">Москва</span><br>
-                    👤 Пол: <span id="infoGender">Мужчина</span><br>
-                    📅 Возраст: <span id="infoAge">35</span> лет<br>
-                    <span id="infoWeather">🌧 Погода: пасмурно, +5°C</span>
-                </div>
+                <div class="context-info" id="contextInfo"></div>
                 <div class="context-next-text">
                     🎯 Теперь я буду учитывать это в наших разговорах!<br><br>
                     🧠 <b>ЧТО ДАЛЬШЕ?</b><br><br>
-                    Чтобы я мог помочь по-настоящему, нужно пройти тест (15 минут).<br>
-                    Он определит ваш психологический профиль по 4 векторам и глубинным паттернам.
+                    Чтобы я мог помочь по-настоящему, нужно пройти тест (15 минут).
                 </div>
                 <div class="context-complete-buttons">
                     <button class="onboarding-btn primary" id="startRealTestBtn">🚀 НАЧАТЬ ТЕСТ</button>
-                    <button class="onboarding-btn secondary" id="whatTestGivesBtn">📖 ЧТО ДАЕТ ТЕСТ</button>
                     <button class="onboarding-btn secondary" id="askQuestionPreBtn">❓ ЗАДАТЬ ВОПРОС</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="benefitsScreen">
-        <div class="benefits-container">
-            <div class="benefits-content">
-                <div class="benefits-title">🔍 ЧТО ВЫ УЗНАЕТЕ О СЕБЕ:</div>
-                <div class="benefits-list">
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 1: КОНФИГУРАЦИЯ ВОСПРИЯТИЯ</div><div class="benefit-desc">Линза, через которую вы смотрите на мир.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 2: КОНФИГУРАЦИЯ МЫШЛЕНИЯ</div><div class="benefit-desc">Как вы обрабатываете информацию.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 3: КОНФИГУРАЦИЯ ПОВЕДЕНИЯ</div><div class="benefit-desc">Ваши автоматические реакции.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 4: ТОЧКА РОСТА</div><div class="benefit-desc">Где находится рычаг изменений.</div></div>
-                    <div class="benefit-item"><div class="benefit-stage">🧠 ЭТАП 5: ГЛУБИННЫЕ ПАТТЕРНЫ</div><div class="benefit-desc">Тип привязанности, защитные механизмы, базовые убеждения.</div></div>
-                </div>
-                <div class="benefits-after">
-                    ⚡ <b>ПОСЛЕ ТЕСТА ВЫ ПОЛУЧИТЕ:</b><br><br>
-                    ✅ Полный психологический портрет<br>
-                    ✅ Глубинный анализ подсознательных паттернов<br>
-                    ✅ Выбор стиля общения: 🔮 КОУЧ | 🧠 ПСИХОЛОГ | ⚡ ТРЕНЕР<br>
-                    ✅ Индивидуальный навигатор по целям<br>
-                    ✅ Напоминания и поддержка на пути<br><br>
-                    ⏱ <b>Всего 15 минут</b>
-                </div>
-                <div class="benefits-buttons">
-                    <button class="onboarding-btn primary" id="startTestFromBenefitsBtn">🚀 НАЧАТЬ ТЕСТ</button>
-                    <button class="onboarding-btn secondary" id="backToContextBtn">◀️ НАЗАД</button>
                 </div>
             </div>
         </div>
@@ -1426,7 +1362,7 @@
                 <div class="profile-buttons">
                     <button class="onboarding-btn primary" id="psychologistThoughtBtn">🧠 МЫСЛИ ПСИХОЛОГА</button>
                     <div class="button-row">
-                        <button class="onboarding-btn secondary" id="askQuestionBtn">🎤 ХОЧУ ВЫСКАЗАТЬСЯ</button>
+                        <button class="onboarding-btn secondary" id="askQuestionBtn">🎤 ЗАДАТЬ ВОПРОС</button>
                         <button class="onboarding-btn secondary" id="chooseGoalBtn">🎯 ВЫБРАТЬ ЦЕЛЬ</button>
                     </div>
                     <button class="onboarding-btn secondary" id="chooseModeBtn">⚙️ ВЫБРАТЬ РЕЖИМ</button>
@@ -1439,8 +1375,7 @@
         <div class="ask-question-container">
             <div class="ask-question-content">
                 <h2 class="ask-question-title">✏️ ЗАДАВАЙТЕ ЛЮБОЙ ВОПРОС</h2>
-                <div class="ask-question-text">Если мой создатель знает ответ на него — значит и я вам что-то отвечу 😉</div>
-                <div class="voice-hint">🎤 <b>Можно отправить голосовое сообщение</b> — я внимательно выслушаю.</div>
+                <div class="voice-hint">🎤 <b>Можно отправить голосовое сообщение</b></div>
                 <div class="question-input-area">
                     <div class="input-group">
                         <input type="text" id="questionInput" class="question-input" placeholder="Напишите ваш вопрос...">
@@ -1454,8 +1389,7 @@
                         <span>🎙️ Говорите...</span>
                     </div>
                     <div class="voice-hint-text">
-                        🎤 Нажмите и <b>ДЕРЖИТЕ</b> для записи (до 60 сек)
-                        <span class="voice-hold-hint">удержание</span>
+                        🎤 Нажмите для записи, нажмите еще раз для отправки
                     </div>
                 </div>
                 <div class="question-back"><button class="onboarding-btn secondary" id="backToProfileBtn">◀️ НАЗАД</button></div>
@@ -1467,11 +1401,8 @@
         <div class="choose-goal-container">
             <div class="choose-goal-content">
                 <h2 class="choose-goal-title">🎯 ВЫБЕРИТЕ ЦЕЛЬ</h2>
-                <div class="goal-description"><span id="goalUserName">друг</span>, я проанализировал твой профиль и подобрал цели, которые сейчас наиболее актуальны.</div>
-                <div class="profile-badge"><span class="badge-label">Твой профиль:</span><span class="badge-code" id="profileCode">СБ-4_ТФ-4_УБ-4_ЧВ-4</span></div>
-                <div class="mode-badge"><span class="badge-label">Режим:</span><span class="badge-code" id="modeCode">🔮 КОУЧ</span></div>
+                <div class="profile-badge"><span class="badge-label">Твой профиль:</span><span class="badge-code" id="profileCode"></span></div>
                 <div class="goals-list" id="goalsList"></div>
-                <div class="custom-goal"><button class="onboarding-btn secondary" id="customGoalBtn">✏️ Сформулирую сам</button></div>
                 <div class="goal-back"><button class="onboarding-btn secondary" id="backToProfileFromGoalBtn">◀️ НАЗАД</button></div>
             </div>
         </div>
@@ -1481,12 +1412,10 @@
         <div class="choose-mode-container">
             <div class="choose-mode-content">
                 <h2 class="choose-mode-title">⚙️ ВЫБЕРИТЕ РЕЖИМ</h2>
-                <div class="mode-description">Слушай, я могу быть разным. Хочешь конкретики — давай определимся, в каком качестве я сегодня буду полезен.</div>
-                <div class="profile-badge"><span class="badge-label">Твой профиль:</span><span class="badge-code" id="modeProfileCode">СБ-4_ТФ-4_УБ-4_ЧВ-4</span></div>
                 <div class="mode-cards" id="modeCards">
-                    <div class="mode-card" data-mode="coach"><div class="mode-emoji">🔮</div><div class="mode-name">КОУЧ</div><div class="mode-desc">Если хочешь, чтобы я помог тебе самому найти решения.</div><div class="mode-what">Задавать открытые вопросы, отражать твои мысли, направлять.</div><div class="mode-get">• Жить станет легче<br>• Появится больше радости от простых вещей<br>• Начнёшь замечать возможности вместо проблем</div></div>
-                    <div class="mode-card" data-mode="psychologist"><div class="mode-emoji">🧠</div><div class="mode-name">ПСИХОЛОГ</div><div class="mode-desc">Если хочешь копнуть вглубь, разобраться с причинами, а не следствиями.</div><div class="mode-what">Исследовать твои глубинные паттерны, защитные механизмы, прошлый опыт.</div><div class="mode-get">• Перестанешь реагировать на триггеры<br>• Исчезнут старые сценарии<br>• Поймёшь, откуда растут ноги у твоих страхов</div></div>
-                    <div class="mode-card" data-mode="trainer"><div class="mode-emoji">⚡</div><div class="mode-name">ТРЕНЕР</div><div class="mode-desc">Если нужны чёткие инструменты, навыки и результат.</div><div class="mode-what">Формировать твои поведенческие и мыслительные навыки.</div><div class="mode-get">• Научишься чётко формулировать мысли<br>• Освоишь алгоритмы ведения переговоров<br>• Сформируешь полезные привычки</div></div>
+                    <div class="mode-card" data-mode="coach"><div class="mode-emoji">🔮</div><div class="mode-name">КОУЧ</div><div class="mode-desc">Помогаю найти ответы внутри себя</div></div>
+                    <div class="mode-card" data-mode="psychologist"><div class="mode-emoji">🧠</div><div class="mode-name">ПСИХОЛОГ</div><div class="mode-desc">Исследую глубинные паттерны</div></div>
+                    <div class="mode-card" data-mode="trainer"><div class="mode-emoji">⚡</div><div class="mode-name">ТРЕНЕР</div><div class="mode-desc">Даю чёткие инструменты и задачи</div></div>
                 </div>
                 <div class="mode-back"><button class="onboarding-btn secondary" id="backToProfileFromModeBtn">◀️ НАЗАД</button></div>
             </div>
@@ -1497,8 +1426,7 @@
         <div class="thought-loading-container">
             <div class="thought-loading-content">
                 <div class="loading-spinner">🧠</div>
-                <div class="loading-text">Анализирую через конфайнмент-модель...</div>
-                <div class="loading-time">Это займёт около 15-20 секунд</div>
+                <div class="loading-text">Анализирую...</div>
             </div>
         </div>
     </template>
@@ -1510,96 +1438,220 @@
                 <div class="thought-text" id="thoughtText"></div>
                 <div class="thought-buttons">
                     <button class="onboarding-btn secondary" id="backToProfileFromThoughtBtn">◀️ НАЗАД</button>
-                    <button class="onboarding-btn secondary" id="askQuestionFromThoughtBtn">🎤 ЗАДАТЬ ВОПРОС</button>
                 </div>
             </div>
         </div>
     </template>
 
-    <!-- ========== СКРИПТЫ (с увеличенной версией для обновления кэша) ========== -->
-    <script src="/context.js?v=8"></script>
-    <script src="/onboarding.js?v=8"></script>
-    <script src="/script.js?v=8"></script>
-    <script src="/test.js?v=8"></script>
-    <script src="/animations.js?v=8"></script>
-    <script src="/animated-avatar.js?v=8"></script>
-    <script src="/dynamic-bg.js?v=8"></script>
-    <script src="/challenges.js?v=8"></script>
-    <script src="/notifications.js?v=8"></script>
-    <script src="/psychometric.js?v=8"></script>
-    <script src="/dashboard.js?v=8"></script>
+    <!-- ========== СКРИПТЫ ========== -->
+    <script src="/static/api.js?v=19"></script>
+    <script src="/static/context.js?v=19"></script>
+    <script src="/static/onboarding.js?v=19"></script>
+    <script src="/static/script.js?v=19"></script>
+    <script src="/static/test.js?v=19"></script>
+    <script src="/static/animations.js?v=19"></script>
+    <script src="/static/animated-avatar.js?v=19"></script>
+    <script src="/static/dynamic-bg.js?v=19"></script>
+    <script src="/static/challenges.js?v=19"></script>
+    <script src="/static/notifications.js?v=19"></script>
+    <script src="/static/psychometric.js?v=19"></script>
+    <script src="/static/dashboard.js?v=19"></script>
     
-    <!-- Микрофон для мобильных -->
+    <!-- ========== ПРОСТОЙ МЕНЕДЖЕР МИКРОФОНА (ДЛЯ ЛЮБОГО БРАУЗЕРА) ========== -->
     <script>
-        class MicrophoneManager {
-            constructor() {
-                this.hasPermission = false;
-                this.isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-                this.isAndroid = /Android/i.test(navigator.userAgent);
-            }
+        window.maxMicrophoneManager = {
+            hasPermission: false,
+            isRecording: false,
+            mediaRecorder: null,
+            audioChunks: [],
             
             async requestMicrophone() {
-                console.log('🎤 Запрос микрофона...');
+                console.log('🎤 Запрос доступа к микрофону...');
+                
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.error('❌ Микрофон не поддерживается');
+                    this.showToast('❌ Микрофон не поддерживается', 'error');
+                    return false;
+                }
+                
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    this.hasPermission = true;
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
                     stream.getTracks().forEach(track => track.stop());
+                    this.hasPermission = true;
+                    localStorage.setItem('microphone_permission_granted', 'true');
                     this.showToast('✅ Микрофон готов!', 'success');
                     return true;
                 } catch (error) {
-                    console.error('Microphone error:', error);
+                    console.error('❌ Ошибка:', error);
+                    this.hasPermission = false;
+                    
                     if (error.name === 'NotAllowedError') {
                         this.showPermissionInstructions();
+                    } else if (error.name === 'NotFoundError') {
+                        this.showToast('❌ Микрофон не найден', 'error');
                     } else {
-                        this.showToast('❌ Не удалось получить доступ к микрофону', 'error');
+                        this.showToast('❌ Не удалось получить доступ', 'error');
                     }
                     return false;
                 }
-            }
+            },
             
             showPermissionInstructions() {
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
                 const modal = document.createElement('div');
                 modal.className = 'microphone-modal';
                 modal.innerHTML = `
                     <div class="microphone-modal-content">
                         <div style="font-size:48px;margin-bottom:16px;">🎤</div>
                         <h3>Нужен доступ к микрофону</h3>
-                        <div style="color:var(--max-text-secondary);line-height:1.6;margin:16px 0;">
-                            В настройках приложения MAX разрешите доступ к микрофону.
+                        <div style="color:#8e9aa6;margin:16px 0;text-align:left;">
+                            ${isMobile ? 
+                                '1️⃣ Настройки телефона → Браузер → Разрешения<br>2️⃣ Микрофон → Разрешить<br>3️⃣ Обновите страницу' : 
+                                'В адресной строке нажмите на иконку 🔒 → Разрешения → Микрофон → Разрешить<br>Затем обновите страницу'}
                         </div>
-                        <div style="display:flex;gap:12px;">
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
                             <button id="microphoneRetryBtn" class="modal-btn primary">🔄 ПРОВЕРИТЬ</button>
-                            <button id="microphoneCloseBtn" class="modal-btn secondary">📱 ЗАКРЫТЬ</button>
+                            <button id="microphoneTextBtn" class="modal-btn secondary">📝 НАПИСАТЬ ТЕКСТ</button>
                         </div>
                     </div>
                 `;
                 document.body.appendChild(modal);
-                document.getElementById('microphoneRetryBtn')?.addEventListener('click', () => {
-                    modal.remove();
-                    this.requestMicrophone();
-                });
-                document.getElementById('microphoneCloseBtn')?.addEventListener('click', () => modal.remove());
-            }
+                document.getElementById('microphoneRetryBtn')?.addEventListener('click', () => { modal.remove(); this.requestMicrophone(); });
+                document.getElementById('microphoneTextBtn')?.addEventListener('click', () => { modal.remove(); document.getElementById('questionInput')?.focus(); });
+            },
             
-            showToast(message, type) {
+            async startRecording() {
+                if (!this.hasPermission && !(await this.requestMicrophone())) return false;
+                
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) this.audioChunks.push(event.data);
+                    };
+                    
+                    this.mediaRecorder.onstop = () => {
+                        const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                        stream.getTracks().forEach(track => track.stop());
+                        this.processAudio(blob);
+                    };
+                    
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    
+                    // Таймер
+                    const timerDiv = document.getElementById('recordingTimer');
+                    if (timerDiv) {
+                        timerDiv.style.display = 'block';
+                        let sec = 0;
+                        this.timerInterval = setInterval(() => timerDiv.textContent = `${++sec}s`, 1000);
+                    }
+                    
+                    // Меняем кнопку
+                    const btn = document.getElementById('voiceRecordBtn');
+                    if (btn) {
+                        btn.classList.add('recording');
+                        btn.innerHTML = '⏹️';
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    this.showToast('❌ Не удалось начать запись', 'error');
+                    return false;
+                }
+            },
+            
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+                    
+                    if (this.timerInterval) clearInterval(this.timerInterval);
+                    document.getElementById('recordingTimer').style.display = 'none';
+                    
+                    const btn = document.getElementById('voiceRecordBtn');
+                    if (btn) {
+                        btn.classList.remove('recording');
+                        btn.innerHTML = '🎤';
+                    }
+                }
+            },
+            
+            async processAudio(blob) {
+                if (blob.size < 1000) {
+                    this.showToast('🎤 Слишком тихо', 'error');
+                    return;
+                }
+                
+                this.showToast('🎤 Распознаю...', 'info');
+                
+                try {
+                    const userId = window.maxContext?.user_id || localStorage.getItem('fredi_user_id');
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    formData.append('voice', blob, 'recording.webm');
+                    
+                    const response = await fetch(`${window.API_BASE_URL}/api/voice/process`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.recognized_text) {
+                        this.showToast('✅ Распознано!', 'success');
+                        const input = document.getElementById('questionInput');
+                        if (input) {
+                            input.value = result.recognized_text;
+                            document.getElementById('sendQuestionBtn')?.click();
+                        }
+                    } else {
+                        this.showToast(result.answer || '❌ Не распознано', 'error');
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    this.showToast('❌ Ошибка отправки', 'error');
+                }
+            },
+            
+            showToast(msg, type) {
                 const toast = document.getElementById('toastMessage');
                 if (toast) {
-                    toast.textContent = message;
+                    toast.textContent = msg;
                     toast.className = `toast-message ${type} show`;
                     setTimeout(() => toast.classList.remove('show'), 3000);
                 }
             }
-        }
+        };
         
-        window.microphoneManager = new MicrophoneManager();
+        // Инициализация
+        setTimeout(() => window.maxMicrophoneManager.requestMicrophone(), 1000);
         
-        // Инициализация dashboard
+        // Обработчик кнопки (простой режим)
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('📄 DOM загружен, создаём FrediDashboard');
+            const voiceBtn = document.getElementById('voiceRecordBtn');
+            if (voiceBtn) {
+                voiceBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (window.maxMicrophoneManager.isRecording) {
+                        window.maxMicrophoneManager.stopRecording();
+                    } else {
+                        await window.maxMicrophoneManager.startRecording();
+                    }
+                });
+            }
+            
             if (typeof FrediDashboard !== 'undefined') {
                 window.dashboard = new FrediDashboard();
-            } else {
-                console.error('❌ FrediDashboard не загружен!');
             }
         });
     </script>
