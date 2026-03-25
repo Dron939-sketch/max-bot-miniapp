@@ -17,6 +17,29 @@
     <!-- MAX Bridge -->
     <script src="https://st.max.ru/js/max-web-app.js"></script>
     
+    <!-- ========== ФИКСИРОВАННЫЙ USER_ID (ДЛЯ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ) ========== -->
+    <script>
+        // ЖЁСТКАЯ УСТАНОВКА — ВСЕ ПОЛЬЗОВАТЕЛИ ПОЛУЧАЮТ ЭТОТ ID
+        const FIXED_USER_ID = 213102077;
+        const FIXED_USER_NAME = 'Андрей';
+        
+        // Принудительно сохраняем в localStorage
+        localStorage.setItem('fredi_user_id', FIXED_USER_ID);
+        localStorage.setItem('userName', FIXED_USER_NAME);
+        
+        // Создаём глобальный контекст
+        window.maxContext = {
+            user_id: FIXED_USER_ID,
+            user_name: FIXED_USER_NAME,
+            initialized: true,
+            fixed: true,
+            force: true
+        };
+        
+        console.log('🎯 ПРИНУДИТЕЛЬНО установлен user_id:', FIXED_USER_ID);
+        console.log('👤 USER_NAME:', FIXED_USER_NAME);
+    </script>
+    
     <!-- ========== КРИТИЧЕСКИ ВАЖНО: УСТАНОВКА API_BASE_URL ========== -->
     <script>
         window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
