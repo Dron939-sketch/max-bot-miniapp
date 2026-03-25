@@ -47,20 +47,27 @@
         console.log('📦 maxContext:', window.maxContext);
     </script>
     
-    <!-- ========== КОНФИГУРАЦИЯ API ========== -->
+    <!-- ========== КОНФИГУРАЦИЯ API (ИСПРАВЛЕНА) ========== -->
     <script>
-        const MAIN_API_URL = 'https://max-bot-miniapp.onrender.com';
+        // ✅ АДРЕС БЭКЕНДА (FastAPI сервер)
+        // Мини-приложение (max-bot-miniapp) и бэкенд (max-bot-1-ywpz) живут на разных URL
+        const API_BACKEND_URL = 'https://max-bot-1-ywpz.onrender.com';
         const hostname = window.location.hostname;
         
-        if (hostname === 'max-bot-miniapp.onrender.com') {
-            window.API_BASE_URL = window.location.origin;
-        } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Определяем базовый URL для API запросов
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            // Локальная разработка
             window.API_BASE_URL = 'http://localhost:10000';
         } else {
-            window.API_BASE_URL = MAIN_API_URL;
+            // Продакшен: всегда используем адрес бэкенда
+            window.API_BASE_URL = API_BACKEND_URL;
         }
         
-        console.log('🌐 API_BASE_URL:', window.API_BASE_URL);
+        console.log('🌐 API_BASE_URL (бэкенд):', window.API_BASE_URL);
+        console.log('📍 Мини-приложение:', window.location.origin);
+        
+        // Сохраняем в localStorage для других скриптов
+        localStorage.setItem('api_base_url', window.API_BASE_URL);
     </script>
     
     <div class="app" id="app">
