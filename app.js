@@ -1,6 +1,6 @@
 // ============================================
 // ЛИЧНЫЙ КАБИНЕТ - КОНСОРЦИУМ ФРЕДИ
-// Версия 2.0 - полная интеграция с челленджами, уведомлениями, двойниками
+// Версия 2.1 - ИСПРАВЛЕНА РАБОТА С API (абсолютные пути)
 // ============================================
 
 class FrediDashboard {
@@ -45,8 +45,17 @@ class FrediDashboard {
         this.init();
     }
     
+    // ============================================
+    // ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ПОЛУЧЕНИЯ API URL
+    // ============================================
+    
+    getApiBaseUrl() {
+        return window.API_BASE_URL || 'https://max-bot-1-ywpz.onrender.com';
+    }
+    
     async init() {
         console.log('🎯 Инициализация личного кабинета...');
+        console.log('🌐 API_BASE_URL:', this.getApiBaseUrl());
         
         if (!this.userId) {
             this.showError('Не удалось идентифицировать пользователя');
@@ -66,21 +75,25 @@ class FrediDashboard {
     }
     
     // ============================================
-    // ЗАГРУЗКА ДАННЫХ
+    // ЗАГРУЗКА ДАННЫХ (ИСПРАВЛЕНО)
     // ============================================
     
     async loadUserData() {
         try {
+            const baseUrl = this.getApiBaseUrl();
+            
             // 1. Получаем статус пользователя
-            const statusResponse = await fetch(`/api/user-status?user_id=${this.userId}`);
+            const statusResponse = await fetch(`${baseUrl}/api/user-status?user_id=${this.userId}`);
             const status = await statusResponse.json();
+            
+            console.log('📊 Статус пользователя:', status);
             
             this.isTestCompleted = status.test_completed || status.has_profile;
             this.profileCode = status.profile_code;
             
             // 2. Загружаем имя пользователя из БД
             try {
-                const userDataResponse = await fetch(`/api/user-data?user_id=${this.userId}`);
+                const userDataResponse = await fetch(`${baseUrl}/api/user-data?user_id=${this.userId}`);
                 const userData = await userDataResponse.json();
                 if (userData && userData.user_name) {
                     this.userName = userData.user_name;
@@ -98,14 +111,15 @@ class FrediDashboard {
             
             // 4. Если тест пройден, загружаем полные данные профиля
             if (status.has_profile || status.has_interpretation) {
-                const profileResponse = await fetch(`/api/get-profile?user_id=${this.userId}`);
+                const profileResponse = await fetch(`${baseUrl}/api/get-profile?user_id=${this.userId}`);
                 const profile = await profileResponse.json();
                 this.userData = profile;
+                console.log('📊 Профиль загружен');
             }
             
             // 5. Загружаем статистику
             try {
-                const statsResponse = await fetch(`/api/user-full-status?user_id=${this.userId}`);
+                const statsResponse = await fetch(`${baseUrl}/api/user-full-status?user_id=${this.userId}`);
                 const stats = await statsResponse.json();
                 if (stats.days_active) this.daysActive = stats.days_active;
                 if (stats.sessions_count) this.sessionsCount = stats.sessions_count;
@@ -132,18 +146,20 @@ class FrediDashboard {
     
     async initChallenges() {
         try {
-            this.challengeManager = new ChallengeManager(this.userId, this.userData);
-            await this.challengeManager.init();
-            
-            this.challengeManager.addListener((event, data) => {
-                if (event === 'level_up') {
-                    this.showFloatingMessage(`🎉 Уровень ${data.level} достигнут!`, 'success');
-                } else if (event === 'challenge_completed') {
-                    this.showFloatingMessage(`🏆 Выполнен челлендж: ${data.name}`, 'success');
-                }
-            });
-            
-            this.renderChallengesWidget();
+            if (window.ChallengeManager) {
+                this.challengeManager = new window.ChallengeManager(this.userId, this.userData);
+                await this.challengeManager.init();
+                
+                this.challengeManager.addListener((event, data) => {
+                    if (event === 'level_up') {
+                        this.showFloatingMessage(`🎉 Уровень ${data.level} достигнут!`, 'success');
+                    } else if (event === 'challenge_completed') {
+                        this.showFloatingMessage(`🏆 Выполнен челлендж: ${data.name}`, 'success');
+                    }
+                });
+                
+                this.renderChallengesWidget();
+            }
         } catch (error) {
             console.error('Ошибка инициализации челленджей:', error);
         }
@@ -151,8 +167,10 @@ class FrediDashboard {
     
     async initPsychometricDoubles() {
         try {
-            // Загружаем профиль пользователя для поиска двойников
-            const profileResponse = await fetch(`/api/get-profile?user_id=${this.userId}`);
+            if (!window.PsychometricDoubles) return;
+            
+            const baseUrl = this.getApiBaseUrl();
+            const profileResponse = await fetch(`${baseUrl}/api/get-profile?user_id=${this.userId}`);
             const profileData = await profileResponse.json();
             
             const userProfile = {
@@ -162,7 +180,7 @@ class FrediDashboard {
                 chv: profileData.profile_data?.chv_level || 4
             };
             
-            this.psychometric = new PsychometricDoubles(this.userId, userProfile);
+            this.psychometric = new window.PsychometricDoubles(this.userId, userProfile);
             await this.psychometric.init();
             
             this.renderDoublesSection();
@@ -173,8 +191,10 @@ class FrediDashboard {
     
     async initNotifications() {
         try {
-            this.notificationManager = new NotificationManager(this.userId, this.userName);
-            await this.notificationManager.init();
+            if (window.NotificationManager) {
+                this.notificationManager = new window.NotificationManager(this.userId, this.userName);
+                await this.notificationManager.init();
+            }
         } catch (error) {
             console.error('Ошибка инициализации уведомлений:', error);
         }
@@ -233,7 +253,7 @@ class FrediDashboard {
                     <div class="user-welcome">
                         <div class="user-avatar" id="avatarContainer"></div>
                         <div class="user-info">
-                            <div class="user-name">${this.userName}</div>
+                            <div class="user-name">${this.escapeHtml(this.userName)}</div>
                             <div class="user-profile">${this.profileCode || 'СБ-4_ТФ-4_УБ-4_ЧВ-4'}</div>
                         </div>
                     </div>
@@ -311,17 +331,18 @@ class FrediDashboard {
     }
     
     // ============================================
-    // АНИМИРОВАННЫЙ АВАТАР
+    // АНИМИРОВАННЫЙ АВАТАР (ИСПРАВЛЕНО)
     // ============================================
     
     async initAnimatedAvatar() {
         if (!window.AnimatedAvatar) return;
         
         try {
-            const profileResponse = await fetch(`/api/get-profile?user_id=${this.userId}`);
+            const baseUrl = this.getApiBaseUrl();
+            const profileResponse = await fetch(`${baseUrl}/api/get-profile?user_id=${this.userId}`);
             const profileData = await profileResponse.json();
             
-            this.animatedAvatar = new AnimatedAvatar(this.userId, this.userName, profileData);
+            this.animatedAvatar = new window.AnimatedAvatar(this.userId, this.userName, profileData);
             const avatarCanvas = await this.animatedAvatar.init();
             
             const avatarContainer = document.getElementById('avatarContainer');
@@ -370,7 +391,7 @@ class FrediDashboard {
     }
     
     renderDoublesSection() {
-        if (!this.psychometric || this.psychometric.doubles.length === 0) return;
+        if (!this.psychometric || this.psychometric.doubles?.length === 0) return;
         
         const doublesSection = document.createElement('div');
         doublesSection.className = 'doubles-section';
@@ -522,7 +543,7 @@ class FrediDashboard {
     }
     
     // ============================================
-    // ГОЛОСОВОЙ ВВОД
+    // ГОЛОСОВОЙ ВВОД (ИСПРАВЛЕНО)
     // ============================================
     
     setupVoiceButton(button) {
@@ -603,7 +624,8 @@ class FrediDashboard {
         formData.append('voice', audioBlob, 'voice.webm');
         
         try {
-            const response = await fetch('/api/voice/process', {
+            const baseUrl = this.getApiBaseUrl();
+            const response = await fetch(`${baseUrl}/api/voice/process`, {
                 method: 'POST',
                 body: formData
             });
@@ -637,7 +659,7 @@ class FrediDashboard {
     }
     
     // ============================================
-    // ОБРАБОТЧИКИ МОДУЛЕЙ
+    // ОБРАБОТЧИКИ МОДУЛЕЙ (ИСПРАВЛЕНО)
     // ============================================
     
     handleModuleClick(moduleId) {
@@ -692,12 +714,13 @@ class FrediDashboard {
     }
     
     // ============================================
-    // API ВЫЗОВЫ
+    // API ВЫЗОВЫ (ИСПРАВЛЕНО)
     // ============================================
     
     async sendQuestionToBot(question) {
         try {
-            const response = await fetch('/api/chat/message', {
+            const baseUrl = this.getApiBaseUrl();
+            const response = await fetch(`${baseUrl}/api/chat/message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -771,7 +794,7 @@ class FrediDashboard {
                 <div class="dashboard-error">
                     <div class="error-icon">⚠️</div>
                     <div class="error-title">Ошибка</div>
-                    <div class="error-text">${message}</div>
+                    <div class="error-text">${this.escapeHtml(message)}</div>
                 </div>
             `;
         }
@@ -782,6 +805,8 @@ class FrediDashboard {
     // ============================================
     
     showChatModal(double) {
+        if (!this.psychometric) return;
+        
         const modalHtml = this.psychometric.renderChatModal(double);
         const modalContainer = document.createElement('div');
         modalContainer.innerHTML = modalHtml;
@@ -801,7 +826,7 @@ class FrediDashboard {
             if (messagesList) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = 'message user-message';
-                messageDiv.innerHTML = `<div class="message-bubble">${message}</div><div class="message-time">только что</div>`;
+                messageDiv.innerHTML = `<div class="message-bubble">${this.escapeHtml(message)}</div><div class="message-time">только что</div>`;
                 messagesList.appendChild(messageDiv);
                 messagesList.scrollTop = messagesList.scrollHeight;
             }
@@ -817,14 +842,15 @@ class FrediDashboard {
         if (sendBtn) sendBtn.onclick = sendMessage;
         if (input) input.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
         
-        modalContainer.querySelector('.modal-overlay').onclick = (e) => {
-            if (e.target === modalContainer.querySelector('.modal-overlay')) modalContainer.remove();
+        const overlay = modalContainer.querySelector('.modal-overlay');
+        if (overlay) overlay.onclick = (e) => {
+            if (e.target === overlay) modalContainer.remove();
         };
     }
     
     addBotReply(double, messagesList) {
         const replies = [
-            `Привет! Рад познакомиться! У нас ${double.compatibility.score}% совместимости!`,
+            `Привет! Рад познакомиться! У нас ${double.compatibility?.score || 85}% совместимости!`,
             `Ого, у нас очень похожий профиль! Как у тебя дела?`,
             `Здорово, что нас свела система! Расскажи, как у тебя дела?`,
             `Привет-привет! Смотрю на твой профиль — мы очень похожи. Как проходит твой день?`
@@ -833,7 +859,7 @@ class FrediDashboard {
         const randomReply = replies[Math.floor(Math.random() * replies.length)];
         const replyDiv = document.createElement('div');
         replyDiv.className = 'message bot-message';
-        replyDiv.innerHTML = `<div class="message-bubble">${randomReply}</div><div class="message-time">только что</div>`;
+        replyDiv.innerHTML = `<div class="message-bubble">${this.escapeHtml(randomReply)}</div><div class="message-time">только что</div>`;
         messagesList.appendChild(replyDiv);
         messagesList.scrollTop = messagesList.scrollHeight;
     }
@@ -848,6 +874,19 @@ class FrediDashboard {
             if (voiceBtn) voiceBtn.dispatchEvent(new Event('mousedown'));
         };
     }
+    
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 }
+
+// Инициализация при загрузке DOM
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM загружен, создаём FrediDashboard');
+    window.dashboard = new FrediDashboard();
+});
 
 window.FrediDashboard = FrediDashboard;
