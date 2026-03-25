@@ -20,6 +20,22 @@
     
     <!-- MAX Bridge (опционально) -->
     <script src="https://st.max.ru/js/max-web-app.js"></script>
+    
+    <!-- ========== КРИТИЧЕСКИ ВАЖНО: УСТАНОВКА API_BASE_URL В HEAD ========== -->
+    <script>
+        // ЖЁСТКАЯ УСТАНОВКА — ДОЛЖНО БЫТЬ САМЫМ ПЕРВЫМ СКРИПТОМ В HEAD
+        // АДРЕС БЭКЕНДА (FastAPI сервер)
+        window.API_BASE_URL = 'https://max-bot-1-ywpz.onrender.com';
+        
+        console.log('🌐 API_BASE_URL установлен в HEAD:', window.API_BASE_URL);
+        console.log('📍 Мини-приложение:', window.location.origin);
+        
+        // Сохраняем в localStorage для других скриптов
+        localStorage.setItem('api_base_url', window.API_BASE_URL);
+    </script>
+    
+    <!-- ========== ПОДКЛЮЧЕНИЕ СТИЛЕЙ ========== -->
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <!-- ========== ФИКСИРОВАННЫЙ USER_ID ДЛЯ ТЕСТИРОВАНИЯ ========== -->
@@ -45,29 +61,6 @@
         console.log('🎯 FIXED USER_ID установлен:', FIXED_USER_ID);
         console.log('👤 USER_NAME:', FIXED_USER_NAME);
         console.log('📦 maxContext:', window.maxContext);
-    </script>
-    
-    <!-- ========== КОНФИГУРАЦИЯ API (ИСПРАВЛЕНА) ========== -->
-    <script>
-        // ✅ АДРЕС БЭКЕНДА (FastAPI сервер)
-        // Мини-приложение (max-bot-miniapp) и бэкенд (max-bot-1-ywpz) живут на разных URL
-        const API_BACKEND_URL = 'https://max-bot-1-ywpz.onrender.com';
-        const hostname = window.location.hostname;
-        
-        // Определяем базовый URL для API запросов
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Локальная разработка
-            window.API_BASE_URL = 'http://localhost:10000';
-        } else {
-            // Продакшен: всегда используем адрес бэкенда
-            window.API_BASE_URL = API_BACKEND_URL;
-        }
-        
-        console.log('🌐 API_BASE_URL (бэкенд):', window.API_BASE_URL);
-        console.log('📍 Мини-приложение:', window.location.origin);
-        
-        // Сохраняем в localStorage для других скриптов
-        localStorage.setItem('api_base_url', window.API_BASE_URL);
     </script>
     
     <div class="app" id="app">
@@ -311,7 +304,6 @@
     </template>
 
     <!-- ========== СКРИПТЫ ========== -->
-    <link rel="stylesheet" href="/styles.css">
     <script src="/api.js?v=20"></script>
     <script src="/context.js?v=20"></script>
     <script src="/onboarding.js?v=20"></script>
