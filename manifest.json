@@ -10,49 +10,49 @@
     "scope": "/",
     "icons": [
         {
-            "src": "/icon-72.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=72&bold=true&length=1&fontsize=0.5",
             "sizes": "72x72",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-96.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=96&bold=true&length=1&fontsize=0.5",
             "sizes": "96x96",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-128.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=128&bold=true&length=1&fontsize=0.5",
             "sizes": "128x128",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-144.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=144&bold=true&length=1&fontsize=0.5",
             "sizes": "144x144",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-152.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=152&bold=true&length=1&fontsize=0.5",
             "sizes": "152x152",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-192.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=192&bold=true&length=1&fontsize=0.5",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-384.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=384&bold=true&length=1&fontsize=0.5",
             "sizes": "384x384",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-512.png",
+            "src": "https://ui-avatars.com/api/?name=🧠&background=248bf2&color=fff&size=512&bold=true&length=1&fontsize=0.5",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
