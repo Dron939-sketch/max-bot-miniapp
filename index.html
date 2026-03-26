@@ -41,6 +41,7 @@
             --text-secondary: #a0a3b0;
             --success: #10b981;
             --error: #ef4444;
+            --warning: #f59e0b;
         }
 
         body {
@@ -340,7 +341,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Анимация появления контента */
+        /* ========== ОБЩИЕ СТИЛИ ДЛЯ СТРАНИЦ ========== */
         .full-content-page {
             max-width: 800px;
             margin: 0 auto;
@@ -405,83 +406,365 @@
             font-size: 15px;
             line-height: 1.6;
             color: var(--text-secondary);
-            max-height: 55vh;
+            max-height: 60vh;
             overflow-y: auto;
             padding-right: 12px;
         }
 
-        /* Стили для форматированного текста */
-        .section-header {
-            margin: 24px 0 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 3px solid var(--chrome);
-            padding-left: 14px;
+        /* ========== КАРТОЧКИ ДЛЯ ЭЛЕМЕНТОВ ========== */
+        .elements-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
         }
 
-        .section-emoji {
-            font-size: 24px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .styled-list {
-            margin: 12px 0;
-            padding-left: 20px;
-            list-style: none;
-        }
-
-        .styled-list li {
-            margin: 10px 0;
-            position: relative;
-            padding-left: 22px;
-        }
-
-        .styled-list li::before {
-            content: '▹';
-            position: absolute;
-            left: 0;
-            color: var(--chrome);
-            font-size: 14px;
-        }
-
-        .content-body p {
-            margin: 12px 0;
-            line-height: 1.6;
-        }
-
-        .content-body strong {
-            color: var(--chrome);
-            font-weight: 600;
-        }
-
-        .speak-content-btn {
-            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
-            border: none;
-            border-radius: 40px;
-            padding: 12px 24px;
-            color: var(--black-obsidian);
-            font-weight: 600;
+        .confinement-element {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid rgba(224, 224, 224, 0.1);
+            transition: all 0.3s;
             cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-            transition: all 0.2s;
-            font-size: 14px;
         }
 
-        .speak-content-btn:active {
+        .confinement-element:hover {
+            transform: translateY(-3px);
+            border-color: var(--chrome);
+            box-shadow: 0 5px 20px rgba(224, 224, 224, 0.1);
+        }
+
+        .element-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--chrome);
+            margin-bottom: 6px;
+        }
+
+        .element-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .element-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .element-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== КЛЮЧЕВОЙ КОНФАЙНТМЕНТ ========== */
+        .key-confinement {
+            background: linear-gradient(135deg, rgba(255, 107, 59, 0.15), rgba(255, 59, 59, 0.1));
+            border: 1px solid var(--amg-orange);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .key-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .key-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--amg-orange);
+        }
+
+        .key-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== ПЕТЛИ ========== */
+        .loop-card {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .loop-type {
+            font-weight: bold;
+            color: var(--chrome);
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .loop-desc {
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .loop-strength {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== ИНТЕРВЕНЦИЯ ========== */
+        .intervention-card {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 20px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .intervention-text {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .daily-practice {
+            background: rgba(224, 224, 224, 0.03);
+            border-radius: 16px;
+            padding: 12px;
+            margin: 12px 0;
+            border-left: 3px solid var(--chrome);
+        }
+
+        /* ========== ПРАКТИКИ ========== */
+        .practice-card {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 20px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .quote-card {
+            background: rgba(224, 224, 224, 0.03);
+            border-radius: 16px;
+            padding: 16px;
+            font-style: italic;
+            text-align: center;
+            margin: 12px 0;
+        }
+
+        /* ========== СКАЗКИ ========== */
+        .tale-card {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tale-card:hover {
+            background: rgba(224, 224, 224, 0.1);
+            transform: translateX(5px);
+        }
+
+        /* ========== ЯКОРЯ ========== */
+        .anchor-card {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .anchor-phrase {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ========== СТАТИСТИКА ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .stat-card {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--chrome);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== ГИПНОЗ ========== */
+        .hypno-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(224, 224, 224, 0.05);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            border-radius: 30px;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            resize: none;
+        }
+
+        .hypno-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .topic-btn {
+            padding: 8px 16px;
+            background: rgba(224, 224, 224, 0.1);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            border-radius: 30px;
+            color: var(--chrome);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* ========== ВСПОМОГАТЕЛЬНЫЕ КНОПКИ ========== */
+        .action-btn {
+            padding: 12px 20px;
+            background: rgba(224, 224, 224, 0.1);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            border-radius: 40px;
+            color: var(--chrome);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            margin: 8px 0;
+        }
+
+        .action-btn:active {
             transform: scale(0.98);
         }
 
-        /* Селектор режимов с подсветкой */
+        .primary-btn {
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
+            color: var(--black-obsidian);
+            font-weight: bold;
+        }
+
+        /* ========== МОДУЛИ И БЫСТРЫЕ ДЕЙСТВИЯ ========== */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .module-card {
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5), rgba(26, 26, 26, 0.4));
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            padding: 20px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(224, 224, 224, 0.1);
+            text-align: center;
+        }
+
+        .module-card:active {
+            transform: scale(0.98);
+        }
+
+        .module-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .module-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .quick-actions {
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5), rgba(26, 26, 26, 0.4));
+            backdrop-filter: blur(15px);
+            border-radius: 28px;
+            padding: 20px;
+            border: 1px solid rgba(224, 224, 224, 0.1);
+        }
+
+        .quick-actions-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .quick-action {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 20px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(224, 224, 224, 0.1);
+        }
+
+        .quick-action:active {
+            transform: scale(0.96);
+        }
+
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .action-name {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .expandable-section {
+            margin-top: 20px;
+            border-top: 1px solid rgba(224, 224, 224, 0.1);
+            padding-top: 16px;
+        }
+
+        .expandable-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+            color: var(--chrome);
+        }
+
+        .expandable-content {
+            display: none;
+            padding-top: 12px;
+        }
+
+        .expandable-content.open {
+            display: block;
+        }
+
         .mode-selector {
             display: flex;
             gap: 8px;
@@ -522,7 +805,6 @@
             100% { box-shadow: 0 0 0 0 rgba(224, 224, 224, 0); }
         }
 
-        /* Голосовая кнопка с удержанием */
         .voice-section {
             margin-bottom: 32px;
         }
@@ -552,16 +834,10 @@
             font-weight: 500;
             touch-action: manipulation;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .voice-record-btn-premium:active {
             transform: scale(0.98);
-        }
-
-        .voice-record-btn-premium .voice-icon {
-            font-size: 32px;
-            transition: transform 0.1s;
         }
 
         .voice-record-btn-premium.recording {
@@ -570,156 +846,9 @@
             animation: pulseRed 1s infinite;
         }
 
-        .voice-record-btn-premium.recording .voice-icon {
-            transform: scale(1.1);
-        }
-
         @keyframes pulseRed {
             0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.3); }
             50% { box-shadow: 0 0 0 15px rgba(255, 59, 59, 0); }
-        }
-
-        .voice-hint {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        /* Модули */
-        .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .module-card {
-            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5), rgba(26, 26, 26, 0.4));
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
-            padding: 20px 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid rgba(224, 224, 224, 0.1);
-            text-align: center;
-        }
-
-        .module-card:active {
-            transform: scale(0.98);
-        }
-
-        .module-icon {
-            font-size: 40px;
-            margin-bottom: 12px;
-        }
-
-        .module-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .module-desc {
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        /* Быстрые действия */
-        .quick-actions {
-            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5), rgba(26, 26, 26, 0.4));
-            backdrop-filter: blur(15px);
-            border-radius: 28px;
-            padding: 20px;
-            border: 1px solid rgba(224, 224, 224, 0.1);
-        }
-
-        .quick-actions-title {
-            font-weight: 600;
-            margin-bottom: 16px;
-            font-size: 16px;
-        }
-
-        .quick-actions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 12px;
-        }
-
-        .quick-action {
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 20px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid rgba(224, 224, 224, 0.1);
-        }
-
-        .quick-action:active {
-            transform: scale(0.96);
-        }
-
-        .action-icon {
-            font-size: 24px;
-            margin-bottom: 6px;
-        }
-
-        .action-name {
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        /* Сообщения чата */
-        .chat-messages {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 20px;
-            animation: fadeIn 0.2s ease;
-            font-size: 14px;
-        }
-
-        .message.user {
-            background: linear-gradient(135deg, rgba(224, 224, 224, 0.15), rgba(192, 192, 192, 0.08));
-            align-self: flex-end;
-            border-radius: 20px 20px 6px 20px;
-            border: 1px solid rgba(224, 224, 224, 0.2);
-        }
-
-        .message.bot {
-            background: linear-gradient(135deg, rgba(10, 10, 10, 0.7), rgba(26, 26, 26, 0.5));
-            backdrop-filter: blur(10px);
-            align-self: flex-start;
-            border-radius: 20px 20px 20px 6px;
-            border: 1px solid rgba(224, 224, 224, 0.15);
-        }
-
-        .message.system {
-            background: rgba(224, 224, 224, 0.05);
-            align-self: center;
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-align: center;
-            max-width: 90%;
-        }
-
-        .message audio {
-            margin-top: 8px;
-            width: 100%;
-            height: 32px;
-            border-radius: 16px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .hero-section {
@@ -768,7 +897,6 @@
             color: transparent;
         }
 
-        /* Всплывающие сообщения */
         .floating-message {
             position: fixed;
             bottom: 20px;
@@ -787,14 +915,6 @@
             align-items: center;
             gap: 10px;
             border: 1px solid rgba(224, 224, 224, 0.2);
-        }
-
-        .floating-message.success .floating-message-content {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
-        }
-
-        .floating-message.error .floating-message-content {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
         }
 
         .floating-message-text {
@@ -818,47 +938,6 @@
             }
         }
 
-        .recording-timer-global {
-            position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: monospace;
-            z-index: 1000;
-            border: 1px solid rgba(224, 224, 224, 0.2);
-        }
-
-        .voice-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 16px;
-            padding: 10px;
-            background: rgba(10, 10, 10, 0.7);
-            border-radius: 40px;
-            border: 1px solid rgba(224, 224, 224, 0.15);
-        }
-
-        .voice-status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--amg-red);
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
         .loading-screen {
             display: flex;
             flex-direction: column;
@@ -878,468 +957,29 @@
             to { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        /* ========== НОВЫЕ СТИЛИ ДЛЯ КОНФАЙНТМЕНТ-МОДЕЛИ ========== */
-        
-        .confinement-model-page {
-            padding: 20px;
-        }
-
-        .confinement-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .confinement-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .confinement-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
-        .elements-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
         @media (max-width: 768px) {
             .elements-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-        }
-
-        .confinement-element {
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 16px;
-            padding: 12px;
-            border: 1px solid rgba(224, 224, 224, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .confinement-element:hover {
-            transform: translateY(-3px);
-            border-color: var(--chrome);
-            box-shadow: 0 5px 20px rgba(224, 224, 224, 0.1);
-        }
-
-        .element-number {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--chrome);
-            margin-bottom: 6px;
-        }
-
-        .element-name {
-            font-weight: 600;
-            font-size: 13px;
-            margin-bottom: 6px;
-        }
-
-        .element-desc {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-
-        .element-meta {
-            display: flex;
-            gap: 8px;
-            font-size: 10px;
-            color: var(--text-secondary);
-        }
-
-        .key-confinement {
-            background: linear-gradient(135deg, rgba(255, 107, 59, 0.15), rgba(255, 59, 59, 0.1));
-            border: 1px solid var(--amg-orange);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .key-icon {
-            font-size: 36px;
-            margin-bottom: 8px;
-        }
-
-        .key-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: var(--amg-orange);
-        }
-
-        .key-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .loop-card {
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .loop-type {
-            font-weight: bold;
-            color: var(--chrome);
-            font-size: 12px;
-            margin-bottom: 6px;
-        }
-
-        .loop-desc {
-            font-size: 12px;
-            margin-bottom: 6px;
-        }
-
-        .loop-strength {
-            font-size: 10px;
-            color: var(--text-secondary);
-        }
-
-        .vectors-info {
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 16px;
-            padding: 16px;
-            margin-top: 20px;
-        }
-
-        .vector-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border-bottom: 1px solid rgba(224, 224, 224, 0.1);
-            font-size: 13px;
-        }
-
-        .rebuild-model-btn {
-            width: 100%;
-            margin-top: 25px;
-            padding: 12px;
-            background: rgba(224, 224, 224, 0.1);
-            border: 1px solid rgba(224, 224, 224, 0.2);
-            border-radius: 40px;
-            color: var(--chrome);
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* Стили для проверки реальности */
-        .reality-check-form {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .reality-check-form .form-group {
-            margin-bottom: 20px;
-        }
-
-        .reality-check-form label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 13px;
-        }
-
-        .reality-check-form input,
-        .reality-check-form select {
-            width: 100%;
-            padding: 12px;
-            background: rgba(224, 224, 224, 0.05);
-            border: 1px solid rgba(224, 224, 224, 0.2);
-            border-radius: 30px;
-            color: var(--text-primary);
-            font-size: 14px;
-        }
-
-        .reality-check-form input[type="range"] {
-            width: calc(100% - 50px);
-            display: inline-block;
-            margin-right: 10px;
-        }
-
-        .check-reality-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
-            border: none;
-            border-radius: 40px;
-            color: var(--black-obsidian);
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-
-        .reality-result {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .result-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .result-emoji {
-            font-size: 50px;
-            margin-bottom: 8px;
-        }
-
-        .result-status {
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .result-deficit {
-            background: rgba(224, 224, 224, 0.1);
-            border-radius: 30px;
-            padding: 16px;
-            margin-bottom: 20px;
-            position: relative;
-            text-align: center;
-        }
-
-        .deficit-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--amg-red), var(--amg-orange), var(--amg-blue));
-            border-radius: 2px;
-        }
-
-        .result-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .requirements, .available {
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 16px;
-            padding: 12px;
-        }
-
-        .requirements h4, .available h4 {
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .requirements p, .available p {
-            font-size: 12px;
-            margin: 4px 0;
-        }
-
-        .result-recommendation,
-        .result-key-confinement {
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 16px;
-        }
-
-        .result-recommendation h4,
-        .result-key-confinement h4 {
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .result-recommendation p,
-        .result-key-confinement p {
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .result-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .build-route-btn {
-            flex: 2;
-            padding: 12px;
-            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
-            border: none;
-            border-radius: 40px;
-            color: var(--black-obsidian);
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* Стили для маршрута */
-        .route-page {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .route-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .route-goal {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 8px 0;
-        }
-
-        .route-time {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .route-key-confinement {
-            background: rgba(255, 107, 59, 0.15);
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-left: 3px solid var(--amg-orange);
-        }
-
-        .route-key-confinement h3 {
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .route-step {
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 16px;
-            display: flex;
-            gap: 12px;
-        }
-
-        .step-number {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--black-obsidian);
-            flex-shrink: 0;
-            font-size: 14px;
-        }
-
-        .step-content {
-            flex: 1;
-            line-height: 1.5;
-            font-size: 13px;
-        }
-
-        .route-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
-
-        .track-route-btn {
-            flex: 2;
-            padding: 12px;
-            background: linear-gradient(135deg, var(--success), #059669);
-            border: none;
-            border-radius: 40px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .goal-selection-page {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .goal-selection-page h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        .goal-select-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(224, 224, 224, 0.05);
-            border-radius: 16px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .goal-select-item:hover {
-            background: rgba(224, 224, 224, 0.1);
-            transform: translateX(5px);
-        }
-
-        .goal-emoji {
-            font-size: 28px;
-        }
-
-        .goal-info {
-            flex: 1;
-        }
-
-        .goal-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 3px;
-        }
-
-        .goal-meta {
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        .select-goal-btn {
-            padding: 6px 16px;
-            background: rgba(224, 224, 224, 0.1);
-            border: 1px solid rgba(224, 224, 224, 0.2);
-            border-radius: 30px;
-            color: var(--chrome);
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        @media (max-width: 768px) {
+            
             .quick-actions-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
             
-            .result-details {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
             
-            .route-step {
-                flex-direction: column;
-                align-items: flex-start;
+            .full-content-page {
+                padding: 16px;
             }
             
-            .step-number {
-                margin-bottom: 8px;
+            .hero-section {
+                padding: 16px;
+            }
+            
+            .greeting-text h2 {
+                font-size: 20px;
             }
         }
     </style>
@@ -1406,7 +1046,6 @@
     </div>
 
     <audio id="hiddenAudioPlayer" preload="auto"></audio>
-    <div id="recordingTimerGlobal" class="recording-timer-global" style="display: none;">0s</div>
     <div id="toastMessage" class="floating-message" style="display: none;">
         <div class="floating-message-content">
             <div class="floating-message-text" id="toastText"></div>
@@ -1483,7 +1122,7 @@
         let recordingSeconds = 0;
         let mediaRecorder = null;
         let audioChunks = [];
-        let chatMessages = [];
+        let navigationHistory = [];
         
         // ========== API ВЫЗОВЫ ==========
         
@@ -1507,17 +1146,316 @@
             }
         }
         
-        async function saveMode(mode) {
+        // ========== КОНФАЙНТМЕНТ-МОДЕЛЬ API ==========
+        
+        async function getConfinementModel() {
             try {
-                await apiCall('/api/save-mode', {
-                    method: 'POST',
-                    body: JSON.stringify({ user_id: CONFIG.USER_ID, mode })
-                });
-                console.log('✅ Режим сохранён:', mode);
+                const data = await apiCall(`/api/confinement-model?user_id=${CONFIG.USER_ID}`);
+                return data;
             } catch (error) {
-                console.warn('Не удалось сохранить режим', error);
+                console.warn('Failed to get confinement model', error);
+                return null;
             }
         }
+        
+        async function getConfinementLoops() {
+            try {
+                const data = await apiCall(`/api/confinement/model/${CONFIG.USER_ID}/loops`);
+                return data;
+            } catch (error) {
+                console.warn('Failed to get loops', error);
+                return null;
+            }
+        }
+        
+        async function getKeyConfinement() {
+            try {
+                const data = await apiCall(`/api/confinement/model/${CONFIG.USER_ID}/key-confinement`);
+                return data;
+            } catch (error) {
+                console.warn('Failed to get key confinement', error);
+                return null;
+            }
+        }
+        
+        async function getIntervention(elementId) {
+            try {
+                const data = await apiCall(`/api/intervention/${elementId}?user_id=${CONFIG.USER_ID}`);
+                return data;
+            } catch (error) {
+                console.warn('Failed to get intervention', error);
+                return null;
+            }
+        }
+        
+        async function rebuildConfinementModel() {
+            try {
+                const data = await apiCall(`/api/confinement/model/${CONFIG.USER_ID}/rebuild`, {
+                    method: 'POST'
+                });
+                return data;
+            } catch (error) {
+                console.warn('Failed to rebuild model', error);
+                return null;
+            }
+        }
+        
+        // ========== ПРАКТИКИ API ==========
+        
+        async function getMorningPractice() {
+            try {
+                const data = await apiCall('/api/practice/morning');
+                return data.practice;
+            } catch (error) {
+                console.warn('Failed to get morning practice', error);
+                return 'Утренняя практика: начните день с намерения. Сделайте 3 глубоких вдоха и скажите себе: "Я выбираю, как мне относиться к этому дню".';
+            }
+        }
+        
+        async function getEveningPractice() {
+            try {
+                const data = await apiCall('/api/practice/evening');
+                return data.practice;
+            } catch (error) {
+                console.warn('Failed to get evening practice', error);
+                return 'Вечерняя практика: вспомните три хороших события сегодня. За что вы благодарны? Что было важным?';
+            }
+        }
+        
+        async function getRandomExercise() {
+            try {
+                const data = await apiCall('/api/practice/random-exercise');
+                return data.exercise;
+            } catch (error) {
+                console.warn('Failed to get exercise', error);
+                return 'Сделайте паузу. Обратите внимание на своё дыхание. Вдох... выдох... Повторите 5 раз.';
+            }
+        }
+        
+        async function getRandomQuote() {
+            try {
+                const data = await apiCall('/api/practice/random-quote');
+                return data.quote;
+            } catch (error) {
+                console.warn('Failed to get quote', error);
+                return '«Не в силе, а в правде. Не в деньгах, а в душевном покое.» — Андрей Мейстер';
+            }
+        }
+        
+        // ========== ГИПНОЗ API ==========
+        
+        async function processHypno(text, mode = currentMode) {
+            try {
+                const data = await apiCall('/api/hypno/process', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        user_id: CONFIG.USER_ID,
+                        text: text,
+                        mode: mode
+                    })
+                });
+                return data.response;
+            } catch (error) {
+                console.warn('Failed to process hypno', error);
+                return 'Сделайте глубокий вдох... Представьте, что с каждым выдохом вы отпускаете напряжение... Вы в безопасности... Дышите...';
+            }
+        }
+        
+        async function getHypnoSupport(text = '') {
+            try {
+                const data = await apiCall('/api/hypno/support', {
+                    method: 'POST',
+                    body: JSON.stringify({ text: text })
+                });
+                return data.response;
+            } catch (error) {
+                console.warn('Failed to get support', error);
+                return 'Я здесь. Ты справляешься. Дыши спокойно.';
+            }
+        }
+        
+        // ========== СКАЗКИ API ==========
+        
+        async function getTales() {
+            try {
+                const data = await apiCall('/api/tale');
+                return data;
+            } catch (error) {
+                console.warn('Failed to get tales', error);
+                return { success: false, available_tales: [] };
+            }
+        }
+        
+        async function getTaleById(taleId) {
+            try {
+                const data = await apiCall(`/api/tale/${taleId}`);
+                return data.tale;
+            } catch (error) {
+                console.warn('Failed to get tale', error);
+                return null;
+            }
+        }
+        
+        // ========== ЯКОРЯ API ==========
+        
+        async function getUserAnchors() {
+            try {
+                const data = await apiCall(`/api/anchor/user/${CONFIG.USER_ID}`);
+                return data.anchors;
+            } catch (error) {
+                console.warn('Failed to get anchors', error);
+                return [];
+            }
+        }
+        
+        async function setAnchor(anchorName, state, phrase) {
+            try {
+                const data = await apiCall('/api/anchor/set', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        user_id: CONFIG.USER_ID,
+                        anchor_name: anchorName,
+                        state: state,
+                        phrase: phrase
+                    })
+                });
+                return data;
+            } catch (error) {
+                console.warn('Failed to set anchor', error);
+                return null;
+            }
+        }
+        
+        async function fireAnchor(anchorName) {
+            try {
+                const data = await apiCall('/api/anchor/fire', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        user_id: CONFIG.USER_ID,
+                        anchor_name: anchorName
+                    })
+                });
+                return data.phrase;
+            } catch (error) {
+                console.warn('Failed to fire anchor', error);
+                return null;
+            }
+        }
+        
+        async function getAnchor(state) {
+            try {
+                const data = await apiCall(`/api/anchor/${state}`);
+                return data.phrase;
+            } catch (error) {
+                console.warn('Failed to get anchor', error);
+                return `Я спокоен. Я дышу. Я здесь и сейчас.`;
+            }
+        }
+        
+        // ========== СТАТИСТИКА API ==========
+        
+        async function getConfinementStatistics() {
+            try {
+                const data = await apiCall(`/api/confinement/statistics/${CONFIG.USER_ID}`);
+                return data.statistics;
+            } catch (error) {
+                console.warn('Failed to get statistics', error);
+                return {
+                    total_elements: 0,
+                    active_elements: 0,
+                    total_loops: 0,
+                    is_system_closed: false,
+                    closure_score: 0
+                };
+            }
+        }
+        
+        // ========== ДРУГИЕ API ==========
+        
+        async function getUserStatus() {
+            try {
+                return await apiCall(`/api/user-status?user_id=${CONFIG.USER_ID}`);
+            } catch (error) {
+                return { has_profile: true, test_completed: true, profile_code: CONFIG.PROFILE_CODE };
+            }
+        }
+        
+        async function getPsychologistThought() {
+            try {
+                const data = await apiCall(`/api/thought?user_id=${CONFIG.USER_ID}`);
+                return data.thought;
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        async function generateNewThought() {
+            try {
+                const data = await apiCall('/api/psychologist-thoughts/generate', {
+                    method: 'POST',
+                    body: JSON.stringify({ user_id: CONFIG.USER_ID })
+                });
+                return data.thought;
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        async function getWeekendIdeas() {
+            try {
+                const data = await apiCall(`/api/ideas?user_id=${CONFIG.USER_ID}`);
+                return data.ideas || [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        async function getUserProfile() {
+            try {
+                const data = await apiCall(`/api/get-profile?user_id=${CONFIG.USER_ID}`);
+                return data.ai_generated_profile || 'Психологический портрет формируется.';
+            } catch (error) {
+                return 'Профиль временно недоступен.';
+            }
+        }
+        
+        async function getUserGoals() {
+            try {
+                const data = await apiCall(`/api/goals/with-confinement?user_id=${CONFIG.USER_ID}&mode=${currentMode}`);
+                return data.goals || [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        async function getSmartQuestions() {
+            try {
+                const data = await apiCall(`/api/smart-questions?user_id=${CONFIG.USER_ID}`);
+                return data.questions || [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        async function getChallenges() {
+            try {
+                const data = await apiCall(`/api/challenges?user_id=${CONFIG.USER_ID}`);
+                return data.challenges || [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        async function findPsychometricDoubles() {
+            try {
+                const data = await apiCall(`/api/psychometric/find-doubles?user_id=${CONFIG.USER_ID}&limit=5`);
+                return data.doubles || [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        // ========== ГОЛОСОВЫЕ ФУНКЦИИ ==========
         
         async function sendVoiceToServer(audioBlob) {
             const formData = new FormData();
@@ -1549,189 +1487,87 @@
             }
         }
         
-        async function getUserStatus() {
-            try {
-                return await apiCall(`/api/user-status?user_id=${CONFIG.USER_ID}`);
-            } catch (error) {
-                console.warn('Failed to get user status', error);
-                return { has_profile: true, test_completed: true, profile_code: CONFIG.PROFILE_CODE };
+        function playAudioResponse(audioUrl) {
+            if (!audioUrl) return;
+            const audio = document.getElementById('hiddenAudioPlayer');
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.src = audioUrl;
+                audio.play().catch(e => console.warn('Audio error:', e));
             }
         }
         
-        async function getPsychologistThought() {
-            try {
-                const data = await apiCall(`/api/thought?user_id=${CONFIG.USER_ID}`);
-                return data.thought;
-            } catch (error) {
-                console.warn('Failed to get thought', error);
-                return null;
+        // ========== НАВИГАЦИЯ ==========
+        
+        function navigateBack() {
+            if (navigationHistory.length > 0) {
+                const last = navigationHistory.pop();
+                if (last.screen === 'dashboard') {
+                    renderDashboard();
+                } else {
+                    navigateTo(last.screen, last.params);
+                }
+            } else {
+                renderDashboard();
             }
         }
         
-        async function getWeekendIdeas() {
-            try {
-                const data = await apiCall(`/api/ideas?user_id=${CONFIG.USER_ID}`);
-                return data.ideas || [];
-            } catch (error) {
-                console.warn('Failed to get ideas', error);
-                return [];
-            }
-        }
-        
-        async function generateNewThought() {
-            try {
-                const data = await apiCall('/api/psychologist-thoughts/generate', {
-                    method: 'POST',
-                    body: JSON.stringify({ user_id: CONFIG.USER_ID })
-                });
-                return data.thought;
-            } catch (error) {
-                console.warn('Failed to generate thought', error);
-                return null;
-            }
-        }
-        
-        // ========== НОВЫЕ API ИНТЕГРАЦИИ ==========
-        
-        async function getUserProfile() {
-            try {
-                const data = await apiCall(`/api/get-profile?user_id=${CONFIG.USER_ID}`);
-                return data.ai_generated_profile || 'Психологический портрет формируется. Пройдите тест для детального анализа.';
-            } catch (error) {
-                console.warn('Failed to get profile', error);
-                return 'Профиль временно недоступен.';
-            }
-        }
-        
-        async function getUserGoals() {
-            try {
-                const data = await apiCall(`/api/goals/with-confinement?user_id=${CONFIG.USER_ID}&mode=${currentMode}`);
-                return data.goals || [];
-            } catch (error) {
-                console.warn('Failed to get goals', error);
-                return [];
-            }
-        }
-        
-        async function getSmartQuestions() {
-            try {
-                const data = await apiCall(`/api/smart-questions?user_id=${CONFIG.USER_ID}`);
-                return data.questions || [];
-            } catch (error) {
-                console.warn('Failed to get smart questions', error);
-                return [];
-            }
-        }
-        
-        async function getChallenges() {
-            try {
-                const data = await apiCall(`/api/challenges?user_id=${CONFIG.USER_ID}`);
-                return data.challenges || [];
-            } catch (error) {
-                console.warn('Failed to get challenges', error);
-                return [];
-            }
-        }
-        
-        async function findPsychometricDoubles() {
-            try {
-                const data = await apiCall(`/api/psychometric/find-doubles?user_id=${CONFIG.USER_ID}&limit=5`);
-                return data.doubles || [];
-            } catch (error) {
-                console.warn('Failed to find doubles', error);
-                return [];
-            }
-        }
-        
-        // ========== НОВЫЕ ФУНКЦИИ ДЛЯ КОНФАЙНТМЕНТ-МОДЕЛИ ==========
-        
-        async function getConfinementModel() {
-            try {
-                const data = await apiCall(`/api/confinement-model?user_id=${CONFIG.USER_ID}`);
-                return data;
-            } catch (error) {
-                console.warn('Failed to get confinement model', error);
-                return null;
-            }
-        }
-        
-        async function rebuildConfinementModel() {
-            try {
-                const data = await apiCall('/api/confinement-model/rebuild', {
-                    method: 'POST',
-                    body: JSON.stringify({ user_id: CONFIG.USER_ID })
-                });
-                return data;
-            } catch (error) {
-                console.warn('Failed to rebuild model', error);
-                return null;
-            }
-        }
-        
-        async function checkRealityWithConfinement(goal, lifeContext, goalContext) {
-            try {
-                const data = await apiCall('/api/reality-check/with-confinement', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        user_id: CONFIG.USER_ID,
-                        goal: goal,
-                        life_context: lifeContext,
-                        goal_context: goalContext
-                    })
-                });
-                return data;
-            } catch (error) {
-                console.warn('Failed to check reality', error);
-                return null;
-            }
-        }
-        
-        async function buildRouteWithConfinement(goal) {
-            try {
-                const data = await apiCall('/api/route/build-with-confinement', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        user_id: CONFIG.USER_ID,
-                        goal: goal
-                    })
-                });
-                return data;
-            } catch (error) {
-                console.warn('Failed to build route', error);
-                return null;
-            }
-        }
-        
-        // ========== ФОРМАТИРОВАНИЕ ТЕКСТА ==========
-        
-        function formatContentForDisplay(text, contentType) {
-            if (!text) return '<p>Нет данных</p>';
+        function navigateTo(screen, params = {}) {
+            navigationHistory.push({ screen, params });
             
-            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            const headerEmojis = '🔑💪🎯🌱⚠️🔐🔄🚪📊🧠💭💕🕊️✨🏆👥🎨';
-            const headerRegex = new RegExp(`([${headerEmojis}])\\s*\\*\\*(.*?)\\*\\*`, 'g');
-            formatted = formatted.replace(headerRegex, 
-                '<div class="section-header"><span class="section-emoji">$1</span><strong class="section-title">$2</strong></div>');
-            
-            formatted = formatted.replace(/•\s*(.*?)(?=\n|$)/g, '<li>$1</li>');
-            formatted = formatted.replace(/(\d+)\.\s*(.*?)(?=\n|$)/g, '<li class="numbered">$1. $2</li>');
-            
-            const paragraphs = formatted.split('\n\n');
-            formatted = paragraphs.map(p => {
-                if (p.trim().startsWith('<li>')) return `<ul class="styled-list">${p}</ul>`;
-                if (p.trim().startsWith('<li class="numbered">')) return `<ol class="styled-list numbered-list">${p}</ol>`;
-                if (p.trim().startsWith('<div class="section-header')) return p;
-                if (p.trim().startsWith('<strong>') || p.trim().startsWith('<p>')) return p;
-                return `<p>${p}</p>`;
-            }).join('');
-            
-            return formatted;
+            switch(screen) {
+                case 'confinement-model':
+                    showConfinementModel();
+                    break;
+                case 'confinement-loops':
+                    showConfinementLoops(params);
+                    break;
+                case 'intervention':
+                    showIntervention(params);
+                    break;
+                case 'practices':
+                    showPractices();
+                    break;
+                case 'hypnosis':
+                    showHypnosis();
+                    break;
+                case 'tales':
+                    showTales();
+                    break;
+                case 'anchors':
+                    showAnchors();
+                    break;
+                case 'statistics':
+                    showStatistics();
+                    break;
+                case 'profile':
+                    showFullContentScreen('🧠 Психологический портрет', params.content, 'profile');
+                    break;
+                case 'thoughts':
+                    showFullContentScreen('💭 Мысли психолога', params.content, 'thoughts');
+                    break;
+                case 'weekend':
+                    showFullContentScreen('🎨 Идеи на выходные', params.content, 'weekend');
+                    break;
+                case 'goals':
+                    showFullContentScreen('🎯 Ваши цели', params.content, 'goals');
+                    break;
+                case 'questions':
+                    showFullContentScreen('❓ Вопросы для размышления', params.content, 'questions');
+                    break;
+                case 'challenges':
+                    showFullContentScreen('🏆 Челленджи', params.content, 'challenges');
+                    break;
+                case 'doubles':
+                    showFullContentScreen('👥 Психометрические двойники', params.content, 'doubles');
+                    break;
+                default:
+                    renderDashboard();
+            }
         }
         
-        // ========== ОТОБРАЖЕНИЕ КОНТЕНТА ==========
-        
-        function showFullContent(title, content, contentType, rawText = null) {
+        function showFullContentScreen(title, content, contentType, rawText = null) {
             const container = document.getElementById('screenContainer');
             
             const emojiMap = {
@@ -1743,15 +1579,18 @@
                 doubles: '👥',
                 weekend: '🎨',
                 confinement: '🔐',
-                reality: '🔍',
-                route: '🗺️'
+                practices: '🧘',
+                hypnosis: '🌙',
+                tales: '📚',
+                anchors: '⚓',
+                statistics: '📊'
             };
             
-            const formattedContent = typeof content === 'string' ? formatContentForDisplay(content, contentType) : content;
+            const formattedContent = typeof content === 'string' ? formatContentForDisplay(content) : content;
             
             container.innerHTML = `
                 <div class="full-content-page">
-                    <button class="back-btn" id="backToDashboardBtn">◀️ НАЗАД</button>
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
                     <div class="content-header">
                         <div class="content-emoji">${emojiMap[contentType] || '📄'}</div>
                         <h1 class="content-title">${title}</h1>
@@ -1759,95 +1598,691 @@
                     <div class="content-body" id="contentBody">
                         ${formattedContent}
                     </div>
-                    <button class="speak-content-btn" id="speakContentBtn">
-                        🔊 Озвучить
-                    </button>
+                    <button class="action-btn primary-btn" id="speakBtn" style="margin-top: 20px;">🔊 Озвучить</button>
                 </div>
             `;
             
-            document.getElementById('backToDashboardBtn').onclick = () => renderDashboard();
-            document.getElementById('speakContentBtn').onclick = async () => {
-                const textToSpeak = typeof rawText === 'string' ? rawText.replace(/\*\*(.*?)\*\*/g, '$1').replace(/[🔑💪🎯🌱⚠️🔐🔄🚪📊]/g, '') : String(content);
+            document.getElementById('backBtn').onclick = () => navigateBack();
+            document.getElementById('speakBtn').onclick = async () => {
+                const textToSpeak = rawText || (typeof content === 'string' ? content.replace(/\*\*(.*?)\*\*/g, '$1') : '');
                 showToast('Озвучиваю...', 'info');
                 const tts = await textToSpeech(textToSpeak, currentMode);
                 if (tts?.audio_url) playAudioResponse(tts.audio_url);
             };
         }
         
-        // ========== ВИБРАЦИЯ ==========
-        
-        function vibrate(duration = 30) {
-            if (navigator.vibrate) {
-                navigator.vibrate(duration);
-            }
+        function formatContentForDisplay(text) {
+            if (!text) return '<p>Нет данных</p>';
+            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            const headerEmojis = '🔑💪🎯🌱⚠️🔐🔄🚪📊🧠💭💕🕊️✨🏆👥🎨';
+            const headerRegex = new RegExp(`([${headerEmojis}])\\s*\\*\\*(.*?)\\*\\*`, 'g');
+            formatted = formatted.replace(headerRegex, 
+                '<div class="section-header"><span class="section-emoji">$1</span><strong class="section-title">$2</strong></div>');
+            formatted = formatted.replace(/•\s*(.*?)(?=\n|$)/g, '<li>$1</li>');
+            const paragraphs = formatted.split('\n\n');
+            formatted = paragraphs.map(p => {
+                if (p.trim().startsWith('<li>')) return `<ul class="styled-list">${p}</ul>`;
+                if (p.trim().startsWith('<div class="section-header')) return p;
+                return `<p>${p}</p>`;
+            }).join('');
+            return formatted;
         }
         
-        // ========== UI ФУНКЦИИ ==========
+        // ========== ОТОБРАЖЕНИЕ РАЗДЕЛОВ ==========
         
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toastMessage');
-            const textEl = document.getElementById('toastText');
-            if (!toast || !textEl) return;
-            
-            textEl.textContent = message;
-            toast.className = `floating-message ${type}`;
-            toast.style.display = 'block';
-            
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
-            
-            const closeBtn = document.getElementById('toastClose');
-            if (closeBtn) closeBtn.onclick = () => toast.style.display = 'none';
-        }
-        
-        function addMessage(text, sender = 'bot', audioUrl = null) {
+        async function showConfinementModel() {
             const container = document.getElementById('screenContainer');
-            if (!container) return;
+            showToast('Загружаю модель ограничений...', 'info');
             
-            if (container.querySelector('.loading-screen')) {
-                container.innerHTML = '';
+            const model = await getConfinementModel();
+            if (!model) {
+                container.innerHTML = `
+                    <div class="full-content-page">
+                        <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                        <div class="content-header">
+                            <div class="content-emoji">🔐</div>
+                            <h1 class="content-title">Модель ограничений</h1>
+                        </div>
+                        <div class="content-body">
+                            <p>Не удалось загрузить модель. Попробуйте позже.</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('backBtn').onclick = () => navigateBack();
+                return;
             }
             
-            let messagesContainer = container.querySelector('.chat-messages');
-            if (!messagesContainer) {
-                messagesContainer = document.createElement('div');
-                messagesContainer.className = 'chat-messages';
-                container.appendChild(messagesContainer);
+            let elementsHtml = '';
+            if (model.elements) {
+                for (let i = 1; i <= 9; i++) {
+                    const elem = model.elements[i];
+                    if (elem) {
+                        elementsHtml += `
+                            <div class="confinement-element" data-element="${i}">
+                                <div class="element-number">${i}</div>
+                                <div class="element-name">${elem.name || `Элемент ${i}`}</div>
+                                <div class="element-desc">${(elem.description || '').substring(0, 60)}...</div>
+                                <div class="element-meta">
+                                    <span class="element-strength">💪 ${Math.round((elem.strength || 0.5) * 100)}%</span>
+                                    <span class="element-vak">🎭 ${elem.vak || 'digital'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
             }
             
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            
-            const textSpan = document.createElement('div');
-            textSpan.textContent = text;
-            messageDiv.appendChild(textSpan);
-            
-            if (audioUrl) {
-                const audio = document.createElement('audio');
-                audio.controls = true;
-                audio.src = audioUrl;
-                messageDiv.appendChild(audio);
+            let loopsHtml = '';
+            if (model.loops && model.loops.length) {
+                loopsHtml = '<h3>🔄 Петли</h3>';
+                model.loops.forEach(loop => {
+                    loopsHtml += `
+                        <div class="loop-card">
+                            <div class="loop-type">${loop.type || 'Петля'}</div>
+                            <div class="loop-desc">${loop.description || 'Нет описания'}</div>
+                            <div class="loop-strength">Сила: ${Math.round((loop.strength || 0.5) * 100)}%</div>
+                        </div>
+                    `;
+                });
             }
             
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            chatMessages.push({ text, sender, audioUrl, timestamp: new Date() });
+            let keyHtml = '';
+            if (model.key_confinement) {
+                keyHtml = `
+                    <div class="key-confinement">
+                        <div class="key-icon">🔐</div>
+                        <div class="key-title">КЛЮЧЕВОЕ ОГРАНИЧЕНИЕ</div>
+                        <div class="key-desc">${model.key_confinement.description || 'Анализ в процессе...'}</div>
+                        <div class="key-desc" style="margin-top: 8px;">Важность: ${Math.round((model.key_confinement.importance || 0.7) * 100)}%</div>
+                        <button class="action-btn" id="keyConfinementInterventionBtn" style="margin-top: 12px;">💡 Получить интервенцию</button>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">🔐</div>
+                        <h1 class="content-title">Модель ограничений</h1>
+                    </div>
+                    <div class="content-body">
+                        <div class="key-confinement" style="background: rgba(224,224,224,0.05); margin-bottom: 20px;">
+                            <div class="key-title">📊 СТЕПЕНЬ ЗАМЫКАНИЯ</div>
+                            <div style="font-size: 32px; font-weight: bold; color: var(--chrome);">${Math.round((model.closure_score || 0) * 100)}%</div>
+                            <div>${model.is_closed ? '🔒 Система замкнута' : '🔓 Система открыта'}</div>
+                        </div>
+                        
+                        ${keyHtml}
+                        
+                        <h3>📊 ЭЛЕМЕНТЫ МОДЕЛИ</h3>
+                        <div class="elements-grid" id="elementsGrid">
+                            ${elementsHtml || '<p>Нет данных об элементах</p>'}
+                        </div>
+                        
+                        ${loopsHtml}
+                        
+                        <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="action-btn" id="loopsBtn">🔄 Все петли</button>
+                            <button class="action-btn" id="rebuildModelBtn">🔄 Перестроить модель</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
+            document.getElementById('loopsBtn')?.addEventListener('click', () => navigateTo('confinement-loops', { model: model }));
+            document.getElementById('rebuildModelBtn')?.addEventListener('click', async () => {
+                showToast('Перестраиваю модель...', 'info');
+                const result = await rebuildConfinementModel();
+                if (result && result.success) {
+                    showToast('Модель перестроена', 'success');
+                    navigateTo('confinement-model');
+                } else {
+                    showToast('Не удалось перестроить модель', 'error');
+                }
+            });
+            document.getElementById('keyConfinementInterventionBtn')?.addEventListener('click', () => {
+                if (model.key_confinement && model.key_confinement.element) {
+                    navigateTo('intervention', { elementId: model.key_confinement.element.id });
+                }
+            });
+            
+            document.querySelectorAll('.confinement-element').forEach(el => {
+                el.addEventListener('click', () => {
+                    const elementId = el.dataset.element;
+                    navigateTo('intervention', { elementId: parseInt(elementId) });
+                });
+            });
         }
         
-        function playAudioResponse(audioUrl) {
-            if (!audioUrl) return;
-            const audio = document.getElementById('hiddenAudioPlayer');
-            if (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-                audio.src = audioUrl;
-                audio.play().catch(e => console.warn('Audio error:', e));
-                vibrate(20);
+        async function showConfinementLoops(params) {
+            const container = document.getElementById('screenContainer');
+            showToast('Анализирую петли...', 'info');
+            
+            const loopsData = await getConfinementLoops();
+            
+            let loopsHtml = '';
+            if (loopsData && loopsData.loops && loopsData.loops.length) {
+                loopsData.loops.forEach((loop, idx) => {
+                    loopsHtml += `
+                        <div class="loop-card">
+                            <div class="loop-type">🔄 ПЕТЛЯ ${idx + 1}: ${loop.type || 'Цикл'}</div>
+                            <div class="loop-desc" style="margin: 8px 0;">${loop.description || 'Нет описания'}</div>
+                            <div class="loop-strength">Сила: ${Math.round((loop.strength || 0.5) * 100)}%</div>
+                            ${loop.elements ? `<div class="loop-strength">Элементы: ${loop.elements.join(' → ')}</div>` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                loopsHtml = '<p>Петли не обнаружены</p>';
             }
+            
+            let statsHtml = '';
+            if (loopsData && loopsData.statistics) {
+                statsHtml = `
+                    <div class="stats-grid" style="margin-bottom: 20px;">
+                        <div class="stat-card"><div class="stat-value">${loopsData.statistics.total_loops || 0}</div><div class="stat-label">Всего петель</div></div>
+                        <div class="stat-card"><div class="stat-value">${Math.round((loopsData.statistics.avg_loop_strength || 0) * 100)}%</div><div class="stat-label">Ср. сила петель</div></div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">🔄</div>
+                        <h1 class="content-title">Петли системы</h1>
+                    </div>
+                    <div class="content-body">
+                        ${statsHtml}
+                        <h3>Обнаруженные петли</h3>
+                        ${loopsHtml}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
         }
         
-        // ========== ГОЛОСОВАЯ ЗАПИСЬ С УДЕРЖАНИЕМ ==========
+        async function showIntervention(params) {
+            const elementId = params.elementId;
+            const container = document.getElementById('screenContainer');
+            showToast('Загружаю интервенцию...', 'info');
+            
+            const intervention = await getIntervention(elementId);
+            
+            let elementHtml = '';
+            if (intervention && intervention.element) {
+                elementHtml = `
+                    <div class="key-confinement" style="margin-bottom: 20px;">
+                        <div class="key-title">🧠 ЭЛЕМЕНТ ${intervention.element.id}: ${intervention.element.name || 'Неизвестно'}</div>
+                        <div class="key-desc">${intervention.element.description || 'Нет описания'}</div>
+                        <div class="key-desc">Уровень: ${intervention.element.level || 3}/6 | Сила: ${Math.round((intervention.element.strength || 0.5) * 100)}%</div>
+                    </div>
+                `;
+            }
+            
+            let interventionHtml = '';
+            if (intervention && intervention.intervention) {
+                interventionHtml = `
+                    <div class="intervention-card">
+                        <h3>💡 ЧТО ДЕЛАТЬ</h3>
+                        <div class="intervention-text">${intervention.intervention.description || intervention.intervention}</div>
+                    </div>
+                `;
+            }
+            
+            let dailyHtml = '';
+            if (intervention && intervention.daily_practice) {
+                dailyHtml = `
+                    <div class="daily-practice">
+                        <h3>📝 ЕЖЕДНЕВНАЯ ПРАКТИКА</h3>
+                        <div class="intervention-text">${intervention.daily_practice}</div>
+                    </div>
+                `;
+            }
+            
+            let weekHtml = '';
+            if (intervention && intervention.week_program) {
+                weekHtml = `
+                    <div class="daily-practice">
+                        <h3>📅 НЕДЕЛЬНАЯ ПРОГРАММА</h3>
+                        <div class="intervention-text">${intervention.week_program}</div>
+                    </div>
+                `;
+            }
+            
+            let quoteHtml = '';
+            if (intervention && intervention.random_quote) {
+                quoteHtml = `
+                    <div class="quote-card">
+                        <div>${intervention.random_quote}</div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">💡</div>
+                        <h1 class="content-title">Интервенция</h1>
+                    </div>
+                    <div class="content-body">
+                        ${elementHtml}
+                        ${interventionHtml}
+                        ${dailyHtml}
+                        ${weekHtml}
+                        ${quoteHtml}
+                        <button class="action-btn primary-btn" id="speakInterventionBtn" style="margin-top: 16px;">🔊 Озвучить</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
+            document.getElementById('speakInterventionBtn')?.addEventListener('click', async () => {
+                const text = (intervention?.intervention?.description || '') + ' ' + (intervention?.daily_practice || '');
+                const tts = await textToSpeech(text, currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            });
+        }
+        
+        async function showPractices() {
+            const container = document.getElementById('screenContainer');
+            showToast('Загружаю практики...', 'info');
+            
+            const [morning, evening, exercise, quote] = await Promise.all([
+                getMorningPractice(),
+                getEveningPractice(),
+                getRandomExercise(),
+                getRandomQuote()
+            ]);
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">🧘</div>
+                        <h1 class="content-title">Практики</h1>
+                    </div>
+                    <div class="content-body">
+                        <div class="practice-card">
+                            <h3>🌅 УТРЕННЯЯ ПРАКТИКА</h3>
+                            <div class="intervention-text">${morning}</div>
+                            <button class="action-btn" id="speakMorningBtn" style="margin-top: 12px;">🔊 Озвучить</button>
+                        </div>
+                        
+                        <div class="practice-card">
+                            <h3>🌙 ВЕЧЕРНЯЯ ПРАКТИКА</h3>
+                            <div class="intervention-text">${evening}</div>
+                            <button class="action-btn" id="speakEveningBtn" style="margin-top: 12px;">🔊 Озвучить</button>
+                        </div>
+                        
+                        <div class="practice-card">
+                            <h3>🎲 СЛУЧАЙНОЕ УПРАЖНЕНИЕ</h3>
+                            <div class="intervention-text">${exercise}</div>
+                            <button class="action-btn" id="newExerciseBtn" style="margin-top: 12px;">🔄 Другое упражнение</button>
+                            <button class="action-btn" id="speakExerciseBtn" style="margin-top: 12px;">🔊 Озвучить</button>
+                        </div>
+                        
+                        <div class="quote-card">
+                            <h3>📖 ЦИТАТА ДНЯ</h3>
+                            <div class="intervention-text" style="font-style: italic;">${quote}</div>
+                            <button class="action-btn" id="newQuoteBtn" style="margin-top: 12px;">🔄 Другая цитата</button>
+                            <button class="action-btn" id="speakQuoteBtn" style="margin-top: 12px;">🔊 Озвучить</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
+            document.getElementById('speakMorningBtn')?.addEventListener('click', async () => {
+                const tts = await textToSpeech(morning, currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            });
+            document.getElementById('speakEveningBtn')?.addEventListener('click', async () => {
+                const tts = await textToSpeech(evening, currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            });
+            document.getElementById('newExerciseBtn')?.addEventListener('click', async () => {
+                const newExercise = await getRandomExercise();
+                const exerciseDiv = document.querySelector('.practice-card:nth-child(3) .intervention-text');
+                if (exerciseDiv) exerciseDiv.textContent = newExercise;
+            });
+            document.getElementById('newQuoteBtn')?.addEventListener('click', async () => {
+                const newQuote = await getRandomQuote();
+                const quoteDiv = document.querySelector('.quote-card .intervention-text');
+                if (quoteDiv) quoteDiv.textContent = newQuote;
+            });
+        }
+        
+        async function showHypnosis() {
+            const container = document.getElementById('screenContainer');
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">🌙</div>
+                        <h1 class="content-title">Гипноз</h1>
+                    </div>
+                    <div class="content-body">
+                        <div class="hypno-topics">
+                            <button class="topic-btn" data-topic="тревога">Тревога</button>
+                            <button class="topic-btn" data-topic="уверенность">Уверенность</button>
+                            <button class="topic-btn" data-topic="спокойствие">Спокойствие</button>
+                            <button class="topic-btn" data-topic="сон">Сон</button>
+                            <button class="topic-btn" data-topic="вдохновение">Вдохновение</button>
+                        </div>
+                        <textarea class="hypno-input" id="hypnoInput" rows="3" placeholder="Напишите, что вас беспокоит..."></textarea>
+                        <button class="action-btn primary-btn" id="processHypnoBtn">🌙 Получить гипнотический ответ</button>
+                        
+                        <div id="hypnoResponse" style="margin-top: 20px;"></div>
+                        
+                        <div class="practice-card" style="margin-top: 20px;">
+                            <h3>🎧 ПОДДЕРЖКА</h3>
+                            <button class="action-btn" id="supportBtn">Получить поддерживающий ответ</button>
+                            <div id="supportResponse" style="margin-top: 12px;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
+            
+            document.querySelectorAll('.topic-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const topic = btn.dataset.topic;
+                    const input = document.getElementById('hypnoInput');
+                    input.value = `Я чувствую ${topic}`;
+                    const response = await processHypno(input.value);
+                    document.getElementById('hypnoResponse').innerHTML = `
+                        <div class="intervention-card">
+                            <div class="intervention-text">${response}</div>
+                            <button class="action-btn" id="speakHypnoBtn">🔊 Озвучить</button>
+                        </div>
+                    `;
+                    document.getElementById('speakHypnoBtn')?.addEventListener('click', async () => {
+                        const tts = await textToSpeech(response, currentMode);
+                        if (tts?.audio_url) playAudioResponse(tts.audio_url);
+                    });
+                });
+            });
+            
+            document.getElementById('processHypnoBtn')?.addEventListener('click', async () => {
+                const input = document.getElementById('hypnoInput').value;
+                if (!input.trim()) {
+                    showToast('Напишите, что вас беспокоит', 'info');
+                    return;
+                }
+                showToast('Формирую гипнотический ответ...', 'info');
+                const response = await processHypno(input);
+                document.getElementById('hypnoResponse').innerHTML = `
+                    <div class="intervention-card">
+                        <div class="intervention-text">${response}</div>
+                        <button class="action-btn" id="speakHypnoBtn">🔊 Озвучить</button>
+                    </div>
+                `;
+                document.getElementById('speakHypnoBtn')?.addEventListener('click', async () => {
+                    const tts = await textToSpeech(response, currentMode);
+                    if (tts?.audio_url) playAudioResponse(tts.audio_url);
+                });
+            });
+            
+            document.getElementById('supportBtn')?.addEventListener('click', async () => {
+                const support = await getHypnoSupport();
+                document.getElementById('supportResponse').innerHTML = `
+                    <div class="intervention-card">
+                        <div class="intervention-text">${support}</div>
+                        <button class="action-btn" id="speakSupportBtn">🔊 Озвучить</button>
+                    </div>
+                `;
+                document.getElementById('speakSupportBtn')?.addEventListener('click', async () => {
+                    const tts = await textToSpeech(support, currentMode);
+                    if (tts?.audio_url) playAudioResponse(tts.audio_url);
+                });
+            });
+        }
+        
+        async function showTales() {
+            const container = document.getElementById('screenContainer');
+            showToast('Загружаю библиотеку сказок...', 'info');
+            
+            const talesData = await getTales();
+            const talesList = talesData.available_tales || [];
+            
+            let talesHtml = '';
+            if (talesList.length) {
+                talesList.forEach(tale => {
+                    talesHtml += `
+                        <div class="tale-card" data-tale-id="${tale}">
+                            <div class="loop-type">📖 ${tale}</div>
+                            <div class="loop-desc">Терапевтическая сказка</div>
+                        </div>
+                    `;
+                });
+            } else {
+                talesHtml = '<p>Сказки загружаются...</p>';
+            }
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">📚</div>
+                        <h1 class="content-title">Терапевтические сказки</h1>
+                    </div>
+                    <div class="content-body">
+                        <div class="hypno-topics" style="margin-bottom: 20px;">
+                            <button class="topic-btn" data-issue="страх">Страх</button>
+                            <button class="topic-btn" data-issue="одиночество">Одиночество</button>
+                            <button class="topic-btn" data-issue="уверенность">Уверенность</button>
+                            <button class="topic-btn" data-issue="потеря">Потеря</button>
+                            <button class="topic-btn" data-issue="любовь">Любовь</button>
+                        </div>
+                        <div id="taleContent"></div>
+                        <h3>📚 БИБЛИОТЕКА СКАЗОК</h3>
+                        <div id="talesList">
+                            ${talesHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
+            
+            document.querySelectorAll('.topic-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const issue = btn.dataset.issue;
+                    showToast(`Ищу сказку на тему "${issue}"...`, 'info');
+                    const data = await apiCall(`/api/tale?issue=${issue}`);
+                    if (data.tale) {
+                        document.getElementById('taleContent').innerHTML = `
+                            <div class="intervention-card">
+                                <h3>📖 Сказка</h3>
+                                <div class="intervention-text">${data.tale}</div>
+                                <button class="action-btn" id="speakTaleBtn">🔊 Озвучить</button>
+                            </div>
+                        `;
+                        document.getElementById('speakTaleBtn')?.addEventListener('click', async () => {
+                            const tts = await textToSpeech(data.tale, currentMode);
+                            if (tts?.audio_url) playAudioResponse(tts.audio_url);
+                        });
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.tale-card').forEach(card => {
+                card.addEventListener('click', async () => {
+                    const taleId = card.dataset.taleId;
+                    const tale = await getTaleById(taleId);
+                    if (tale) {
+                        document.getElementById('taleContent').innerHTML = `
+                            <div class="intervention-card">
+                                <h3>📖 ${taleId}</h3>
+                                <div class="intervention-text">${tale}</div>
+                                <button class="action-btn" id="speakTaleBtn">🔊 Озвучить</button>
+                            </div>
+                        `;
+                        document.getElementById('speakTaleBtn')?.addEventListener('click', async () => {
+                            const tts = await textToSpeech(tale, currentMode);
+                            if (tts?.audio_url) playAudioResponse(tts.audio_url);
+                        });
+                    }
+                });
+            });
+        }
+        
+        async function showAnchors() {
+            const container = document.getElementById('screenContainer');
+            showToast('Загружаю якоря...', 'info');
+            
+            const anchors = await getUserAnchors();
+            
+            let anchorsHtml = '';
+            if (anchors && anchors.length) {
+                anchors.forEach(anchor => {
+                    anchorsHtml += `
+                        <div class="anchor-card">
+                            <div>
+                                <div class="loop-type">${anchor.name}</div>
+                                <div class="anchor-phrase">${anchor.phrase}</div>
+                                <div class="loop-strength">Состояние: ${anchor.state}</div>
+                            </div>
+                            <button class="action-btn fire-anchor" data-name="${anchor.name}" style="padding: 6px 12px;">🔥 Активировать</button>
+                        </div>
+                    `;
+                });
+            } else {
+                anchorsHtml = '<p>У вас пока нет якорей. Создайте свой первый якорь.</p>';
+            }
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">⚓</div>
+                        <h1 class="content-title">Мои якоря</h1>
+                    </div>
+                    <div class="content-body">
+                        <h3>📋 АКТИВНЫЕ ЯКОРЯ</h3>
+                        <div id="anchorsList">
+                            ${anchorsHtml}
+                        </div>
+                        
+                        <div class="practice-card" style="margin-top: 20px;">
+                            <h3>➕ СОЗДАТЬ НОВЫЙ ЯКОРЬ</h3>
+                            <input type="text" id="anchorName" placeholder="Название якоря" style="width: 100%; padding: 10px; margin: 8px 0; background: rgba(224,224,224,0.05); border: 1px solid rgba(224,224,224,0.2); border-radius: 30px; color: white;">
+                            <input type="text" id="anchorState" placeholder="Состояние (например: спокойствие)" style="width: 100%; padding: 10px; margin: 8px 0; background: rgba(224,224,224,0.05); border: 1px solid rgba(224,224,224,0.2); border-radius: 30px; color: white;">
+                            <textarea id="anchorPhrase" placeholder="Фраза-якорь" rows="2" style="width: 100%; padding: 10px; margin: 8px 0; background: rgba(224,224,224,0.05); border: 1px solid rgba(224,224,224,0.2); border-radius: 20px; color: white;"></textarea>
+                            <button class="action-btn primary-btn" id="createAnchorBtn">✨ СОЗДАТЬ</button>
+                        </div>
+                        
+                        <div class="practice-card" style="margin-top: 20px;">
+                            <h3>💡 ПРЕДЛОЖЕННЫЕ ЯКОРЯ</h3>
+                            <button class="action-btn" id="anchorCalmBtn" style="margin: 5px;">😌 Спокойствие</button>
+                            <button class="action-btn" id="anchorConfidenceBtn" style="margin: 5px;">💪 Уверенность</button>
+                            <button class="action-btn" id="anchorHereBtn" style="margin: 5px;">🧘 Здесь и сейчас</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
+            
+            document.querySelectorAll('.fire-anchor').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const name = btn.dataset.name;
+                    const phrase = await fireAnchor(name);
+                    if (phrase) {
+                        showToast(`Активирован якорь: ${phrase}`, 'success');
+                        const tts = await textToSpeech(phrase, currentMode);
+                        if (tts?.audio_url) playAudioResponse(tts.audio_url);
+                    }
+                });
+            });
+            
+            document.getElementById('createAnchorBtn')?.addEventListener('click', async () => {
+                const name = document.getElementById('anchorName').value;
+                const state = document.getElementById('anchorState').value;
+                const phrase = document.getElementById('anchorPhrase').value;
+                if (!name || !state || !phrase) {
+                    showToast('Заполните все поля', 'error');
+                    return;
+                }
+                const result = await setAnchor(name, state, phrase);
+                if (result && result.success) {
+                    showToast('Якорь создан!', 'success');
+                    showAnchors();
+                } else {
+                    showToast('Не удалось создать якорь', 'error');
+                }
+            });
+            
+            document.getElementById('anchorCalmBtn')?.addEventListener('click', async () => {
+                const phrase = await getAnchor('calm');
+                showToast(`Якорь: ${phrase}`, 'success');
+                const tts = await textToSpeech(phrase, currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            });
+            
+            document.getElementById('anchorConfidenceBtn')?.addEventListener('click', async () => {
+                const phrase = await getAnchor('confidence');
+                showToast(`Якорь: ${phrase}`, 'success');
+                const tts = await textToSpeech(phrase, currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            });
+            
+            document.getElementById('anchorHereBtn')?.addEventListener('click', async () => {
+                const phrase = await getAnchor('here');
+                showToast(`Якорь: ${phrase}`, 'success');
+                const tts = await textToSpeech(phrase, currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            });
+        }
+        
+        async function showStatistics() {
+            const container = document.getElementById('screenContainer');
+            showToast('Загружаю статистику...', 'info');
+            
+            const stats = await getConfinementStatistics();
+            const status = await getUserStatus();
+            
+            container.innerHTML = `
+                <div class="full-content-page">
+                    <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    <div class="content-header">
+                        <div class="content-emoji">📊</div>
+                        <h1 class="content-title">Статистика</h1>
+                    </div>
+                    <div class="content-body">
+                        <div class="stats-grid">
+                            <div class="stat-card"><div class="stat-value">${stats.total_elements || 0}</div><div class="stat-label">Всего элементов</div></div>
+                            <div class="stat-card"><div class="stat-value">${stats.active_elements || 0}</div><div class="stat-label">Активных элементов</div></div>
+                            <div class="stat-card"><div class="stat-value">${stats.total_loops || 0}</div><div class="stat-label">Найдено петель</div></div>
+                            <div class="stat-card"><div class="stat-value">${Math.round((stats.closure_score || 0) * 100)}%</div><div class="stat-label">Степень замыкания</div></div>
+                        </div>
+                        
+                        <div class="key-confinement" style="margin-top: 20px;">
+                            <div class="key-title">${stats.is_system_closed ? '🔒 СИСТЕМА ЗАМКНУТА' : '🔓 СИСТЕМА ОТКРЫТА'}</div>
+                            <div class="key-desc">${stats.is_system_closed ? 'Требуется работа с ключевыми элементами для разрыва петель' : 'Система готова к изменениям'}</div>
+                        </div>
+                        
+                        <div class="practice-card">
+                            <h3>🧠 ПРОФИЛЬ</h3>
+                            <div class="intervention-text">Код: ${status.profile_code || CONFIG.PROFILE_CODE}</div>
+                            <div class="intervention-text">Тест: ${status.test_completed ? '✅ Пройден' : '⏳ Не пройден'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('backBtn').onclick = () => navigateBack();
+        }
+        
+        // ========== ГОЛОСОВАЯ ЗАПИСЬ ==========
         
         async function startRecordingWithHold() {
             if (isRecording) return;
@@ -1866,54 +2301,30 @@
                     const audioBlob = new Blob(audioChunks, { type: mimeType });
                     if (audioBlob.size > 5000) {
                         addMessage('🎙️ Распознаю речь...', 'system');
-                        vibrate(20);
-                        
                         const result = await sendVoiceToServer(audioBlob);
-                        
                         if (result.success) {
-                            vibrate(30);
-                            if (result.recognized_text) {
-                                addMessage(`🎤 "${result.recognized_text}"`, 'system');
-                            }
-                            if (result.answer) {
-                                addMessage(result.answer, 'bot');
-                                if (result.audio_url) {
-                                    playAudioResponse(result.audio_url);
-                                }
-                            }
+                            if (result.recognized_text) addMessage(`🎤 "${result.recognized_text}"`, 'system');
+                            if (result.answer) addMessage(result.answer, 'bot');
+                            if (result.audio_url) playAudioResponse(result.audio_url);
                         } else {
-                            vibrate(100);
                             addMessage(`❌ ${result.error || 'Не удалось распознать речь'}`, 'system');
                         }
                     } else {
                         addMessage('Запись слишком короткая', 'system');
                     }
-                    
                     stream.getTracks().forEach(track => track.stop());
-                    
                     const voiceBtn = document.getElementById('mainVoiceBtn');
                     if (voiceBtn) {
                         voiceBtn.classList.remove('recording');
                         voiceBtn.querySelector('.voice-icon').textContent = '🎤';
                         voiceBtn.querySelector('.voice-text').textContent = MODES[currentMode].voicePrompt;
                     }
-                    
-                    const statusDiv = document.getElementById('voiceStatusIndicator');
-                    if (statusDiv) statusDiv.style.display = 'none';
-                    
-                    const timerDiv = document.getElementById('recordingTimerGlobal');
-                    if (timerDiv) timerDiv.style.display = 'none';
-                    
                     isRecording = false;
-                    if (recordingTimer) {
-                        clearInterval(recordingTimer);
-                        recordingTimer = null;
-                    }
+                    if (recordingTimer) clearInterval(recordingTimer);
                 };
                 
                 mediaRecorder.start(100);
                 isRecording = true;
-                recordingSeconds = 0;
                 
                 const voiceBtn = document.getElementById('mainVoiceBtn');
                 if (voiceBtn) {
@@ -1922,599 +2333,156 @@
                     voiceBtn.querySelector('.voice-text').textContent = 'Отпустите для отправки';
                 }
                 
-                const statusDiv = document.getElementById('voiceStatusIndicator');
-                if (statusDiv) statusDiv.style.display = 'flex';
-                
-                const timerDiv = document.getElementById('recordingTimerGlobal');
-                if (timerDiv) timerDiv.style.display = 'block';
-                
-                recordingTimer = setInterval(() => {
-                    recordingSeconds++;
-                    const timerEl = document.getElementById('recordingTimerGlobal');
-                    const voiceTimer = document.getElementById('voiceTimer');
-                    if (timerEl) timerEl.textContent = `${recordingSeconds}s`;
-                    if (voiceTimer) voiceTimer.textContent = `${recordingSeconds}s`;
-                    if (recordingSeconds >= 60) {
-                        stopRecordingWithCancel();
+                recordingTimer = setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
                     }
-                }, 1000);
+                }, 60000);
                 
             } catch (error) {
-                console.error('Recording error:', error);
                 showToast('❌ Не удалось получить доступ к микрофону', 'error');
-                vibrate(100);
             }
         }
         
-        function stopRecordingWithSend() {
-            if (!isRecording || !mediaRecorder) return;
-            mediaRecorder.stop();
-        }
-        
-        function stopRecordingWithCancel() {
-            if (!isRecording || !mediaRecorder) return;
-            
-            mediaRecorder.onstop = null;
-            mediaRecorder.stop();
-            isRecording = false;
-            audioChunks = [];
-            
-            if (recordingTimer) {
-                clearInterval(recordingTimer);
-                recordingTimer = null;
-            }
-            
-            const voiceBtn = document.getElementById('mainVoiceBtn');
-            if (voiceBtn) {
-                voiceBtn.classList.remove('recording');
-                voiceBtn.querySelector('.voice-icon').textContent = '🎤';
-                voiceBtn.querySelector('.voice-text').textContent = MODES[currentMode].voicePrompt;
-            }
-            
-            const statusDiv = document.getElementById('voiceStatusIndicator');
-            if (statusDiv) statusDiv.style.display = 'none';
-            
-            const timerDiv = document.getElementById('recordingTimerGlobal');
-            if (timerDiv) timerDiv.style.display = 'none';
-            
-            addMessage('Запись отменена', 'system');
-        }
-        
-        function initVoiceButtonWithHold() {
+        function initVoiceButton() {
             const voiceBtn = document.getElementById('mainVoiceBtn');
             if (!voiceBtn) return;
-            
             if (voiceBtn.dataset.initialized === 'true') return;
             voiceBtn.dataset.initialized = 'true';
             
             let pressTimer = null;
             let isPressing = false;
-            let startY = 0;
-            let startX = 0;
             
-            const onStart = (e) => {
-                e.preventDefault();
-                if (e.type === 'touchstart') {
-                    startY = e.touches[0].clientY;
-                    startX = e.touches[0].clientX;
-                }
+            const onStart = () => {
                 if (isPressing) return;
                 isPressing = true;
-                
                 pressTimer = setTimeout(() => {
-                    if (isPressing) {
-                        startRecordingWithHold();
-                    }
+                    if (isPressing) startRecordingWithHold();
                 }, 150);
             };
             
-            const onEnd = (e) => {
-                if (pressTimer) {
-                    clearTimeout(pressTimer);
-                    pressTimer = null;
-                }
-                if (isPressing && isRecording) {
-                    stopRecordingWithSend();
-                }
+            const onEnd = () => {
+                if (pressTimer) clearTimeout(pressTimer);
+                if (isPressing && isRecording && mediaRecorder) mediaRecorder.stop();
                 isPressing = false;
-            };
-            
-            const onCancel = () => {
-                if (pressTimer) {
-                    clearTimeout(pressTimer);
-                    pressTimer = null;
-                }
-                if (isRecording) {
-                    stopRecordingWithCancel();
-                }
-                isPressing = false;
-            };
-            
-            const checkSwipe = (e) => {
-                if (!isPressing) return;
-                let currentY, currentX;
-                if (e.type === 'touchmove') {
-                    currentY = e.touches[0].clientY;
-                    currentX = e.touches[0].clientX;
-                } else {
-                    currentY = e.clientY;
-                    currentX = e.clientX;
-                }
-                const deltaY = Math.abs(currentY - startY);
-                const deltaX = Math.abs(currentX - startX);
-                if (deltaY > 50 || deltaX > 50) {
-                    onCancel();
-                }
             };
             
             voiceBtn.addEventListener('mousedown', onStart);
             voiceBtn.addEventListener('mouseup', onEnd);
-            voiceBtn.addEventListener('mouseleave', onCancel);
+            voiceBtn.addEventListener('mouseleave', onEnd);
             voiceBtn.addEventListener('touchstart', onStart, { passive: false });
             voiceBtn.addEventListener('touchend', onEnd, { passive: false });
-            voiceBtn.addEventListener('touchcancel', onCancel, { passive: false });
-            voiceBtn.addEventListener('touchmove', checkSwipe, { passive: false });
+            voiceBtn.addEventListener('touchcancel', onEnd, { passive: false });
         }
         
-        // ========== НОВЫЕ ОБРАБОТЧИКИ ==========
+        // ========== UI ФУНКЦИИ ==========
         
-        async function showConfinementModel() {
-            showToast('Загружаю модель ограничений...', 'info');
-            const data = await getConfinementModel();
-            
-            if (!data) {
-                showToast('Не удалось загрузить модель', 'error');
-                return;
-            }
-            
-            let elementsHtml = '';
-            if (data.elements) {
-                for (let i = 1; i <= 9; i++) {
-                    const elem = data.elements[i];
-                    if (elem) {
-                        elementsHtml += `
-                            <div class="confinement-element" data-element="${i}">
-                                <div class="element-number">${i}</div>
-                                <div class="element-name">${elem.name || `Элемент ${i}`}</div>
-                                <div class="element-desc">${(elem.description || '').substring(0, 60)}...</div>
-                                <div class="element-meta">
-                                    <span class="element-strength">💪 ${Math.round((elem.strength || 0.5) * 100)}%</span>
-                                    <span class="element-vak">🎭 ${elem.vak || 'digital'}</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-            }
-            
-            let loopsHtml = '';
-            if (data.loops && data.loops.length) {
-                loopsHtml = '<div class="loops-section"><h3>🔄 Обнаруженные петли</h3>';
-                data.loops.forEach((loop, idx) => {
-                    loopsHtml += `
-                        <div class="loop-card">
-                            <div class="loop-type">${loop.type || `Петля ${idx + 1}`}</div>
-                            <div class="loop-desc">${loop.description || 'Нет описания'}</div>
-                            <div class="loop-strength">Сила: ${Math.round((loop.strength || 0.5) * 100)}%</div>
-                        </div>
-                    `;
-                });
-                loopsHtml += '</div>';
-            }
-            
-            let keyHtml = '';
-            if (data.key_confinement) {
-                keyHtml = `
-                    <div class="key-confinement">
-                        <div class="key-icon">🔐</div>
-                        <div class="key-title">КЛЮЧЕВОЕ ОГРАНИЧЕНИЕ</div>
-                        <div class="key-desc">${data.key_confinement.description || 'Анализ в процессе...'}</div>
-                        <div class="key-importance">Важность: ${Math.round((data.key_confinement.importance || 0.7) * 100)}%</div>
-                    </div>
-                `;
-            }
-            
-            let vectorsHtml = '';
-            if (data.vectors) {
-                vectorsHtml = '<div class="vectors-info"><h3>📈 Векторы</h3>';
-                for (const [k, v] of Object.entries(data.vectors)) {
-                    vectorsHtml += `
-                        <div class="vector-item">
-                            <span class="vector-emoji">${v.emoji || '🔍'}</span>
-                            <span class="vector-name">${v.name || k}</span>
-                            <span class="vector-level">Уровень ${v.level || 3}/6</span>
-                        </div>
-                    `;
-                }
-                vectorsHtml += '</div>';
-            }
-            
-            const fullHtml = `
-                <div class="confinement-model-page">
-                    <div class="confinement-header">
-                        <h2>🔐 9-элементная модель ограничений</h2>
-                        <p>Степень замыкания системы: <strong>${Math.round((data.closure_score || 0) * 100)}%</strong> ${data.is_closed ? '🔒 Система замкнута' : '🔓 Система открыта'}</p>
-                    </div>
-                    
-                    ${keyHtml}
-                    
-                    <div class="confinement-grid">
-                        <div class="confinement-column left">
-                            <h3>📊 Элементы модели</h3>
-                            <div class="elements-grid">
-                                ${elementsHtml || '<p>Нет данных об элементах</p>'}
-                            </div>
-                        </div>
-                        <div class="confinement-column right">
-                            ${loopsHtml}
-                            ${vectorsHtml}
-                        </div>
-                    </div>
-                    <button class="rebuild-model-btn" id="rebuildModelBtn">🔄 Перестроить модель</button>
-                </div>
-            `;
-            
-            showFullContent('Конфайнтмент-модель', fullHtml, 'confinement');
-            
-            document.getElementById('rebuildModelBtn')?.addEventListener('click', async () => {
-                showToast('Перестраиваю модель...', 'info');
-                const result = await rebuildConfinementModel();
-                if (result && result.success) {
-                    showToast('Модель перестроена', 'success');
-                    showConfinementModel();
-                } else {
-                    showToast('Не удалось перестроить модель', 'error');
-                }
-            });
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toastMessage');
+            const textEl = document.getElementById('toastText');
+            if (!toast || !textEl) return;
+            textEl.textContent = message;
+            toast.className = `floating-message ${type}`;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            const closeBtn = document.getElementById('toastClose');
+            if (closeBtn) closeBtn.onclick = () => toast.style.display = 'none';
         }
         
-        async function showRealityCheckWithConfinement() {
+        function addMessage(text, sender = 'bot', audioUrl = null) {
             const container = document.getElementById('screenContainer');
-            container.innerHTML = `
-                <div class="reality-check-form">
-                    <h2>🔍 Проверка реальности</h2>
-                    <p>Ответьте на несколько вопросов, чтобы оценить достижимость вашей цели с учётом вашей модели ограничений.</p>
-                    
-                    <div class="form-group">
-                        <label>🎯 Выберите цель</label>
-                        <select id="goalSelect">
-                            <option value="">-- Выберите цель --</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>⏱ Сколько часов в неделю вы готовы уделять?</label>
-                        <input type="number" id="timePerWeek" placeholder="Например: 5" min="1" max="40" value="5">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>⚡ Оцените свой уровень энергии (1-10)</label>
-                        <input type="range" id="energyLevel" min="1" max="10" value="5">
-                        <span id="energyValue">5</span>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>🏠 Есть ли у вас личное пространство для работы над целью?</label>
-                        <select id="privateSpace">
-                            <option value="true">Да</option>
-                            <option value="false">Нет</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>👥 Есть ли люди, которые поддерживают вас?</label>
-                        <select id="support">
-                            <option value="true">Да</option>
-                            <option value="false">Нет</option>
-                        </select>
-                    </div>
-                    
-                    <button class="check-reality-btn" id="checkRealityBtn">🔍 Проверить</button>
-                    <button class="back-btn" id="backBtn" style="margin-top: 12px;">◀️ НАЗАД</button>
-                </div>
-            `;
-            
-            const goals = await getUserGoals();
-            const goalSelect = document.getElementById('goalSelect');
-            if (goals && goals.length) {
-                goals.forEach(goal => {
-                    const option = document.createElement('option');
-                    option.value = JSON.stringify(goal);
-                    option.textContent = `${goal.emoji || '🎯'} ${goal.name} (${goal.time || '?'})`;
-                    goalSelect.appendChild(option);
-                });
+            if (!container) return;
+            if (container.querySelector('.loading-screen')) container.innerHTML = '';
+            let messagesContainer = container.querySelector('.chat-messages');
+            if (!messagesContainer) {
+                messagesContainer = document.createElement('div');
+                messagesContainer.className = 'chat-messages';
+                container.appendChild(messagesContainer);
             }
-            
-            const energySlider = document.getElementById('energyLevel');
-            const energyValue = document.getElementById('energyValue');
-            energySlider.addEventListener('input', () => {
-                energyValue.textContent = energySlider.value;
-            });
-            
-            document.getElementById('checkRealityBtn').onclick = async () => {
-                const goalValue = goalSelect.value;
-                if (!goalValue) {
-                    showToast('Выберите цель', 'error');
-                    return;
-                }
-                
-                const goal = JSON.parse(goalValue);
-                const lifeContext = {
-                    energy_level: parseInt(energySlider.value),
-                    has_private_space: document.getElementById('privateSpace').value === 'true',
-                    support_people: document.getElementById('support').value === 'true'
-                };
-                const goalContext = {
-                    time_per_week: parseInt(document.getElementById('timePerWeek').value) || 5
-                };
-                
-                showToast('Анализирую...', 'info');
-                const result = await checkRealityWithConfinement(goal, lifeContext, goalContext);
-                
-                if (!result) {
-                    showToast('Ошибка проверки', 'error');
-                    return;
-                }
-                
-                const resultHtml = `
-                    <div class="reality-result">
-                        <div class="result-header">
-                            <div class="result-emoji">${result.status_emoji || '❓'}</div>
-                            <div class="result-status">${result.status || 'Анализ'}</div>
-                        </div>
-                        
-                        <div class="result-deficit">
-                            <div class="deficit-bar" style="width: ${result.deficit || 0}%"></div>
-                            <span>Дефицит ресурсов: ${result.deficit || 0}%</span>
-                        </div>
-                        
-                        <div class="result-details">
-                            <div class="requirements">
-                                <h4>📋 Требуется</h4>
-                                <p>⏱ ${result.requirements?.time_per_week || '?'} ч/нед</p>
-                                <p>⚡ Энергия: ${result.requirements?.energy_level || '?'}/10</p>
-                            </div>
-                            <div class="available">
-                                <h4>✅ Доступно</h4>
-                                <p>⏱ ${result.available?.time_per_week || '?'} ч/нед</p>
-                                <p>⚡ Энергия: ${result.available?.energy_level || '?'}/10</p>
-                            </div>
-                        </div>
-                        
-                        <div class="result-recommendation">
-                            <h4>💡 Рекомендация</h4>
-                            <p>${result.recommendation || 'Рекомендация формируется...'}</p>
-                        </div>
-                        
-                        ${result.key_confinement ? `
-                            <div class="result-key-confinement">
-                                <h4>🔐 Ключевое ограничение</h4>
-                                <p>${result.key_confinement.description || 'Анализ в процессе...'}</p>
-                            </div>
-                        ` : ''}
-                        
-                        <div class="result-actions">
-                            <button class="build-route-btn" id="buildRouteBtn">🗺️ Построить маршрут</button>
-                            <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
-                        </div>
-                    </div>
-                `;
-                
-                container.innerHTML = resultHtml;
-                
-                document.getElementById('buildRouteBtn')?.addEventListener('click', () => {
-                    buildRouteWithConfinementUI(goal);
-                });
-                document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
-            };
-            
-            document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
-        }
-        
-        async function buildRouteWithConfinementUI(goal) {
-            showToast('Строю маршрут с учётом вашей модели...', 'info');
-            const result = await buildRouteWithConfinement(goal);
-            
-            if (!result || !result.success) {
-                showToast('Не удалось построить маршрут', 'error');
-                return;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            const textSpan = document.createElement('div');
+            textSpan.textContent = text;
+            messageDiv.appendChild(textSpan);
+            if (audioUrl) {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = audioUrl;
+                messageDiv.appendChild(audio);
             }
-            
-            const route = result.route;
-            const steps = route.steps || [];
-            
-            const routeHtml = `
-                <div class="route-page">
-                    <div class="route-header">
-                        <h2>🗺️ Маршрут к цели</h2>
-                        <p class="route-goal">${goal.emoji || '🎯'} ${goal.name}</p>
-                        <p class="route-time">⏱ ${goal.time || '3-6 месяцев'}</p>
-                    </div>
-                    
-                    ${result.key_confinement ? `
-                        <div class="route-key-confinement">
-                            <h3>🔐 Учитываем ключевое ограничение</h3>
-                            <p>${result.key_confinement.description || ''}</p>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="route-steps">
-                        ${steps.map((step, idx) => `
-                            <div class="route-step">
-                                <div class="step-number">${idx + 1}</div>
-                                <div class="step-content">${step.replace(/\n/g, '<br>')}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="route-actions">
-                        <button class="track-route-btn" id="trackRouteBtn">✅ Начать выполнение</button>
-                        <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
-                    </div>
-                </div>
-            `;
-            
-            const container = document.getElementById('screenContainer');
-            container.innerHTML = routeHtml;
-            
-            document.getElementById('trackRouteBtn')?.addEventListener('click', () => {
-                showToast('Маршрут сохранён! Отмечайте выполнение этапов.', 'success');
-            });
-            document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
-        }
-        
-        async function showGoalSelectionForRoute() {
-            const goals = await getUserGoals();
-            if (!goals || !goals.length) {
-                showToast('Сначала выберите цель в разделе "Цели"', 'info');
-                return;
-            }
-            
-            const container = document.getElementById('screenContainer');
-            container.innerHTML = `
-                <div class="goal-selection-page">
-                    <h2>🎯 Выберите цель для построения маршрута</h2>
-                    <div class="goals-list" id="goalsList">
-                        ${goals.map(goal => `
-                            <div class="goal-select-item" data-goal='${JSON.stringify(goal)}'>
-                                <div class="goal-emoji">${goal.emoji || '🎯'}</div>
-                                <div class="goal-info">
-                                    <div class="goal-name">${goal.name}</div>
-                                    <div class="goal-meta">${goal.time || '3-6 месяцев'} • ${goal.difficulty || 'medium'}</div>
-                                </div>
-                                <button class="select-goal-btn">Выбрать</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <button class="back-btn" id="backBtn" style="margin-top: 20px;">◀️ НАЗАД</button>
-                </div>
-            `;
-            
-            document.querySelectorAll('.goal-select-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('select-goal-btn')) {
-                        const goal = JSON.parse(item.dataset.goal);
-                        buildRouteWithConfinementUI(goal);
-                    }
-                });
-            });
-            
-            document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
         // ========== ОБРАБОТЧИКИ БЫСТРЫХ ДЕЙСТВИЙ ==========
         
         async function handleShowProfile() {
-            showToast('Загружаю ваш психологический портрет...', 'info');
             const profile = await getUserProfile();
-            showFullContent('Психологический портрет', profile, 'profile', profile);
+            navigateTo('profile', { content: profile });
         }
         
         async function handleShowThoughts() {
-            showToast('Загружаю мысли психолога...', 'info');
             const thought = await getPsychologistThought();
-            if (thought && !thought.includes('еще не сгенерированы')) {
-                showFullContent('Мысли психолога', thought, 'thoughts', thought);
-            } else {
-                showToast('Мысли психолога появятся после прохождения теста', 'info');
-            }
+            if (thought) navigateTo('thoughts', { content: thought });
+            else showToast('Мысли психолога появятся после прохождения теста', 'info');
         }
         
         async function handleShowNewThought() {
-            showToast('Генерирую свежую мысль...', 'info');
             const newThought = await generateNewThought();
-            if (newThought) {
-                showFullContent('Свежая мысль', newThought, 'thoughts', newThought);
-            } else {
-                showToast('Мысль не удалось сгенерировать', 'error');
-            }
+            if (newThought) navigateTo('thoughts', { content: newThought });
+            else showToast('Не удалось сгенерировать мысль', 'error');
         }
         
         async function handleShowWeekend() {
-            showToast('Ищу идеи для выходных...', 'info');
             const ideas = await getWeekendIdeas();
-            if (ideas.length > 0) {
-                const ideasText = ideas.map(idea => idea.description || idea).join('\n\n');
-                showFullContent('Идеи на выходные', ideasText, 'weekend', ideasText);
-            } else {
-                showToast('Идеи скоро появятся', 'info');
-            }
+            if (ideas.length) navigateTo('weekend', { content: ideas.map(i => i.description || i).join('\n\n') });
+            else showToast('Идеи скоро появятся', 'info');
         }
         
         async function handleShowGoals() {
-            showToast('Подбираю цели...', 'info');
             const goals = await getUserGoals();
-            if (goals.length > 0) {
-                const goalsText = goals.map(g => `**${g.name}**\n⏱ ${g.time || '?'}  |  🎯 ${g.difficulty || 'medium'}\n${g.is_priority ? '🔐 Приоритетная цель (ключевое ограничение)' : ''}`).join('\n\n');
-                showFullContent('Ваши цели', goalsText, 'goals', goalsText);
-            } else {
-                showToast('Цели появятся после прохождения теста', 'info');
-            }
+            if (goals.length) navigateTo('goals', { content: goals.map(g => `**${g.name}**\n⏱ ${g.time || '?'}  |  🎯 ${g.difficulty || 'medium'}\n${g.is_priority ? '🔐 Приоритетная цель' : ''}`).join('\n\n') });
+            else showToast('Цели появятся после прохождения теста', 'info');
         }
         
         async function handleShowQuestions() {
-            showToast('Генерирую вопросы...', 'info');
             const questions = await getSmartQuestions();
-            if (questions.length > 0) {
-                const questionsText = questions.map((q, i) => `${i+1}. ${q}`).join('\n\n');
-                showFullContent('Вопросы для размышления', questionsText, 'questions', questionsText);
-            } else {
-                showToast('Вопросы появятся после прохождения теста', 'info');
-            }
+            if (questions.length) navigateTo('questions', { content: questions.map((q, i) => `${i+1}. ${q}`).join('\n\n') });
+            else showToast('Вопросы появятся после прохождения теста', 'info');
         }
         
         async function handleShowChallenges() {
-            showToast('Загружаю челленджи...', 'info');
             const challenges = await getChallenges();
-            if (challenges.length > 0) {
-                const challengesText = challenges.map(c => `**${c.name}**\n${c.description}\n🎁 Награда: ${c.reward} очков`).join('\n\n');
-                showFullContent('Челленджи', challengesText, 'challenges', challengesText);
-            } else {
-                showToast('Челленджи появятся после прохождения теста', 'info');
-            }
+            if (challenges.length) navigateTo('challenges', { content: challenges.map(c => `**${c.name}**\n${c.description}\n🎁 Награда: ${c.reward} очков`).join('\n\n') });
+            else showToast('Челленджи появятся после прохождения теста', 'info');
         }
         
         async function handleShowDoubles() {
-            showToast('Ищу ваших психометрических двойников...', 'info');
             const doubles = await findPsychometricDoubles();
-            if (doubles.length > 0) {
-                const doublesText = doubles.map(d => `**${d.name}**\nПрофиль: ${d.profile_code}\nСхожесть: ${Math.round(d.similarity * 100)}%`).join('\n\n');
-                showFullContent('Психометрические двойники', doublesText, 'doubles', doublesText);
-            } else {
-                showToast('Двойники появятся после прохождения теста', 'info');
-            }
+            if (doubles.length) navigateTo('doubles', { content: doubles.map(d => `**${d.name}**\nПрофиль: ${d.profile_code}\nСхожесть: ${Math.round(d.similarity * 100)}%`).join('\n\n') });
+            else showToast('Двойники появятся после прохождения теста', 'info');
         }
         
-        // ========== ОТРИСОВКА ДАШБОРДА ==========
+        // ========== ДАШБОРД ==========
         
         function updateModeUI() {
             const config = MODES[currentMode];
-            const modeLabel = document.getElementById('modeLabel');
-            const modeIndicator = document.getElementById('modeIndicator');
-            
-            if (modeLabel) modeLabel.textContent = config.name;
-            if (modeIndicator) modeIndicator.style.background = config.color;
+            document.getElementById('modeLabel').textContent = config.name;
+            document.getElementById('modeIndicator').style.background = config.color;
         }
         
         async function switchMode(mode) {
             if (mode === currentMode) return;
-            
             currentMode = mode;
-            console.log('🔄 Смена режима на:', mode);
-            
             const config = MODES[mode];
             showToast(`Режим "${config.name}" активирован`, 'success');
-            vibrate(20);
-            
-            await saveMode(mode);
+            await apiCall('/api/save-mode', { method: 'POST', body: JSON.stringify({ user_id: CONFIG.USER_ID, mode }) });
             updateModeUI();
             renderDashboard();
         }
         
         function renderDashboard() {
             const container = document.getElementById('screenContainer');
-            if (!container) return;
-            
             const modeConfig = MODES[currentMode];
             const modules = MODULES[currentMode];
             
@@ -2528,21 +2496,15 @@
                             </div>
                             <div class="profile-badge">
                                 <div class="profile-code" id="profileCode">${CONFIG.PROFILE_CODE}</div>
-                                <div style="font-size: 10px; color: var(--text-secondary);">ваш психотип</div>
+                                <div style="font-size: 10px;">ваш психотип</div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="mode-selector">
-                        <button class="mode-btn ${currentMode === 'coach' ? 'active coach' : ''}" data-mode="coach">
-                            🔮 КОУЧ
-                        </button>
-                        <button class="mode-btn ${currentMode === 'psychologist' ? 'active psychologist' : ''}" data-mode="psychologist">
-                            🧠 ПСИХОЛОГ
-                        </button>
-                        <button class="mode-btn ${currentMode === 'trainer' ? 'active trainer' : ''}" data-mode="trainer">
-                            ⚡ ТРЕНЕР
-                        </button>
+                        <button class="mode-btn ${currentMode === 'coach' ? 'active coach' : ''}" data-mode="coach">🔮 КОУЧ</button>
+                        <button class="mode-btn ${currentMode === 'psychologist' ? 'active psychologist' : ''}" data-mode="psychologist">🧠 ПСИХОЛОГ</button>
+                        <button class="mode-btn ${currentMode === 'trainer' ? 'active trainer' : ''}" data-mode="trainer">⚡ ТРЕНЕР</button>
                     </div>
                     
                     <div class="voice-section">
@@ -2551,15 +2513,7 @@
                                 <span class="voice-icon">🎤</span>
                                 <span class="voice-text">${modeConfig.voicePrompt}</span>
                             </button>
-                            <div class="voice-hint">
-                                🎙️ Нажмите и удерживайте для записи (до 60 сек)<br>
-                                Свайп вверх/вбок — отмена
-                            </div>
-                            <div id="voiceStatusIndicator" style="display: none;" class="voice-status">
-                                <span class="voice-status-dot"></span>
-                                <span>Запись...</span>
-                                <span id="voiceTimer">0s</span>
-                            </div>
+                            <div class="voice-hint">🎙️ Нажмите и удерживайте для записи (до 60 сек)</div>
                         </div>
                     </div>
                     
@@ -2574,74 +2528,46 @@
                     </div>
                     
                     <div class="quick-actions">
-                        <div class="quick-actions-title">Быстрые действия</div>
+                        <div class="quick-actions-title">⚡ Быстрые действия</div>
                         <div class="quick-actions-grid">
-                            <div class="quick-action" data-action="profile">
-                                <div class="action-icon">🧠</div>
-                                <div class="action-name">Мой портрет</div>
-                            </div>
-                            <div class="quick-action" data-action="thoughts">
-                                <div class="action-icon">💭</div>
-                                <div class="action-name">Мысли психолога</div>
-                            </div>
-                            <div class="quick-action" data-action="newThought">
-                                <div class="action-icon">✨</div>
-                                <div class="action-name">Свежая мысль</div>
-                            </div>
-                            <div class="quick-action" data-action="weekend">
-                                <div class="action-icon">🎨</div>
-                                <div class="action-name">Идеи на выходные</div>
-                            </div>
-                            <div class="quick-action" data-action="goals">
-                                <div class="action-icon">🎯</div>
-                                <div class="action-name">Цели</div>
-                            </div>
-                            <div class="quick-action" data-action="questions">
-                                <div class="action-icon">❓</div>
-                                <div class="action-name">Вопросы</div>
-                            </div>
-                            <div class="quick-action" data-action="challenges">
-                                <div class="action-icon">🏆</div>
-                                <div class="action-name">Челленджи</div>
-                            </div>
-                            <div class="quick-action" data-action="doubles">
-                                <div class="action-icon">👥</div>
-                                <div class="action-name">Двойники</div>
-                            </div>
-                            <div class="quick-action" data-action="confinement">
-                                <div class="action-icon">🔐</div>
-                                <div class="action-name">Модель ограничений</div>
-                            </div>
-                            <div class="quick-action" data-action="realityCheck">
-                                <div class="action-icon">🔍</div>
-                                <div class="action-name">Проверка реальности</div>
-                            </div>
-                            <div class="quick-action" data-action="buildRoute">
-                                <div class="action-icon">🗺️</div>
-                                <div class="action-name">Построить маршрут</div>
+                            <div class="quick-action" data-action="profile"><div class="action-icon">🧠</div><div class="action-name">Мой портрет</div></div>
+                            <div class="quick-action" data-action="thoughts"><div class="action-icon">💭</div><div class="action-name">Мысли психолога</div></div>
+                            <div class="quick-action" data-action="newThought"><div class="action-icon">✨</div><div class="action-name">Свежая мысль</div></div>
+                            <div class="quick-action" data-action="weekend"><div class="action-icon">🎨</div><div class="action-name">Идеи на выходные</div></div>
+                            <div class="quick-action" data-action="goals"><div class="action-icon">🎯</div><div class="action-name">Цели</div></div>
+                            <div class="quick-action" data-action="questions"><div class="action-icon">❓</div><div class="action-name">Вопросы</div></div>
+                            <div class="quick-action" data-action="challenges"><div class="action-icon">🏆</div><div class="action-name">Челленджи</div></div>
+                            <div class="quick-action" data-action="doubles"><div class="action-icon">👥</div><div class="action-name">Двойники</div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="expandable-section">
+                        <div class="expandable-header" id="expandableHeader">
+                            <span>🔧 РАСШИРЕННЫЕ ФУНКЦИИ</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="expandable-content" id="expandableContent">
+                            <div class="quick-actions-grid" style="margin-top: 12px;">
+                                <div class="quick-action" data-action="confinement"><div class="action-icon">🔐</div><div class="action-name">Модель ограничений</div></div>
+                                <div class="quick-action" data-action="practices"><div class="action-icon">🧘</div><div class="action-name">Практики</div></div>
+                                <div class="quick-action" data-action="hypnosis"><div class="action-icon">🌙</div><div class="action-name">Гипноз</div></div>
+                                <div class="quick-action" data-action="tales"><div class="action-icon">📚</div><div class="action-name">Сказки</div></div>
+                                <div class="quick-action" data-action="anchors"><div class="action-icon">⚓</div><div class="action-name">Якоря</div></div>
+                                <div class="quick-action" data-action="statistics"><div class="action-icon">📊</div><div class="action-name">Статистика</div></div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             
-            attachEvents();
-            initVoiceButtonWithHold();
-        }
-        
-        function attachEvents() {
+            initVoiceButton();
+            
             document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const mode = btn.dataset.mode;
-                    if (mode) switchMode(mode);
-                });
+                btn.addEventListener('click', () => { const mode = btn.dataset.mode; if (mode) switchMode(mode); });
             });
             
             document.querySelectorAll('.module-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const moduleName = card.querySelector('.module-name')?.textContent || 'модуль';
-                    showToast(`Модуль "${moduleName}" — скоро будет доступен`, 'info');
-                });
+                card.addEventListener('click', () => { const name = card.querySelector('.module-name')?.textContent; showToast(`Модуль "${name}" — скоро будет доступен`, 'info'); });
             });
             
             document.querySelectorAll('.quick-action').forEach(action => {
@@ -2656,49 +2582,45 @@
                         case 'questions': await handleShowQuestions(); break;
                         case 'challenges': await handleShowChallenges(); break;
                         case 'doubles': await handleShowDoubles(); break;
-                        case 'confinement': await showConfinementModel(); break;
-                        case 'realityCheck': await showRealityCheckWithConfinement(); break;
-                        case 'buildRoute': await showGoalSelectionForRoute(); break;
+                        case 'confinement': navigateTo('confinement-model'); break;
+                        case 'practices': navigateTo('practices'); break;
+                        case 'hypnosis': navigateTo('hypnosis'); break;
+                        case 'tales': navigateTo('tales'); break;
+                        case 'anchors': navigateTo('anchors'); break;
+                        case 'statistics': navigateTo('statistics'); break;
                     }
                 });
             });
-        }
-        
-        function initMobileMenu() {
-            const menuBtn = document.getElementById('mobileMenuBtn');
-            const chatsPanel = document.getElementById('chatsPanel');
-            if (menuBtn && chatsPanel) {
-                menuBtn.addEventListener('click', () => {
-                    chatsPanel.classList.toggle('open');
+            
+            const expandableHeader = document.getElementById('expandableHeader');
+            const expandableContent = document.getElementById('expandableContent');
+            if (expandableHeader && expandableContent) {
+                expandableHeader.addEventListener('click', () => {
+                    expandableContent.classList.toggle('open');
+                    expandableHeader.querySelector('span:last-child').textContent = expandableContent.classList.contains('open') ? '▲' : '▼';
                 });
             }
         }
         
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        function initMobileMenu() {
+            document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+                document.getElementById('chatsPanel').classList.toggle('open');
+            });
+        }
         
         async function init() {
-            console.log('🚀 FREDI PREMIUM — инициализация...');
-            console.log('👤 USER_ID:', CONFIG.USER_ID);
-            console.log('🌐 API_URL:', CONFIG.API_BASE_URL);
-            
+            console.log('🚀 FREDI PREMIUM — полная версия');
             try {
                 const status = await getUserStatus();
                 if (status.profile_code) {
                     const profileCodeEl = document.getElementById('profileCode');
                     if (profileCodeEl) profileCodeEl.textContent = status.profile_code;
                 }
-            } catch (error) {
-                console.warn('API недоступен, работаем в офлайн-режиме');
-            }
-            
+            } catch (e) {}
             renderDashboard();
             initMobileMenu();
-            
-            const userNameEl = document.getElementById('userName');
-            if (userNameEl) userNameEl.textContent = CONFIG.USER_NAME;
-            
-            const userAvatarEl = document.getElementById('userMiniAvatar');
-            if (userAvatarEl) userAvatarEl.textContent = CONFIG.USER_NAME.charAt(0);
+            document.getElementById('userName').textContent = CONFIG.USER_NAME;
+            document.getElementById('userMiniAvatar').textContent = CONFIG.USER_NAME.charAt(0);
         }
         
         document.addEventListener('DOMContentLoaded', init);
