@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#6366f1">
-    <title>Фреди · виртуальный психолог</title>
+    <meta name="theme-color" content="#0a0a0a">
+    <title>Фреди | Премиум виртуальный психолог</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     
@@ -18,14 +18,28 @@
         }
 
         :root {
-            --bg-dark: #0a0c15;
-            --bg-card: rgba(18, 22, 35, 0.85);
-            --bg-sidebar: rgba(12, 14, 22, 0.95);
-            --gradient-coach: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            --gradient-psychologist: linear-gradient(135deg, #ec489a 0%, #8b5cf6 100%);
-            --gradient-trainer: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-            --accent-purple: #8b5cf6;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --black-obsidian: #0a0a0a;
+            --black-matte: #111111;
+            --carbon-fiber: #1a1a1a;
+            --glass-dark: rgba(10, 10, 10, 0.85);
+            
+            --chrome: #e0e0e0;
+            --silver-metallic: #c0c0c0;
+            --silver-brushed: #b0b0b0;
+            --platinum: #a0a0a0;
+            
+            --amg-red: #ff3b3b;
+            --amg-orange: #ff6b3b;
+            --amg-blue: #3b82ff;
+            --amber: #ffb83b;
+            
+            --glass-gradient: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.85) 100%);
+            --chrome-gradient: linear-gradient(135deg, #e0e0e0 0%, #b0b0b0 50%, #e0e0e0 100%);
+            
+            --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --shadow-glass: 0 0 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            --shadow-chrome: 0 5px 15px rgba(192, 192, 192, 0.2);
+            
             --text-primary: #ffffff;
             --text-secondary: #a0a3b0;
             --success: #10b981;
@@ -34,36 +48,35 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
+            background: var(--black-obsidian);
             color: var(--text-primary);
             overflow: hidden;
             height: 100vh;
+            position: relative;
         }
 
-        /* Анимированный фон */
-        .animated-bg {
+        /* Премиум фон с мерцанием */
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 40%, rgba(224, 224, 224, 0.03) 0%, transparent 60%),
+                        radial-gradient(circle at 70% 80%, rgba(255, 59, 59, 0.02) 0%, transparent 60%);
+            pointer-events: none;
         }
-
-        .animated-bg::before {
+        
+        body::after {
             content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 40%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.2) 0%, transparent 50%);
-            animation: bgMove 25s ease-in-out infinite;
-        }
-
-        @keyframes bgMove {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
-            50% { transform: translate(-2%, -2%) scale(1.05); opacity: 1; }
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(45deg, rgba(224, 224, 224, 0.008) 0px, rgba(224, 224, 224, 0.008) 2px, transparent 2px, transparent 8px);
+            pointer-events: none;
         }
 
         .app {
@@ -71,33 +84,46 @@
             height: 100vh;
             width: 100%;
             overflow: hidden;
+            position: relative;
         }
 
-        /* Левая панель */
+        /* Левая панель — матовое стекло с хромом */
         .chats-panel {
             width: 320px;
-            background: var(--bg-sidebar);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--glass-border);
+            background: rgba(10, 10, 10, 0.75);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(224, 224, 224, 0.15);
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            transition: all 0.4s ease;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             z-index: 10;
         }
 
         .chats-header {
-            padding: 28px 20px;
-            border-bottom: 1px solid var(--glass-border);
+            padding: 28px 20px 20px;
+            border-bottom: 1px solid rgba(224, 224, 224, 0.1);
+            position: relative;
+        }
+
+        .chats-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--chrome), transparent);
         }
 
         .chats-title {
             font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--chrome) 0%, var(--silver-brushed) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            letter-spacing: -0.5px;
         }
 
         .chats-search {
@@ -107,16 +133,18 @@
         .chats-search input {
             width: 100%;
             padding: 12px 18px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
+            background: rgba(224, 224, 224, 0.03);
+            border: 1px solid rgba(224, 224, 224, 0.15);
             border-radius: 40px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 14px;
+            transition: all 0.3s;
         }
 
         .chats-search input:focus {
             outline: none;
-            border-color: var(--accent-purple);
+            border-color: var(--chrome);
+            box-shadow: 0 0 15px rgba(224, 224, 224, 0.1);
         }
 
         .chats-list {
@@ -134,28 +162,31 @@
             cursor: pointer;
             transition: all 0.3s;
             gap: 14px;
+            border: 1px solid transparent;
         }
 
         .chat-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(224, 224, 224, 0.05);
+            border-color: rgba(224, 224, 224, 0.2);
             transform: translateX(4px);
         }
 
         .chat-item.active {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.1));
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, rgba(224, 224, 224, 0.08), rgba(192, 192, 192, 0.03));
+            border-color: rgba(224, 224, 224, 0.3);
         }
 
         .chat-avatar {
             width: 52px;
             height: 52px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 26px;
             position: relative;
+            box-shadow: 0 0 15px rgba(224, 224, 224, 0.2);
         }
 
         .chat-avatar::after {
@@ -167,7 +198,8 @@
             height: 12px;
             background: var(--success);
             border-radius: 50%;
-            border: 2px solid var(--bg-sidebar);
+            border: 2px solid var(--black-obsidian);
+            box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
         }
 
         .chat-info {
@@ -185,9 +217,25 @@
             color: var(--text-secondary);
         }
 
+        .chat-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
         .chats-footer {
             padding: 20px;
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(224, 224, 224, 0.1);
+            position: relative;
+        }
+
+        .chats-footer::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--chrome), transparent);
         }
 
         .user-mini-profile {
@@ -196,25 +244,28 @@
             gap: 14px;
             padding: 12px 14px;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(224, 224, 224, 0.03);
             cursor: pointer;
             transition: all 0.3s;
+            border: 1px solid rgba(224, 224, 224, 0.1);
         }
 
         .user-mini-profile:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(224, 224, 224, 0.08);
+            border-color: rgba(224, 224, 224, 0.2);
         }
 
         .user-mini-avatar {
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
             font-weight: 600;
+            color: var(--black-obsidian);
         }
 
         .user-mini-name {
@@ -227,22 +278,34 @@
             color: var(--text-secondary);
         }
 
-        /* Правая панель */
+        /* Правая панель — центральная консоль */
         .chat-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            background: rgba(10, 10, 10, 0.5);
         }
 
         .chat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
-            background: rgba(10, 12, 21, 0.7);
+            padding: 16px 28px;
+            background: rgba(10, 10, 10, 0.7);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid rgba(224, 224, 224, 0.1);
+            position: relative;
+        }
+
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--chrome), transparent);
         }
 
         .chat-header-left {
@@ -253,30 +316,44 @@
 
         .mobile-menu-btn {
             display: none;
-            background: rgba(255, 255, 255, 0.05);
-            border: none;
+            background: rgba(224, 224, 224, 0.05);
+            border: 1px solid rgba(224, 224, 224, 0.2);
             font-size: 24px;
-            color: white;
+            color: var(--chrome);
             cursor: pointer;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(224, 224, 224, 0.1);
+            transform: scale(1.02);
         }
 
         .chat-header-avatar {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 32px;
+            box-shadow: 0 0 20px rgba(224, 224, 224, 0.2);
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(224, 224, 224, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(224, 224, 224, 0.4); }
         }
 
         .chat-header-name {
             font-weight: 700;
-            font-size: 20px;
+            font-size: 22px;
+            letter-spacing: -0.3px;
         }
 
         .chat-header-status {
@@ -307,19 +384,49 @@
             padding: 28px 32px;
         }
 
-        /* Дашборд */
+        /* Премиум скролл */
+        .screen-container::-webkit-scrollbar,
+        .chats-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .screen-container::-webkit-scrollbar-track,
+        .chats-list::-webkit-scrollbar-track {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 4px;
+        }
+
+        .screen-container::-webkit-scrollbar-thumb,
+        .chats-list::-webkit-scrollbar-thumb {
+            background: var(--chrome);
+            border-radius: 4px;
+        }
+
+        /* Дашборд — стеклянные карты */
         .dashboard-container {
             max-width: 1300px;
             margin: 0 auto;
         }
 
         .hero-section {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.1));
+            background: linear-gradient(135deg, rgba(224, 224, 224, 0.05), rgba(192, 192, 192, 0.02));
             border-radius: 32px;
-            padding: 28px 32px;
+            padding: 32px 36px;
             margin-bottom: 32px;
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(224, 224, 224, 0.15);
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--chrome), transparent);
         }
 
         .user-greeting {
@@ -331,9 +438,10 @@
         }
 
         .greeting-text h2 {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 600;
             margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
         .greeting-text p {
@@ -342,17 +450,19 @@
         }
 
         .profile-badge {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(224, 224, 224, 0.05);
             border-radius: 40px;
-            padding: 8px 20px;
+            padding: 10px 24px;
             text-align: center;
+            border: 1px solid rgba(224, 224, 224, 0.2);
         }
 
         .profile-code {
             font-family: monospace;
             font-size: 14px;
             font-weight: 600;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -360,25 +470,29 @@
 
         .stats-row {
             display: flex;
-            gap: 32px;
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid var(--glass-border);
+            gap: 48px;
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(224, 224, 224, 0.1);
         }
 
         .stat-card {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .stat-icon {
-            font-size: 28px;
+            font-size: 32px;
         }
 
         .stat-info h4 {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .stat-info span {
@@ -386,77 +500,98 @@
             color: var(--text-secondary);
         }
 
-        /* Голосовая кнопка */
+        /* Голосовая кнопка AMG стиль */
         .voice-section {
             margin-bottom: 40px;
         }
 
         .voice-card {
-            background: var(--bg-card);
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.7), rgba(26, 26, 26, 0.6));
             backdrop-filter: blur(20px);
-            border-radius: 48px;
+            border-radius: 60px;
             padding: 8px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            box-shadow: var(--shadow-premium);
         }
 
         .voice-record-btn-premium {
             width: 100%;
-            padding: 24px 32px;
-            border-radius: 40px;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.1));
+            padding: 28px 32px;
+            border-radius: 52px;
+            background: linear-gradient(135deg, rgba(224, 224, 224, 0.08), rgba(192, 192, 192, 0.03));
             border: none;
-            color: white;
+            color: var(--text-primary);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 16px;
-            transition: all 0.3s;
+            gap: 20px;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             font-size: 18px;
             font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-record-btn-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(224, 224, 224, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .voice-record-btn-premium:hover::before {
+            left: 100%;
         }
 
         .voice-record-btn-premium .voice-icon {
-            font-size: 32px;
+            font-size: 40px;
+            filter: drop-shadow(0 0 10px rgba(224, 224, 224, 0.5));
         }
 
         .voice-record-btn-premium:hover {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.2));
             transform: scale(1.01);
+            border-color: rgba(224, 224, 224, 0.4);
         }
 
         .voice-record-btn-premium.recording {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            animation: pulseRed 1s infinite;
+            background: linear-gradient(135deg, rgba(255, 59, 59, 0.2), rgba(239, 68, 68, 0.1));
+            border-color: var(--amg-red);
+            animation: pulseRed 1.5s infinite;
         }
 
         @keyframes pulseRed {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.3); }
+            50% { box-shadow: 0 0 0 20px rgba(255, 59, 59, 0); }
         }
 
         .voice-hint {
             text-align: center;
-            margin-top: 12px;
+            margin-top: 16px;
             font-size: 12px;
             color: var(--text-secondary);
+            letter-spacing: 0.5px;
         }
 
-        /* Селектор режимов */
+        /* Селектор режимов — хромированные кнопки */
         .mode-selector {
             display: flex;
             gap: 12px;
             margin-bottom: 32px;
-            background: var(--bg-card);
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5), rgba(26, 26, 26, 0.4));
             backdrop-filter: blur(20px);
             border-radius: 60px;
             padding: 6px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(224, 224, 224, 0.2);
         }
 
         .mode-btn {
             flex: 1;
-            padding: 14px 20px;
+            padding: 14px 24px;
             border-radius: 50px;
             border: none;
             background: transparent;
@@ -468,20 +603,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
+            letter-spacing: 0.5px;
+            position: relative;
         }
 
         .mode-btn.active {
-            background: var(--gradient-coach);
-            color: white;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, rgba(224, 224, 224, 0.15), rgba(192, 192, 192, 0.05));
+            color: var(--text-primary);
+            box-shadow: 0 0 20px rgba(224, 224, 224, 0.1);
         }
 
-        .mode-btn.coach.active { background: var(--gradient-coach); }
-        .mode-btn.psychologist.active { background: var(--gradient-psychologist); }
-        .mode-btn.trainer.active { background: var(--gradient-trainer); }
+        .mode-btn.coach.active { border-color: var(--amg-blue); box-shadow: 0 0 15px rgba(59, 130, 255, 0.2); }
+        .mode-btn.psychologist.active { border-color: var(--amg-orange); box-shadow: 0 0 15px rgba(255, 107, 59, 0.2); }
+        .mode-btn.trainer.active { border-color: var(--amg-red); box-shadow: 0 0 15px rgba(255, 59, 59, 0.2); }
 
-        /* Модули */
+        /* Модули — стеклянные карты */
         .modules-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -490,24 +627,42 @@
         }
 
         .module-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5), rgba(26, 26, 26, 0.4));
+            backdrop-filter: blur(15px);
+            border-radius: 28px;
             padding: 24px 20px;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid var(--glass-border);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(224, 224, 224, 0.1);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--chrome), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .module-card:hover::before {
+            transform: translateX(100%);
         }
 
         .module-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-purple);
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+            transform: translateY(-6px);
+            border-color: rgba(224, 224, 224, 0.3);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
         }
 
         .module-icon {
-            font-size: 44px;
+            font-size: 48px;
             margin-bottom: 16px;
         }
 
@@ -524,49 +679,142 @@
 
         /* Быстрые действия */
         .quick-actions {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 24px;
-            border: 1px solid var(--glass-border);
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.5), rgba(26, 26, 26, 0.4));
+            backdrop-filter: blur(15px);
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid rgba(224, 224, 224, 0.1);
         }
 
         .quick-actions-title {
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             font-size: 18px;
+            letter-spacing: 0.5px;
         }
 
         .quick-actions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
+            gap: 16px;
         }
 
         .quick-action {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 20px;
-            padding: 16px;
+            background: rgba(224, 224, 224, 0.03);
+            border-radius: 24px;
+            padding: 18px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            border: 1px solid transparent;
+            border: 1px solid rgba(224, 224, 224, 0.1);
         }
 
         .quick-action:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--glass-border);
-            transform: translateY(-2px);
+            background: rgba(224, 224, 224, 0.08);
+            border-color: rgba(224, 224, 224, 0.3);
+            transform: translateY(-3px);
         }
 
         .action-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
+            font-size: 32px;
+            margin-bottom: 10px;
         }
 
         .action-name {
             font-size: 13px;
             font-weight: 500;
+        }
+
+        /* Сообщения чата */
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 14px 20px;
+            border-radius: 24px;
+            animation: fadeIn 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, rgba(224, 224, 224, 0.12), rgba(192, 192, 192, 0.06));
+            align-self: flex-end;
+            border-radius: 24px 24px 6px 24px;
+            border: 1px solid rgba(224, 224, 224, 0.2);
+        }
+
+        .message.bot {
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.6), rgba(26, 26, 26, 0.4));
+            backdrop-filter: blur(10px);
+            align-self: flex-start;
+            border-radius: 24px 24px 24px 6px;
+            border: 1px solid rgba(224, 224, 224, 0.15);
+        }
+
+        .message.system {
+            background: rgba(224, 224, 224, 0.03);
+            align-self: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .message audio {
+            margin-top: 12px;
+            width: 100%;
+            height: 36px;
+            border-radius: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Поле ввода */
+        .input-area {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.7), rgba(26, 26, 26, 0.5));
+            backdrop-filter: blur(20px);
+            border-radius: 60px;
+            border: 1px solid rgba(224, 224, 224, 0.15);
+        }
+
+        .input-area input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 16px;
+            padding: 14px 20px;
+            outline: none;
+        }
+
+        .input-area input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .input-area button {
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
+            border: none;
+            border-radius: 40px;
+            padding: 12px 28px;
+            color: var(--black-obsidian);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .input-area button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
         }
 
         /* Всплывающие сообщения */
@@ -576,26 +824,26 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            animation: slideUp 0.3s ease;
+            animation: slideUp 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
 
         .floating-message-content {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(10, 10, 10, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 60px;
             padding: 14px 28px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(224, 224, 224, 0.2);
         }
 
         .floating-message.success .floating-message-content {
-            background: var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
         }
 
         .floating-message.error .floating-message-content {
-            background: var(--error);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
         }
 
         .floating-message-text {
@@ -621,18 +869,19 @@
 
         .recording-timer-global {
             position: fixed;
-            bottom: 130px;
+            bottom: 150px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(10, 10, 10, 0.95);
             backdrop-filter: blur(20px);
-            padding: 10px 24px;
+            padding: 12px 28px;
             border-radius: 50px;
             font-size: 18px;
             font-weight: bold;
             font-family: monospace;
             z-index: 1000;
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            letter-spacing: 2px;
         }
 
         .voice-status {
@@ -640,18 +889,20 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            margin-top: 16px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+            padding: 14px;
+            background: rgba(10, 10, 10, 0.6);
             border-radius: 40px;
+            border: 1px solid rgba(224, 224, 224, 0.15);
         }
 
         .voice-status-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #ef4444;
+            background: var(--amg-red);
             animation: blink 1s infinite;
+            box-shadow: 0 0 5px var(--amg-red);
         }
 
         @keyframes blink {
@@ -665,11 +916,13 @@
             align-items: center;
             justify-content: center;
             height: 100%;
+            gap: 20px;
         }
 
         .loading-spinner {
-            font-size: 56px;
+            font-size: 64px;
             animation: spin 1s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(224, 224, 224, 0.5));
         }
 
         @keyframes spin {
@@ -677,96 +930,16 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Чат сообщения */
-        .chat-messages {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .message.user {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            align-self: flex-end;
-            border-radius: 20px 20px 4px 20px;
-        }
-
-        .message.bot {
-            background: rgba(255, 255, 255, 0.1);
-            align-self: flex-start;
-            border-radius: 20px 20px 20px 4px;
-        }
-
-        .message.system {
-            background: rgba(255, 255, 255, 0.05);
-            align-self: center;
-            font-size: 12px;
+        .loading-text {
             color: var(--text-secondary);
-            text-align: center;
-        }
-
-        .message audio {
-            margin-top: 8px;
-            width: 100%;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Ввод сообщения */
-        .input-area {
-            display: flex;
-            gap: 12px;
-            padding: 16px;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-radius: 60px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .input-area input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 16px;
-            padding: 12px 16px;
-            outline: none;
-        }
-
-        .input-area input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .input-area button {
-            background: var(--accent-purple);
-            border: none;
-            border-radius: 40px;
-            padding: 12px 24px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .input-area button:hover {
-            transform: scale(1.02);
-            background: #7c3aed;
+            font-size: 14px;
+            letter-spacing: 1px;
         }
 
         @media (max-width: 768px) {
             .chats-panel {
                 position: fixed;
-                left: -320px;
+                left: -280px;
                 width: 280px;
                 z-index: 100;
                 height: 100%;
@@ -774,6 +947,7 @@
             
             .chats-panel.open {
                 left: 0;
+                box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
             }
             
             .mobile-menu-btn {
@@ -787,11 +961,16 @@
             }
             
             .hero-section {
-                padding: 20px;
+                padding: 24px 20px;
             }
             
             .greeting-text h2 {
-                font-size: 22px;
+                font-size: 24px;
+            }
+            
+            .stats-row {
+                gap: 24px;
+                flex-wrap: wrap;
             }
             
             .modules-grid {
@@ -814,33 +993,25 @@
             .message {
                 max-width: 90%;
             }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-purple);
-            border-radius: 10px;
+            
+            .voice-record-btn-premium {
+                padding: 20px 24px;
+            }
+            
+            .voice-record-btn-premium .voice-icon {
+                font-size: 32px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="animated-bg"></div>
-    
     <div class="app">
         <!-- Левая панель -->
         <div class="chats-panel" id="chatsPanel">
             <div class="chats-header">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="chats-title">Фреди</div>
-                    <button class="mode-btn" id="newChatBtn" style="width: 40px; height: 40px; padding: 0; background: rgba(255,255,255,0.05);">✎</button>
+                    <div class="chats-title">FREDI</div>
+                    <button class="mode-btn" id="newChatBtn" style="width: 44px; height: 44px; padding: 0; background: rgba(224,224,224,0.05); border-radius: 50%;">✎</button>
                 </div>
             </div>
             <div class="chats-search">
@@ -848,7 +1019,7 @@
             </div>
             <div class="chats-list" id="chatsList">
                 <div class="chat-item active" data-chat="fredi">
-                    <div class="chat-avatar">🧠</div>
+                    <div class="chat-avatar">⭐</div>
                     <div class="chat-info">
                         <div class="chat-name">Фреди</div>
                         <div class="chat-preview" id="chatPreview">Чем могу помочь?</div>
@@ -861,7 +1032,7 @@
                     <div class="user-mini-avatar" id="userMiniAvatar">А</div>
                     <div class="user-mini-info">
                         <div class="user-mini-name" id="userName">Андрей</div>
-                        <div class="user-mini-status" id="userStatus">🧠 активен</div>
+                        <div class="user-mini-status" id="userStatus">⚡ активен</div>
                     </div>
                 </div>
             </div>
@@ -872,23 +1043,23 @@
             <div class="chat-header">
                 <div class="chat-header-left">
                     <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
-                    <div class="chat-header-avatar">🧠</div>
+                    <div class="chat-header-avatar">⭐</div>
                     <div>
                         <div class="chat-header-name">Фреди</div>
                         <div class="chat-header-status" id="botStatus">
-                            <span class="mode-indicator" id="modeIndicator" style="background: #8b5cf6;"></span>
+                            <span class="mode-indicator" id="modeIndicator" style="background: var(--amg-orange);"></span>
                             <span id="modeLabel">Психолог</span>
                         </div>
                     </div>
                 </div>
                 <div class="chat-header-right">
-                    <button class="mode-btn" style="width: 40px; height: 40px; padding: 0;" id="menuBtn">⋮</button>
+                    <button class="mode-btn" style="width: 44px; height: 44px; padding: 0; background: rgba(224,224,224,0.05); border-radius: 50%;" id="menuBtn">⋮</button>
                 </div>
             </div>
             <div id="screenContainer" class="screen-container">
                 <div class="loading-screen">
-                    <div class="loading-spinner">🧠</div>
-                    <div class="loading-text">Загрузка личного кабинета...</div>
+                    <div class="loading-spinner">⭐</div>
+                    <div class="loading-text">Инициализация системы...</div>
                 </div>
             </div>
         </div>
@@ -921,15 +1092,15 @@
                 id: 'coach',
                 name: 'КОУЧ',
                 emoji: '🔮',
-                color: '#3b82f6',
-                greeting: 'Привет! Я твой коуч. Давай найдём ответы внутри тебя.',
-                voicePrompt: 'Задай вопрос, я помогу найти решение'
+                color: '#3b82ff',
+                greeting: 'Приветствую. Я твой коуч. Давай найдём ответы внутри тебя.',
+                voicePrompt: 'Задай вопрос — я помогу найти решение'
             },
             psychologist: {
                 id: 'psychologist',
                 name: 'ПСИХОЛОГ',
                 emoji: '🧠',
-                color: '#ec489a',
+                color: '#ff6b3b',
                 greeting: 'Здравствуйте. Я здесь, чтобы помочь разобраться в глубинных паттернах.',
                 voicePrompt: 'Расскажите, что вас беспокоит'
             },
@@ -937,16 +1108,16 @@
                 id: 'trainer',
                 name: 'ТРЕНЕР',
                 emoji: '⚡',
-                color: '#f59e0b',
-                greeting: 'Готов к работе! Давай достигать целей вместе!',
-                voicePrompt: 'Сформулируй задачу, получишь чёткий план'
+                color: '#ff3b3b',
+                greeting: 'Готов к работе. Давай достигать целей вместе!',
+                voicePrompt: 'Сформулируй задачу — получишь чёткий план'
             }
         };
         
         // Модули для каждого режима
         const MODULES = {
             coach: [
-                { id: 'goals', name: 'Цели', icon: '🎯', desc: 'Постановка и достижение целей' },
+                { id: 'goals', name: 'Цели', icon: '🎯', desc: 'Постановка и достижение' },
                 { id: 'strategy', name: 'Стратегия', icon: '📊', desc: 'План действий' },
                 { id: 'motivation', name: 'Мотивация', icon: '⚡', desc: 'Энергия для движения' },
                 { id: 'habits', name: 'Привычки', icon: '🔄', desc: 'Формирование привычек' }
@@ -1120,31 +1291,27 @@
             const container = document.getElementById('screenContainer');
             if (!container) return;
             
-            // Убираем загрузочный экран если есть
             if (container.querySelector('.loading-screen')) {
                 container.innerHTML = '';
             }
             
-            // Создаём контейнер для сообщений если его нет
             let messagesContainer = container.querySelector('.chat-messages');
             if (!messagesContainer) {
                 messagesContainer = document.createElement('div');
                 messagesContainer.className = 'chat-messages';
                 container.appendChild(messagesContainer);
                 
-                // Добавляем поле ввода
                 const inputArea = document.createElement('div');
                 inputArea.className = 'input-area';
                 inputArea.innerHTML = `
-                    <input type="text" id="messageInput" placeholder="Напишите сообщение...">
+                    <input type="text" id="messageInput" placeholder="Введите сообщение...">
                     <button id="sendTextBtn">📤 Отправить</button>
-                    <button id="voiceRecordBtn" class="voice-record-btn-premium" style="width: auto; padding: 12px 24px;">
+                    <button id="voiceRecordBtn" class="voice-record-btn-premium" style="width: auto; padding: 12px 28px;">
                         <span class="voice-icon">🎤</span>
                     </button>
                 `;
                 container.appendChild(inputArea);
                 
-                // Прикрепляем обработчики
                 document.getElementById('sendTextBtn')?.addEventListener('click', () => sendTextMessage());
                 document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') sendTextMessage();
@@ -1168,8 +1335,6 @@
             
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
-            // Сохраняем в историю
             chatMessages.push({ text, sender, audioUrl, timestamp: new Date() });
         }
         
@@ -1181,13 +1346,12 @@
             addMessage(text, 'user');
             input.value = '';
             
-            showToast('🧠 Формирую ответ...', 'info');
+            showToast('Формирую ответ...', 'info');
             
             try {
                 const responseText = await getBotResponse(text);
                 addMessage(responseText, 'bot');
                 
-                // Генерируем голосовой ответ
                 const tts = await textToSpeech(responseText, currentMode);
                 if (tts?.audio_url) {
                     playAudioResponse(tts.audio_url);
@@ -1229,7 +1393,7 @@
                 mediaRecorder.onstop = async () => {
                     const audioBlob = new Blob(audioChunks, { type: mimeType });
                     if (audioBlob.size > 5000) {
-                        addMessage('🎙️ Распознаю речь...', 'system');
+                        addMessage('Распознаю речь...', 'system');
                         
                         const result = await sendVoiceToServer(audioBlob);
                         
@@ -1287,7 +1451,6 @@
                     const voiceTimer = document.getElementById('voiceTimer');
                     if (timerEl) timerEl.textContent = `${recordingSeconds}s`;
                     if (voiceTimer) voiceTimer.textContent = `${recordingSeconds}s`;
-                    
                     if (recordingSeconds >= 60) stopRecording();
                 }, 1000);
                 
@@ -1326,7 +1489,7 @@
             console.log('🔄 Смена режима на:', mode);
             
             const config = MODES[mode];
-            showToast(`🔄 Режим "${config.name}" активирован`, 'success');
+            showToast(`Режим "${config.name}" активирован`, 'success');
             
             await saveMode(mode);
             updateModeUI();
@@ -1401,7 +1564,7 @@
                             </div>
                             <div id="voiceStatusIndicator" style="display: none;" class="voice-status">
                                 <span class="voice-status-dot"></span>
-                                <span>🎙️ Запись...</span>
+                                <span>Запись...</span>
                                 <span id="voiceTimer">0s</span>
                             </div>
                         </div>
@@ -1418,7 +1581,7 @@
                     </div>
                     
                     <div class="quick-actions">
-                        <div class="quick-actions-title">⚡ Быстрые действия</div>
+                        <div class="quick-actions-title">Быстрые действия</div>
                         <div class="quick-actions-grid">
                             <div class="quick-action" data-action="profile">
                                 <div class="action-icon">🧠</div>
@@ -1443,7 +1606,6 @@
             
             attachEvents();
             
-            // Инициализируем кнопку микрофона
             const voiceBtn = document.getElementById('mainVoiceBtn');
             if (voiceBtn) {
                 voiceBtn.addEventListener('click', () => startRecording());
@@ -1456,10 +1618,10 @@
             switch(actionType) {
                 case 'profile':
                     const status = await getUserStatus();
-                    showToast(`🧠 Ваш профиль: ${status.profile_code || CONFIG.PROFILE_CODE}`, 'info');
+                    showToast(`Ваш профиль: ${status.profile_code || CONFIG.PROFILE_CODE}`, 'info');
                     break;
                 case 'thoughts':
-                    showToast('💭 Загружаю мысли психолога...', 'info');
+                    showToast('Загружаю мысли психолога...', 'info');
                     const thought = await getPsychologistThought();
                     if (thought) {
                         addMessage(thought, 'bot');
@@ -1470,7 +1632,7 @@
                     }
                     break;
                 case 'newThought':
-                    showToast('✨ Генерирую свежую мысль...', 'info');
+                    showToast('Генерирую свежую мысль...', 'info');
                     const newThought = await generateNewThought();
                     if (newThought) {
                         addMessage(newThought, 'bot');
@@ -1479,7 +1641,7 @@
                     }
                     break;
                 case 'weekend':
-                    showToast('🎨 Ищу идеи для выходных...', 'info');
+                    showToast('Ищу идеи для выходных...', 'info');
                     const ideas = await getWeekendIdeas();
                     if (ideas.length > 0) {
                         addMessage(ideas[0].description || ideas[0], 'bot');
@@ -1501,7 +1663,7 @@
             document.querySelectorAll('.module-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const moduleName = card.querySelector('.module-name')?.textContent || 'модуль';
-                    showToast(`📖 Модуль "${moduleName}" — скоро будет доступен`, 'info');
+                    showToast(`Модуль "${moduleName}" — скоро будет доступен`, 'info');
                 });
             });
             
@@ -1526,11 +1688,10 @@
         // ========== ИНИЦИАЛИЗАЦИЯ ==========
         
         async function init() {
-            console.log('🚀 Инициализация приложения...');
+            console.log('🚀 FREDI PREMIUM — инициализация...');
             console.log('👤 USER_ID:', CONFIG.USER_ID);
             console.log('🌐 API_URL:', CONFIG.API_BASE_URL);
             
-            // Загружаем статус пользователя
             try {
                 const status = await getUserStatus();
                 if (status.profile_code) {
