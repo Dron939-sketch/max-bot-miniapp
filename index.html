@@ -55,7 +55,6 @@
             position: relative;
         }
 
-        /* Премиум фон с мерцанием */
         body::before {
             content: '';
             position: fixed;
@@ -87,7 +86,6 @@
             position: relative;
         }
 
-        /* Левая панель — матовое стекло с хромом */
         .chats-panel {
             width: 320px;
             background: rgba(10, 10, 10, 0.75);
@@ -278,7 +276,6 @@
             color: var(--text-secondary);
         }
 
-        /* Правая панель — центральная консоль */
         .chat-panel {
             flex: 1;
             display: flex;
@@ -384,7 +381,6 @@
             padding: 28px 32px;
         }
 
-        /* Премиум скролл */
         .screen-container::-webkit-scrollbar,
         .chats-list::-webkit-scrollbar {
             width: 4px;
@@ -402,7 +398,6 @@
             border-radius: 4px;
         }
 
-        /* Дашборд — стеклянные карты */
         .dashboard-container {
             max-width: 1300px;
             margin: 0 auto;
@@ -468,39 +463,7 @@
             color: transparent;
         }
 
-        .stats-row {
-            display: flex;
-            gap: 48px;
-            margin-top: 28px;
-            padding-top: 24px;
-            border-top: 1px solid rgba(224, 224, 224, 0.1);
-        }
-
-        .stat-card {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .stat-icon {
-            font-size: 32px;
-        }
-
-        .stat-info h4 {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .stat-info span {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* Голосовая кнопка AMG стиль */
+        /* Голосовая кнопка */
         .voice-section {
             margin-bottom: 40px;
         }
@@ -577,7 +540,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Селектор режимов — хромированные кнопки */
+        /* Селектор режимов */
         .mode-selector {
             display: flex;
             gap: 12px;
@@ -618,7 +581,7 @@
         .mode-btn.psychologist.active { border-color: var(--amg-orange); box-shadow: 0 0 15px rgba(255, 107, 59, 0.2); }
         .mode-btn.trainer.active { border-color: var(--amg-red); box-shadow: 0 0 15px rgba(255, 59, 59, 0.2); }
 
-        /* Модули — стеклянные карты */
+        /* Модули */
         .modules-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -776,48 +739,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Поле ввода */
-        .input-area {
-            display: flex;
-            gap: 12px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(10, 10, 10, 0.7), rgba(26, 26, 26, 0.5));
-            backdrop-filter: blur(20px);
-            border-radius: 60px;
-            border: 1px solid rgba(224, 224, 224, 0.15);
-        }
-
-        .input-area input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 16px;
-            padding: 14px 20px;
-            outline: none;
-        }
-
-        .input-area input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .input-area button {
-            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
-            border: none;
-            border-radius: 40px;
-            padding: 12px 28px;
-            color: var(--black-obsidian);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .input-area button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
-        }
-
-        /* Всплывающие сообщения */
         .floating-message {
             position: fixed;
             bottom: 28px;
@@ -966,11 +887,6 @@
             
             .greeting-text h2 {
                 font-size: 24px;
-            }
-            
-            .stats-row {
-                gap: 24px;
-                flex-wrap: wrap;
             }
             
             .modules-grid {
@@ -1179,23 +1095,6 @@
             }
         }
         
-        async function getBotResponse(question) {
-            try {
-                const response = await apiCall('/api/chat/action', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        user_id: CONFIG.USER_ID,
-                        action: 'ask_question',
-                        data: { question }
-                    })
-                });
-                return response.data?.message || 'Я вас слушаю. Расскажите подробнее.';
-            } catch (error) {
-                console.error('Get bot response error:', error);
-                return 'Извините, произошла ошибка. Попробуйте позже.';
-            }
-        }
-        
         async function sendVoiceToServer(audioBlob) {
             const formData = new FormData();
             formData.append('user_id', CONFIG.USER_ID);
@@ -1268,6 +1167,58 @@
             }
         }
         
+        // ========== НОВЫЕ API ИНТЕГРАЦИИ ==========
+        
+        async function getUserProfile() {
+            try {
+                const data = await apiCall(`/api/get-profile?user_id=${CONFIG.USER_ID}`);
+                return data.ai_generated_profile || 'Психологический портрет формируется. Пройдите тест для детального анализа.';
+            } catch (error) {
+                console.warn('Failed to get profile', error);
+                return 'Профиль временно недоступен.';
+            }
+        }
+        
+        async function getUserGoals() {
+            try {
+                const data = await apiCall(`/api/goals?user_id=${CONFIG.USER_ID}&mode=${currentMode}`);
+                return data.goals || [];
+            } catch (error) {
+                console.warn('Failed to get goals', error);
+                return [];
+            }
+        }
+        
+        async function getSmartQuestions() {
+            try {
+                const data = await apiCall(`/api/smart-questions?user_id=${CONFIG.USER_ID}`);
+                return data.questions || [];
+            } catch (error) {
+                console.warn('Failed to get smart questions', error);
+                return [];
+            }
+        }
+        
+        async function getChallenges() {
+            try {
+                const data = await apiCall(`/api/challenges?user_id=${CONFIG.USER_ID}`);
+                return data.challenges || [];
+            } catch (error) {
+                console.warn('Failed to get challenges', error);
+                return [];
+            }
+        }
+        
+        async function findPsychometricDoubles() {
+            try {
+                const data = await apiCall(`/api/psychometric/find-doubles?user_id=${CONFIG.USER_ID}&limit=5`);
+                return data.doubles || [];
+            } catch (error) {
+                console.warn('Failed to find doubles', error);
+                return [];
+            }
+        }
+        
         // ========== UI ФУНКЦИИ ==========
         
         function showToast(message, type = 'info') {
@@ -1300,23 +1251,6 @@
                 messagesContainer = document.createElement('div');
                 messagesContainer.className = 'chat-messages';
                 container.appendChild(messagesContainer);
-                
-                const inputArea = document.createElement('div');
-                inputArea.className = 'input-area';
-                inputArea.innerHTML = `
-                    <input type="text" id="messageInput" placeholder="Введите сообщение...">
-                    <button id="sendTextBtn">📤 Отправить</button>
-                    <button id="voiceRecordBtn" class="voice-record-btn-premium" style="width: auto; padding: 12px 28px;">
-                        <span class="voice-icon">🎤</span>
-                    </button>
-                `;
-                container.appendChild(inputArea);
-                
-                document.getElementById('sendTextBtn')?.addEventListener('click', () => sendTextMessage());
-                document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') sendTextMessage();
-                });
-                document.getElementById('voiceRecordBtn')?.addEventListener('click', () => startRecording());
             }
             
             const messageDiv = document.createElement('div');
@@ -1336,29 +1270,6 @@
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             chatMessages.push({ text, sender, audioUrl, timestamp: new Date() });
-        }
-        
-        async function sendTextMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            addMessage(text, 'user');
-            input.value = '';
-            
-            showToast('Формирую ответ...', 'info');
-            
-            try {
-                const responseText = await getBotResponse(text);
-                addMessage(responseText, 'bot');
-                
-                const tts = await textToSpeech(responseText, currentMode);
-                if (tts?.audio_url) {
-                    playAudioResponse(tts.audio_url);
-                }
-            } catch (error) {
-                addMessage('Извините, произошла ошибка. Попробуйте позже.', 'system');
-            }
         }
         
         function playAudioResponse(audioUrl) {
@@ -1393,7 +1304,7 @@
                 mediaRecorder.onstop = async () => {
                     const audioBlob = new Blob(audioChunks, { type: mimeType });
                     if (audioBlob.size > 5000) {
-                        addMessage('Распознаю речь...', 'system');
+                        addMessage('🎙️ Распознаю речь...', 'system');
                         
                         const result = await sendVoiceToServer(audioBlob);
                         
@@ -1416,7 +1327,7 @@
                     
                     stream.getTracks().forEach(track => track.stop());
                     
-                    const voiceBtn = document.getElementById('voiceRecordBtn');
+                    const voiceBtn = document.getElementById('mainVoiceBtn');
                     if (voiceBtn) {
                         voiceBtn.classList.remove('recording');
                         voiceBtn.querySelector('.voice-icon').textContent = '🎤';
@@ -1433,7 +1344,7 @@
                 isRecording = true;
                 recordingSeconds = 0;
                 
-                const voiceBtn = document.getElementById('voiceRecordBtn');
+                const voiceBtn = document.getElementById('mainVoiceBtn');
                 if (voiceBtn) {
                     voiceBtn.classList.add('recording');
                     voiceBtn.querySelector('.voice-icon').textContent = '⏹️';
@@ -1468,6 +1379,72 @@
             if (recordingTimer) {
                 clearInterval(recordingTimer);
                 recordingTimer = null;
+            }
+        }
+        
+        // ========== НОВЫЕ ОБРАБОТЧИКИ ==========
+        
+        async function handleShowProfile() {
+            showToast('Загружаю ваш психологический портрет...', 'info');
+            const profile = await getUserProfile();
+            addMessage(profile, 'bot');
+            const tts = await textToSpeech(profile, currentMode);
+            if (tts?.audio_url) playAudioResponse(tts.audio_url);
+        }
+        
+        async function handleShowGoals() {
+            showToast('Подбираю цели для вашего профиля...', 'info');
+            const goals = await getUserGoals();
+            if (goals.length > 0) {
+                const goalsText = `🎯 Ваши цели (режим ${MODES[currentMode].name}):\n\n` + 
+                    goals.map(g => `• ${g.name}\n  ⏱ ${g.time}  |  🎯 ${g.difficulty}`).join('\n\n');
+                addMessage(goalsText, 'bot');
+                const tts = await textToSpeech(goalsText.replace(/[^\w\s,.]/g, ''), currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            } else {
+                addMessage('Цели будут подобраны после прохождения теста.', 'bot');
+            }
+        }
+        
+        async function handleShowSmartQuestions() {
+            showToast('Генерирую вопросы для размышления...', 'info');
+            const questions = await getSmartQuestions();
+            if (questions.length > 0) {
+                const questionsText = `❓ Вопросы для размышления:\n\n` + 
+                    questions.map((q, i) => `${i+1}. ${q}`).join('\n');
+                addMessage(questionsText, 'bot');
+                const tts = await textToSpeech(questionsText.replace(/[^\w\s,.]/g, ''), currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            } else {
+                addMessage('Вопросы появятся после прохождения теста.', 'bot');
+            }
+        }
+        
+        async function handleShowChallenges() {
+            showToast('Загружаю челленджи...', 'info');
+            const challenges = await getChallenges();
+            if (challenges.length > 0) {
+                const challengesText = `🏆 Челленджи для развития:\n\n` + 
+                    challenges.map(c => `• ${c.name}\n  ${c.description}\n  🎁 Награда: ${c.reward} очков`).join('\n\n');
+                addMessage(challengesText, 'bot');
+                const tts = await textToSpeech(challengesText.replace(/[^\w\s,.]/g, ''), currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            } else {
+                addMessage('Челленджи будут доступны после прохождения теста.', 'bot');
+            }
+        }
+        
+        async function handleShowDoubles() {
+            showToast('Ищу ваших психометрических двойников...', 'info');
+            const doubles = await findPsychometricDoubles();
+            if (doubles.length > 0) {
+                const doublesText = `👥 Ваши психометрические двойники:\n\n` + 
+                    doubles.map(d => `• ${d.name}\n  Профиль: ${d.profile_code}\n  Схожесть: ${Math.round(d.similarity * 100)}%`).join('\n\n');
+                addMessage(doublesText, 'bot');
+                const tts = await textToSpeech(doublesText.replace(/[^\w\s,.]/g, ''), currentMode);
+                if (tts?.audio_url) playAudioResponse(tts.audio_url);
+            } else {
+                addMessage('Пока не найдено двойников. Пройдите тест для более точного поиска.', 'bot');
             }
         }
         
@@ -1514,29 +1491,6 @@
                             <div class="profile-badge">
                                 <div class="profile-code" id="profileCode">${CONFIG.PROFILE_CODE}</div>
                                 <div style="font-size: 10px; color: var(--text-secondary);">ваш психотип</div>
-                            </div>
-                        </div>
-                        <div class="stats-row">
-                            <div class="stat-card">
-                                <div class="stat-icon">📅</div>
-                                <div class="stat-info">
-                                    <h4>3</h4>
-                                    <span>дня с вами</span>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">💬</div>
-                                <div class="stat-info">
-                                    <h4>12</h4>
-                                    <span>сессий</span>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">🎯</div>
-                                <div class="stat-info">
-                                    <h4>85%</h4>
-                                    <span>прогресс</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1599,6 +1553,22 @@
                                 <div class="action-icon">🎨</div>
                                 <div class="action-name">Идеи на выходные</div>
                             </div>
+                            <div class="quick-action" data-action="goals">
+                                <div class="action-icon">🎯</div>
+                                <div class="action-name">Цели</div>
+                            </div>
+                            <div class="quick-action" data-action="questions">
+                                <div class="action-icon">❓</div>
+                                <div class="action-name">Вопросы</div>
+                            </div>
+                            <div class="quick-action" data-action="challenges">
+                                <div class="action-icon">🏆</div>
+                                <div class="action-name">Челленджи</div>
+                            </div>
+                            <div class="quick-action" data-action="doubles">
+                                <div class="action-icon">👥</div>
+                                <div class="action-name">Двойники</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1617,8 +1587,7 @@
             
             switch(actionType) {
                 case 'profile':
-                    const status = await getUserStatus();
-                    showToast(`Ваш профиль: ${status.profile_code || CONFIG.PROFILE_CODE}`, 'info');
+                    await handleShowProfile();
                     break;
                 case 'thoughts':
                     showToast('Загружаю мысли психолога...', 'info');
@@ -1648,6 +1617,18 @@
                     } else {
                         showToast('Идеи скоро появятся', 'info');
                     }
+                    break;
+                case 'goals':
+                    await handleShowGoals();
+                    break;
+                case 'questions':
+                    await handleShowSmartQuestions();
+                    break;
+                case 'challenges':
+                    await handleShowChallenges();
+                    break;
+                case 'doubles':
+                    await handleShowDoubles();
                     break;
             }
         }
