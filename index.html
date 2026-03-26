@@ -55,113 +55,6 @@
             left: 0;
         }
 
-        /* Мобильная оптимизация */
-        @media (max-width: 768px) {
-            .screen-container {
-                padding: 16px !important;
-            }
-            
-            .hero-section {
-                padding: 20px !important;
-            }
-            
-            .greeting-text h2 {
-                font-size: clamp(18px, 5vw, 24px) !important;
-            }
-            
-            .profile-badge {
-                padding: 6px 16px !important;
-            }
-            
-            .profile-code {
-                font-size: 12px !important;
-            }
-            
-            .mode-btn {
-                padding: 10px 12px !important;
-                font-size: 12px !important;
-            }
-            
-            .voice-record-btn-premium {
-                padding: 18px 20px !important;
-            }
-            
-            .voice-record-btn-premium .voice-icon {
-                font-size: 28px !important;
-            }
-            
-            .voice-record-btn-premium .voice-text {
-                font-size: 14px !important;
-            }
-            
-            .modules-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
-                gap: 12px !important;
-            }
-            
-            .module-card {
-                padding: 16px 12px !important;
-            }
-            
-            .module-icon {
-                font-size: 36px !important;
-            }
-            
-            .module-name {
-                font-size: 14px !important;
-            }
-            
-            .quick-actions-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px !important;
-            }
-            
-            .quick-action {
-                padding: 12px !important;
-            }
-            
-            .action-icon {
-                font-size: 24px !important;
-            }
-            
-            .action-name {
-                font-size: 11px !important;
-            }
-            
-            .message {
-                max-width: 90% !important;
-                padding: 10px 14px !important;
-                font-size: 14px !important;
-            }
-            
-            .full-content-page {
-                padding: 20px !important;
-            }
-            
-            .content-title {
-                font-size: 20px !important;
-            }
-            
-            .section-title {
-                font-size: 16px !important;
-            }
-            
-            .section-emoji {
-                font-size: 22px !important;
-            }
-            
-            .content-body {
-                font-size: 14px !important;
-                max-height: 50vh !important;
-            }
-            
-            .back-btn, .speak-content-btn {
-                padding: 12px 20px !important;
-                font-size: 14px !important;
-            }
-        }
-
-        /* Общие стили */
         body::before {
             content: '';
             position: fixed;
@@ -588,7 +481,7 @@
             transform: scale(0.98);
         }
 
-        /* Селектор режимов с подсветкой как на iPhone */
+        /* Селектор режимов с подсветкой */
         .mode-selector {
             display: flex;
             gap: 8px;
@@ -749,14 +642,14 @@
 
         .quick-actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 12px;
         }
 
         .quick-action {
             background: rgba(224, 224, 224, 0.05);
             border-radius: 20px;
-            padding: 14px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
@@ -768,12 +661,12 @@
         }
 
         .action-icon {
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 6px;
         }
 
         .action-name {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
         }
 
@@ -989,6 +882,466 @@
             color: var(--text-secondary);
             font-size: 13px;
         }
+
+        /* ========== НОВЫЕ СТИЛИ ДЛЯ КОНФАЙНТМЕНТ-МОДЕЛИ ========== */
+        
+        .confinement-model-page {
+            padding: 20px;
+        }
+
+        .confinement-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .confinement-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .confinement-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .elements-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .elements-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .confinement-element {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid rgba(224, 224, 224, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .confinement-element:hover {
+            transform: translateY(-3px);
+            border-color: var(--chrome);
+            box-shadow: 0 5px 20px rgba(224, 224, 224, 0.1);
+        }
+
+        .element-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--chrome);
+            margin-bottom: 6px;
+        }
+
+        .element-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .element-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .element-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .key-confinement {
+            background: linear-gradient(135deg, rgba(255, 107, 59, 0.15), rgba(255, 59, 59, 0.1));
+            border: 1px solid var(--amg-orange);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .key-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .key-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--amg-orange);
+        }
+
+        .key-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .loop-card {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .loop-type {
+            font-weight: bold;
+            color: var(--chrome);
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .loop-desc {
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .loop-strength {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .vectors-info {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .vector-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid rgba(224, 224, 224, 0.1);
+            font-size: 13px;
+        }
+
+        .rebuild-model-btn {
+            width: 100%;
+            margin-top: 25px;
+            padding: 12px;
+            background: rgba(224, 224, 224, 0.1);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            border-radius: 40px;
+            color: var(--chrome);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Стили для проверки реальности */
+        .reality-check-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .reality-check-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .reality-check-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .reality-check-form input,
+        .reality-check-form select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(224, 224, 224, 0.05);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            border-radius: 30px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .reality-check-form input[type="range"] {
+            width: calc(100% - 50px);
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .check-reality-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
+            border: none;
+            border-radius: 40px;
+            color: var(--black-obsidian);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .reality-result {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .result-emoji {
+            font-size: 50px;
+            margin-bottom: 8px;
+        }
+
+        .result-status {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .result-deficit {
+            background: rgba(224, 224, 224, 0.1);
+            border-radius: 30px;
+            padding: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            text-align: center;
+        }
+
+        .deficit-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--amg-red), var(--amg-orange), var(--amg-blue));
+            border-radius: 2px;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .requirements, .available {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .requirements h4, .available h4 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .requirements p, .available p {
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        .result-recommendation,
+        .result-key-confinement {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .result-recommendation h4,
+        .result-key-confinement h4 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .result-recommendation p,
+        .result-key-confinement p {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .build-route-btn {
+            flex: 2;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
+            border: none;
+            border-radius: 40px;
+            color: var(--black-obsidian);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Стили для маршрута */
+        .route-page {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .route-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .route-goal {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .route-time {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .route-key-confinement {
+            background: rgba(255, 107, 59, 0.15);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--amg-orange);
+        }
+
+        .route-key-confinement h3 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .route-step {
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--chrome), var(--silver-brushed));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--black-obsidian);
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .step-content {
+            flex: 1;
+            line-height: 1.5;
+            font-size: 13px;
+        }
+
+        .route-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .track-route-btn {
+            flex: 2;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .goal-selection-page {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .goal-selection-page h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .goal-select-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(224, 224, 224, 0.05);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .goal-select-item:hover {
+            background: rgba(224, 224, 224, 0.1);
+            transform: translateX(5px);
+        }
+
+        .goal-emoji {
+            font-size: 28px;
+        }
+
+        .goal-info {
+            flex: 1;
+        }
+
+        .goal-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .goal-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .select-goal-btn {
+            padding: 6px 16px;
+            background: rgba(224, 224, 224, 0.1);
+            border: 1px solid rgba(224, 224, 224, 0.2);
+            border-radius: 30px;
+            color: var(--chrome);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .quick-actions-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .route-step {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .step-number {
+                margin-bottom: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1131,9 +1484,6 @@
         let mediaRecorder = null;
         let audioChunks = [];
         let chatMessages = [];
-        let pressTimer = null;
-        let isPressing = false;
-        let startY = 0;
         
         // ========== API ВЫЗОВЫ ==========
         
@@ -1255,7 +1605,7 @@
         
         async function getUserGoals() {
             try {
-                const data = await apiCall(`/api/goals?user_id=${CONFIG.USER_ID}&mode=${currentMode}`);
+                const data = await apiCall(`/api/goals/with-confinement?user_id=${CONFIG.USER_ID}&mode=${currentMode}`);
                 return data.goals || [];
             } catch (error) {
                 console.warn('Failed to get goals', error);
@@ -1293,48 +1643,93 @@
             }
         }
         
+        // ========== НОВЫЕ ФУНКЦИИ ДЛЯ КОНФАЙНТМЕНТ-МОДЕЛИ ==========
+        
+        async function getConfinementModel() {
+            try {
+                const data = await apiCall(`/api/confinement-model?user_id=${CONFIG.USER_ID}`);
+                return data;
+            } catch (error) {
+                console.warn('Failed to get confinement model', error);
+                return null;
+            }
+        }
+        
+        async function rebuildConfinementModel() {
+            try {
+                const data = await apiCall('/api/confinement-model/rebuild', {
+                    method: 'POST',
+                    body: JSON.stringify({ user_id: CONFIG.USER_ID })
+                });
+                return data;
+            } catch (error) {
+                console.warn('Failed to rebuild model', error);
+                return null;
+            }
+        }
+        
+        async function checkRealityWithConfinement(goal, lifeContext, goalContext) {
+            try {
+                const data = await apiCall('/api/reality-check/with-confinement', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        user_id: CONFIG.USER_ID,
+                        goal: goal,
+                        life_context: lifeContext,
+                        goal_context: goalContext
+                    })
+                });
+                return data;
+            } catch (error) {
+                console.warn('Failed to check reality', error);
+                return null;
+            }
+        }
+        
+        async function buildRouteWithConfinement(goal) {
+            try {
+                const data = await apiCall('/api/route/build-with-confinement', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        user_id: CONFIG.USER_ID,
+                        goal: goal
+                    })
+                });
+                return data;
+            } catch (error) {
+                console.warn('Failed to build route', error);
+                return null;
+            }
+        }
+        
         // ========== ФОРМАТИРОВАНИЕ ТЕКСТА ==========
         
         function formatContentForDisplay(text, contentType) {
             if (!text) return '<p>Нет данных</p>';
             
-            // 1. Жирный текст: **текст** → <strong>текст</strong>
             let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
-            // 2. Заголовки с эмодзи (расширенный список)
             const headerEmojis = '🔑💪🎯🌱⚠️🔐🔄🚪📊🧠💭💕🕊️✨🏆👥🎨';
             const headerRegex = new RegExp(`([${headerEmojis}])\\s*\\*\\*(.*?)\\*\\*`, 'g');
             formatted = formatted.replace(headerRegex, 
                 '<div class="section-header"><span class="section-emoji">$1</span><strong class="section-title">$2</strong></div>');
             
-            // 3. Маркированные списки: • текст → <li>текст</li>
             formatted = formatted.replace(/•\s*(.*?)(?=\n|$)/g, '<li>$1</li>');
-            
-            // 4. Цифровые списки
             formatted = formatted.replace(/(\d+)\.\s*(.*?)(?=\n|$)/g, '<li class="numbered">$1. $2</li>');
             
-            // 5. Обработка абзацев
             const paragraphs = formatted.split('\n\n');
             formatted = paragraphs.map(p => {
-                if (p.trim().startsWith('<li>')) {
-                    return `<ul class="styled-list">${p}</ul>`;
-                }
-                if (p.trim().startsWith('<li class="numbered">')) {
-                    return `<ol class="styled-list numbered-list">${p}</ol>`;
-                }
-                if (p.trim().startsWith('<div class="section-header')) {
-                    return p;
-                }
-                if (p.trim().startsWith('<strong>') || p.trim().startsWith('<p>')) {
-                    return p;
-                }
+                if (p.trim().startsWith('<li>')) return `<ul class="styled-list">${p}</ul>`;
+                if (p.trim().startsWith('<li class="numbered">')) return `<ol class="styled-list numbered-list">${p}</ol>`;
+                if (p.trim().startsWith('<div class="section-header')) return p;
+                if (p.trim().startsWith('<strong>') || p.trim().startsWith('<p>')) return p;
                 return `<p>${p}</p>`;
             }).join('');
             
             return formatted;
         }
         
-        // ========== ОТОБРАЖЕНИЕ КОНТЕНТА НА ОТДЕЛЬНОЙ СТРАНИЦЕ ==========
+        // ========== ОТОБРАЖЕНИЕ КОНТЕНТА ==========
         
         function showFullContent(title, content, contentType, rawText = null) {
             const container = document.getElementById('screenContainer');
@@ -1346,10 +1741,13 @@
                 questions: '❓',
                 challenges: '🏆',
                 doubles: '👥',
-                weekend: '🎨'
+                weekend: '🎨',
+                confinement: '🔐',
+                reality: '🔍',
+                route: '🗺️'
             };
             
-            const formattedContent = formatContentForDisplay(content, contentType);
+            const formattedContent = typeof content === 'string' ? formatContentForDisplay(content, contentType) : content;
             
             container.innerHTML = `
                 <div class="full-content-page">
@@ -1369,14 +1767,14 @@
             
             document.getElementById('backToDashboardBtn').onclick = () => renderDashboard();
             document.getElementById('speakContentBtn').onclick = async () => {
-                const textToSpeak = rawText || content.replace(/\*\*(.*?)\*\*/g, '$1').replace(/[🔑💪🎯🌱⚠️🔐🔄🚪📊🧠💭💕🕊️✨🏆👥🎨]/g, '');
+                const textToSpeak = typeof rawText === 'string' ? rawText.replace(/\*\*(.*?)\*\*/g, '$1').replace(/[🔑💪🎯🌱⚠️🔐🔄🚪📊]/g, '') : String(content);
                 showToast('Озвучиваю...', 'info');
                 const tts = await textToSpeech(textToSpeak, currentMode);
                 if (tts?.audio_url) playAudioResponse(tts.audio_url);
             };
         }
         
-        // ========== ВИБРАЦИЯ НА МОБИЛЬНЫХ ==========
+        // ========== ВИБРАЦИЯ ==========
         
         function vibrate(duration = 30) {
             if (navigator.vibrate) {
@@ -1658,6 +2056,352 @@
             voiceBtn.addEventListener('touchmove', checkSwipe, { passive: false });
         }
         
+        // ========== НОВЫЕ ОБРАБОТЧИКИ ==========
+        
+        async function showConfinementModel() {
+            showToast('Загружаю модель ограничений...', 'info');
+            const data = await getConfinementModel();
+            
+            if (!data) {
+                showToast('Не удалось загрузить модель', 'error');
+                return;
+            }
+            
+            let elementsHtml = '';
+            if (data.elements) {
+                for (let i = 1; i <= 9; i++) {
+                    const elem = data.elements[i];
+                    if (elem) {
+                        elementsHtml += `
+                            <div class="confinement-element" data-element="${i}">
+                                <div class="element-number">${i}</div>
+                                <div class="element-name">${elem.name || `Элемент ${i}`}</div>
+                                <div class="element-desc">${(elem.description || '').substring(0, 60)}...</div>
+                                <div class="element-meta">
+                                    <span class="element-strength">💪 ${Math.round((elem.strength || 0.5) * 100)}%</span>
+                                    <span class="element-vak">🎭 ${elem.vak || 'digital'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            let loopsHtml = '';
+            if (data.loops && data.loops.length) {
+                loopsHtml = '<div class="loops-section"><h3>🔄 Обнаруженные петли</h3>';
+                data.loops.forEach((loop, idx) => {
+                    loopsHtml += `
+                        <div class="loop-card">
+                            <div class="loop-type">${loop.type || `Петля ${idx + 1}`}</div>
+                            <div class="loop-desc">${loop.description || 'Нет описания'}</div>
+                            <div class="loop-strength">Сила: ${Math.round((loop.strength || 0.5) * 100)}%</div>
+                        </div>
+                    `;
+                });
+                loopsHtml += '</div>';
+            }
+            
+            let keyHtml = '';
+            if (data.key_confinement) {
+                keyHtml = `
+                    <div class="key-confinement">
+                        <div class="key-icon">🔐</div>
+                        <div class="key-title">КЛЮЧЕВОЕ ОГРАНИЧЕНИЕ</div>
+                        <div class="key-desc">${data.key_confinement.description || 'Анализ в процессе...'}</div>
+                        <div class="key-importance">Важность: ${Math.round((data.key_confinement.importance || 0.7) * 100)}%</div>
+                    </div>
+                `;
+            }
+            
+            let vectorsHtml = '';
+            if (data.vectors) {
+                vectorsHtml = '<div class="vectors-info"><h3>📈 Векторы</h3>';
+                for (const [k, v] of Object.entries(data.vectors)) {
+                    vectorsHtml += `
+                        <div class="vector-item">
+                            <span class="vector-emoji">${v.emoji || '🔍'}</span>
+                            <span class="vector-name">${v.name || k}</span>
+                            <span class="vector-level">Уровень ${v.level || 3}/6</span>
+                        </div>
+                    `;
+                }
+                vectorsHtml += '</div>';
+            }
+            
+            const fullHtml = `
+                <div class="confinement-model-page">
+                    <div class="confinement-header">
+                        <h2>🔐 9-элементная модель ограничений</h2>
+                        <p>Степень замыкания системы: <strong>${Math.round((data.closure_score || 0) * 100)}%</strong> ${data.is_closed ? '🔒 Система замкнута' : '🔓 Система открыта'}</p>
+                    </div>
+                    
+                    ${keyHtml}
+                    
+                    <div class="confinement-grid">
+                        <div class="confinement-column left">
+                            <h3>📊 Элементы модели</h3>
+                            <div class="elements-grid">
+                                ${elementsHtml || '<p>Нет данных об элементах</p>'}
+                            </div>
+                        </div>
+                        <div class="confinement-column right">
+                            ${loopsHtml}
+                            ${vectorsHtml}
+                        </div>
+                    </div>
+                    <button class="rebuild-model-btn" id="rebuildModelBtn">🔄 Перестроить модель</button>
+                </div>
+            `;
+            
+            showFullContent('Конфайнтмент-модель', fullHtml, 'confinement');
+            
+            document.getElementById('rebuildModelBtn')?.addEventListener('click', async () => {
+                showToast('Перестраиваю модель...', 'info');
+                const result = await rebuildConfinementModel();
+                if (result && result.success) {
+                    showToast('Модель перестроена', 'success');
+                    showConfinementModel();
+                } else {
+                    showToast('Не удалось перестроить модель', 'error');
+                }
+            });
+        }
+        
+        async function showRealityCheckWithConfinement() {
+            const container = document.getElementById('screenContainer');
+            container.innerHTML = `
+                <div class="reality-check-form">
+                    <h2>🔍 Проверка реальности</h2>
+                    <p>Ответьте на несколько вопросов, чтобы оценить достижимость вашей цели с учётом вашей модели ограничений.</p>
+                    
+                    <div class="form-group">
+                        <label>🎯 Выберите цель</label>
+                        <select id="goalSelect">
+                            <option value="">-- Выберите цель --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>⏱ Сколько часов в неделю вы готовы уделять?</label>
+                        <input type="number" id="timePerWeek" placeholder="Например: 5" min="1" max="40" value="5">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>⚡ Оцените свой уровень энергии (1-10)</label>
+                        <input type="range" id="energyLevel" min="1" max="10" value="5">
+                        <span id="energyValue">5</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🏠 Есть ли у вас личное пространство для работы над целью?</label>
+                        <select id="privateSpace">
+                            <option value="true">Да</option>
+                            <option value="false">Нет</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>👥 Есть ли люди, которые поддерживают вас?</label>
+                        <select id="support">
+                            <option value="true">Да</option>
+                            <option value="false">Нет</option>
+                        </select>
+                    </div>
+                    
+                    <button class="check-reality-btn" id="checkRealityBtn">🔍 Проверить</button>
+                    <button class="back-btn" id="backBtn" style="margin-top: 12px;">◀️ НАЗАД</button>
+                </div>
+            `;
+            
+            const goals = await getUserGoals();
+            const goalSelect = document.getElementById('goalSelect');
+            if (goals && goals.length) {
+                goals.forEach(goal => {
+                    const option = document.createElement('option');
+                    option.value = JSON.stringify(goal);
+                    option.textContent = `${goal.emoji || '🎯'} ${goal.name} (${goal.time || '?'})`;
+                    goalSelect.appendChild(option);
+                });
+            }
+            
+            const energySlider = document.getElementById('energyLevel');
+            const energyValue = document.getElementById('energyValue');
+            energySlider.addEventListener('input', () => {
+                energyValue.textContent = energySlider.value;
+            });
+            
+            document.getElementById('checkRealityBtn').onclick = async () => {
+                const goalValue = goalSelect.value;
+                if (!goalValue) {
+                    showToast('Выберите цель', 'error');
+                    return;
+                }
+                
+                const goal = JSON.parse(goalValue);
+                const lifeContext = {
+                    energy_level: parseInt(energySlider.value),
+                    has_private_space: document.getElementById('privateSpace').value === 'true',
+                    support_people: document.getElementById('support').value === 'true'
+                };
+                const goalContext = {
+                    time_per_week: parseInt(document.getElementById('timePerWeek').value) || 5
+                };
+                
+                showToast('Анализирую...', 'info');
+                const result = await checkRealityWithConfinement(goal, lifeContext, goalContext);
+                
+                if (!result) {
+                    showToast('Ошибка проверки', 'error');
+                    return;
+                }
+                
+                const resultHtml = `
+                    <div class="reality-result">
+                        <div class="result-header">
+                            <div class="result-emoji">${result.status_emoji || '❓'}</div>
+                            <div class="result-status">${result.status || 'Анализ'}</div>
+                        </div>
+                        
+                        <div class="result-deficit">
+                            <div class="deficit-bar" style="width: ${result.deficit || 0}%"></div>
+                            <span>Дефицит ресурсов: ${result.deficit || 0}%</span>
+                        </div>
+                        
+                        <div class="result-details">
+                            <div class="requirements">
+                                <h4>📋 Требуется</h4>
+                                <p>⏱ ${result.requirements?.time_per_week || '?'} ч/нед</p>
+                                <p>⚡ Энергия: ${result.requirements?.energy_level || '?'}/10</p>
+                            </div>
+                            <div class="available">
+                                <h4>✅ Доступно</h4>
+                                <p>⏱ ${result.available?.time_per_week || '?'} ч/нед</p>
+                                <p>⚡ Энергия: ${result.available?.energy_level || '?'}/10</p>
+                            </div>
+                        </div>
+                        
+                        <div class="result-recommendation">
+                            <h4>💡 Рекомендация</h4>
+                            <p>${result.recommendation || 'Рекомендация формируется...'}</p>
+                        </div>
+                        
+                        ${result.key_confinement ? `
+                            <div class="result-key-confinement">
+                                <h4>🔐 Ключевое ограничение</h4>
+                                <p>${result.key_confinement.description || 'Анализ в процессе...'}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="result-actions">
+                            <button class="build-route-btn" id="buildRouteBtn">🗺️ Построить маршрут</button>
+                            <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML = resultHtml;
+                
+                document.getElementById('buildRouteBtn')?.addEventListener('click', () => {
+                    buildRouteWithConfinementUI(goal);
+                });
+                document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
+            };
+            
+            document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
+        }
+        
+        async function buildRouteWithConfinementUI(goal) {
+            showToast('Строю маршрут с учётом вашей модели...', 'info');
+            const result = await buildRouteWithConfinement(goal);
+            
+            if (!result || !result.success) {
+                showToast('Не удалось построить маршрут', 'error');
+                return;
+            }
+            
+            const route = result.route;
+            const steps = route.steps || [];
+            
+            const routeHtml = `
+                <div class="route-page">
+                    <div class="route-header">
+                        <h2>🗺️ Маршрут к цели</h2>
+                        <p class="route-goal">${goal.emoji || '🎯'} ${goal.name}</p>
+                        <p class="route-time">⏱ ${goal.time || '3-6 месяцев'}</p>
+                    </div>
+                    
+                    ${result.key_confinement ? `
+                        <div class="route-key-confinement">
+                            <h3>🔐 Учитываем ключевое ограничение</h3>
+                            <p>${result.key_confinement.description || ''}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="route-steps">
+                        ${steps.map((step, idx) => `
+                            <div class="route-step">
+                                <div class="step-number">${idx + 1}</div>
+                                <div class="step-content">${step.replace(/\n/g, '<br>')}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="route-actions">
+                        <button class="track-route-btn" id="trackRouteBtn">✅ Начать выполнение</button>
+                        <button class="back-btn" id="backBtn">◀️ НАЗАД</button>
+                    </div>
+                </div>
+            `;
+            
+            const container = document.getElementById('screenContainer');
+            container.innerHTML = routeHtml;
+            
+            document.getElementById('trackRouteBtn')?.addEventListener('click', () => {
+                showToast('Маршрут сохранён! Отмечайте выполнение этапов.', 'success');
+            });
+            document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
+        }
+        
+        async function showGoalSelectionForRoute() {
+            const goals = await getUserGoals();
+            if (!goals || !goals.length) {
+                showToast('Сначала выберите цель в разделе "Цели"', 'info');
+                return;
+            }
+            
+            const container = document.getElementById('screenContainer');
+            container.innerHTML = `
+                <div class="goal-selection-page">
+                    <h2>🎯 Выберите цель для построения маршрута</h2>
+                    <div class="goals-list" id="goalsList">
+                        ${goals.map(goal => `
+                            <div class="goal-select-item" data-goal='${JSON.stringify(goal)}'>
+                                <div class="goal-emoji">${goal.emoji || '🎯'}</div>
+                                <div class="goal-info">
+                                    <div class="goal-name">${goal.name}</div>
+                                    <div class="goal-meta">${goal.time || '3-6 месяцев'} • ${goal.difficulty || 'medium'}</div>
+                                </div>
+                                <button class="select-goal-btn">Выбрать</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="back-btn" id="backBtn" style="margin-top: 20px;">◀️ НАЗАД</button>
+                </div>
+            `;
+            
+            document.querySelectorAll('.goal-select-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('select-goal-btn')) {
+                        const goal = JSON.parse(item.dataset.goal);
+                        buildRouteWithConfinementUI(goal);
+                    }
+                });
+            });
+            
+            document.getElementById('backBtn')?.addEventListener('click', () => renderDashboard());
+        }
+        
         // ========== ОБРАБОТЧИКИ БЫСТРЫХ ДЕЙСТВИЙ ==========
         
         async function handleShowProfile() {
@@ -1701,7 +2445,7 @@
             showToast('Подбираю цели...', 'info');
             const goals = await getUserGoals();
             if (goals.length > 0) {
-                const goalsText = goals.map(g => `**${g.name}**\n⏱ ${g.time}  |  🎯 ${g.difficulty}`).join('\n\n');
+                const goalsText = goals.map(g => `**${g.name}**\n⏱ ${g.time || '?'}  |  🎯 ${g.difficulty || 'medium'}\n${g.is_priority ? '🔐 Приоритетная цель (ключевое ограничение)' : ''}`).join('\n\n');
                 showFullContent('Ваши цели', goalsText, 'goals', goalsText);
             } else {
                 showToast('Цели появятся после прохождения теста', 'info');
@@ -1864,6 +2608,18 @@
                                 <div class="action-icon">👥</div>
                                 <div class="action-name">Двойники</div>
                             </div>
+                            <div class="quick-action" data-action="confinement">
+                                <div class="action-icon">🔐</div>
+                                <div class="action-name">Модель ограничений</div>
+                            </div>
+                            <div class="quick-action" data-action="realityCheck">
+                                <div class="action-icon">🔍</div>
+                                <div class="action-name">Проверка реальности</div>
+                            </div>
+                            <div class="quick-action" data-action="buildRoute">
+                                <div class="action-icon">🗺️</div>
+                                <div class="action-name">Построить маршрут</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1900,6 +2656,9 @@
                         case 'questions': await handleShowQuestions(); break;
                         case 'challenges': await handleShowChallenges(); break;
                         case 'doubles': await handleShowDoubles(); break;
+                        case 'confinement': await showConfinementModel(); break;
+                        case 'realityCheck': await showRealityCheckWithConfinement(); break;
+                        case 'buildRoute': await showGoalSelectionForRoute(); break;
                     }
                 });
             });
